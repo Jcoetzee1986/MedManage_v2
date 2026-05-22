@@ -1,0 +1,10 @@
+C:\Data\Projects\EntLib50Src\Blocks\bin\Debug\Microsoft.Practices.EnterpriseLibrary.Security.xml
+C:\Data\Projects\EntLib50Src\Blocks\bin\Debug\Microsoft.Practices.EnterpriseLibrary.Security.dll
+C:\Data\Projects\EntLib50Src\Blocks\bin\Debug\Microsoft.Practices.EnterpriseLibrary.Security.pdb
+C:\Data\Projects\EntLib50Src\Blocks\Security\Src\Security\obj\Debug\ResolveAssemblyReference.cache
+C:\Data\Projects\EntLib50Src\Blocks\Security\Src\Security\obj\Debug\Microsoft.Practices.EnterpriseLibrary.Security.Configuration.DesignResources.resources
+C:\Data\Projects\EntLib50Src\Blocks\Security\Src\Security\obj\Debug\Microsoft.Practices.EnterpriseLibrary.Security.Configuration.Manageability.Properties.Resources.resources
+C:\Data\Projects\EntLib50Src\Blocks\Security\Src\Security\obj\Debug\Microsoft.Practices.EnterpriseLibrary.Security.Properties.Resources.resources
+C:\Data\Projects\EntLib50Src\Blocks\Security\Src\Security\obj\Debug\Security.csproj.GenerateResource.Cache
+C:\Data\Projects\EntLib50Src\Blocks\Security\Src\Security\obj\Debug\Microsoft.Practices.EnterpriseLibrary.Security.dll
+C:\Data\Projects\EntLib50Src\Blocks\Security\Src\Security\obj\Debug\Microsoft.Practices.EnterpriseLibrary.Security.pdb

@@ -1,0 +1,106 @@
+﻿/* To prevent any potential data loss issues, you should review this script in detail before running it outside the context of the database designer.*/
+BEGIN TRANSACTION
+SET QUOTED_IDENTIFIER ON
+SET ARITHABORT ON
+SET NUMERIC_ROUNDABORT OFF
+SET CONCAT_NULL_YIELDS_NULL ON
+SET ANSI_NULLS ON
+SET ANSI_PADDING ON
+SET ANSI_WARNINGS ON
+COMMIT
+BEGIN TRANSACTION
+GO
+ALTER TABLE CaseManagement.Case_FacilityType
+	DROP CONSTRAINT FK_Case_FacilityType_Cases
+GO
+ALTER TABLE CaseManagement.Cases SET (LOCK_ESCALATION = TABLE)
+GO
+COMMIT
+BEGIN TRANSACTION
+GO
+ALTER TABLE CaseManagement.Case_FacilityType
+	DROP CONSTRAINT FK_Case_FacilityType_FacilityType
+GO
+ALTER TABLE shared.FacilityType SET (LOCK_ESCALATION = TABLE)
+GO
+COMMIT
+BEGIN TRANSACTION
+GO
+CREATE TABLE CaseManagement.Tmp_Case_FacilityType
+	(
+	CaseID_FacilityTypeID int NOT NULL IDENTITY (1, 1),
+	FacilityTypeID int NOT NULL,
+	CaseID int NOT NULL,
+	DateAdmitted datetime2(0) NOT NULL,
+	DateDischarged datetime2(0) NULL,
+	LOS decimal(10, 1) NULL,
+	FacilityTypeCode varchar(10) NULL,
+	MinutesOnVentilator int NULL,
+	Comments varchar(500) NULL,
+	DateInserted date NULL,
+	UserID varchar(100) NULL
+	)  ON [PRIMARY]
+GO
+ALTER TABLE CaseManagement.Tmp_Case_FacilityType SET (LOCK_ESCALATION = TABLE)
+GO
+IF EXISTS(SELECT * FROM CaseManagement.Case_FacilityType)
+	 EXEC('INSERT INTO CaseManagement.Tmp_Case_FacilityType (FacilityTypeID, CaseID, DateAdmitted, LOS, FacilityTypeCode, DateInserted, UserID)
+		SELECT FacilityTypeID, CaseID, CONVERT(datetime2(0), DateAdmitted), LOS, FacilityTypeCode, DateInserted, UserID FROM CaseManagement.Case_FacilityType WITH (HOLDLOCK TABLOCKX)')
+GO
+DROP TABLE CaseManagement.Case_FacilityType
+GO
+EXECUTE sp_rename N'CaseManagement.Tmp_Case_FacilityType', N'Case_FacilityType', 'OBJECT' 
+GO
+ALTER TABLE CaseManagement.Case_FacilityType ADD CONSTRAINT
+	PK_Case_FacilityType PRIMARY KEY CLUSTERED 
+	(
+	FacilityTypeID,
+	CaseID,
+	DateAdmitted
+	) WITH( STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+
+GO
+ALTER TABLE CaseManagement.Case_FacilityType ADD CONSTRAINT
+	FK_Case_FacilityType_FacilityType FOREIGN KEY
+	(
+	FacilityTypeID
+	) REFERENCES shared.FacilityType
+	(
+	FacilityTypeID
+	) ON UPDATE  NO ACTION 
+	 ON DELETE  NO ACTION 
+	
+GO
+ALTER TABLE CaseManagement.Case_FacilityType ADD CONSTRAINT
+	FK_Case_FacilityType_Cases FOREIGN KEY
+	(
+	CaseID
+	) REFERENCES CaseManagement.Cases
+	(
+	CaseID
+	) ON UPDATE  NO ACTION 
+	 ON DELETE  NO ACTION 
+	
+GO
+COMMIT
+
+  UPDATE [MEDMANAGE].[CaseManagement].[Case_FacilityType]
+  SET [DateDischarged] = DATEADD(Day,[LOS],DateAdmitted)
+
+
+Changes:
+Added a new tab for dates
+Added logic to make sure the discharge date cannot be before the admit date
+
+Changed the message box when doing updates to display the confirmation message better, so it fits into the screen.
+Changed ordering of cases on the main screen to show the newest cases on top
+Changed the sorting of case notes (Updates screen to display the last one that was inserted first in the list)
+Added Case Status (Open, pending etc.) on the case letter in the top left-hand corner.
+I also created a screen where you can add missing tariff codes (If you have the correct access level)
+
+I added a functionality to import the DRD employee list.
+
+I created a new control for date selections on the new screen. Please let me know if this works better than the original control.
+If it does, I will change all the date controls in the system to use this.
+
+Invoice

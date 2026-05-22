@@ -1,0 +1,1104 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{42E83A5D-8F8D-4F8A-98C8-18F1F4CE76A1}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Icondev.MedManage</RootNamespace>
+    <AssemblyName>Icondev.MedManage</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <SccProjectName>Svn</SccProjectName>
+    <SccLocalPath>Svn</SccLocalPath>
+    <SccAuxPath>Svn</SccAuxPath>
+    <SccProvider>SubversionScc</SccProvider>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\MedManageDeploy\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>cloudservice.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="ExcelPackage">
+      <HintPath>..\..\ExcelFiles\ExcelPackage.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.EnterpriseLibrary.Caching, Version=5.0.505.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\EnterpriseLibrary.Caching.5.0.505.0\lib\NET35\Microsoft.Practices.EnterpriseLibrary.Caching.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.EnterpriseLibrary.Caching.Database, Version=5.0.505.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\EnterpriseLibrary.Caching.Database.5.0.505.0\lib\NET35\Microsoft.Practices.EnterpriseLibrary.Caching.Database.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.EnterpriseLibrary.Common, Version=5.0.505.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\EnterpriseLibrary.Common.5.0.505.0\lib\NET35\Microsoft.Practices.EnterpriseLibrary.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.EnterpriseLibrary.Data, Version=5.0.505.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\EnterpriseLibrary.Data.5.0.505.0\lib\NET35\Microsoft.Practices.EnterpriseLibrary.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.EnterpriseLibrary.Security, Version=5.0.505.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\EnterpriseLibrary.Security.5.0.505.0\lib\NET35\Microsoft.Practices.EnterpriseLibrary.Security.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.EnterpriseLibrary.Security.Cache.CachingStore, Version=5.0.505.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\EnterpriseLibrary.Security.Cache.CachingStore.5.0.505.0\lib\NET35\Microsoft.Practices.EnterpriseLibrary.Security.Cache.CachingStore.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.ServiceLocation, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\CommonServiceLocator.1.0\lib\NET35\Microsoft.Practices.ServiceLocation.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.Unity, Version=2.1.505.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Unity.2.1.505.0\lib\NET35\Microsoft.Practices.Unity.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.Unity.Configuration, Version=2.1.505.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Unity.2.1.505.0\lib\NET35\Microsoft.Practices.Unity.Configuration.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.Unity.Interception, Version=2.1.505.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Unity.Interception.2.1.505.0\lib\NET35\Microsoft.Practices.Unity.Interception.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.Unity.Interception.Configuration, Version=2.1.505.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Unity.Interception.2.1.505.0\lib\NET35\Microsoft.Practices.Unity.Interception.Configuration.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.ReportViewer.Common, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Report.Viewer.10.0.0.0\lib\net\Microsoft.ReportViewer.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.ReportViewer.ProcessingObjectModel, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Report.Viewer.10.0.0.0\lib\net\Microsoft.ReportViewer.ProcessingObjectModel.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.ReportViewer.WebForms, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Report.Viewer.10.0.0.0\lib\net\Microsoft.ReportViewer.WebForms.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.ReportViewer.WinForms, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.ReportViewer.WinForms.10.0.40219.1\lib\Microsoft.ReportViewer.WinForms.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.VisualBasic" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.Linq" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.ApplicationServices" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UIAutomationProvider" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="WindowsFormsIntegration" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ActionStatus.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ActionStatus.Designer.cs">
+      <DependentUpon>ActionStatus.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BookingAdd.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BookingAdd.Designer.cs">
+      <DependentUpon>BookingAdd.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Bookings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Bookings.Designer.cs">
+      <DependentUpon>Bookings.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Case.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Case.Designer.cs">
+      <DependentUpon>Case.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CaseLetterNote.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CaseLetterNote.Designer.cs">
+      <DependentUpon>CaseLetterNote.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CaseLinkLookup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CaseLinkLookup.Designer.cs">
+      <DependentUpon>CaseLinkLookup.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CaseTariffDetail.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CaseTariffDetail.Designer.cs">
+      <DependentUpon>CaseTariffDetail.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ChooseClient.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ChooseClient.Designer.cs">
+      <DependentUpon>ChooseClient.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ChronicIllnesses.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ChronicIllnesses.Designer.cs">
+      <DependentUpon>ChronicIllnesses.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CopyCaseDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CopyCaseDialog.Designer.cs">
+      <DependentUpon>CopyCaseDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CustomiseServiceProviderTariff.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CustomiseServiceProviderTariff.Designer.cs">
+      <DependentUpon>CustomiseServiceProviderTariff.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CustomMessageBox.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CustomMessageBox.designer.cs">
+      <DependentUpon>CustomMessageBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CustomMessageBoxDateSelector.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CustomMessageBoxDateSelector.Designer.cs">
+      <DependentUpon>CustomMessageBoxDateSelector.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CustomMessageBoxWithGrid.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CustomMessageBoxWithGrid.designer.cs">
+      <DependentUpon>CustomMessageBoxWithGrid.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DeleteUserSession.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DeleteUserSession.Designer.cs">
+      <DependentUpon>DeleteUserSession.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Exclusions.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Exclusions.Designer.cs">
+      <DependentUpon>Exclusions.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FinanceBulkPayment.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FinanceBulkPayment.Designer.cs">
+      <DependentUpon>FinanceBulkPayment.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FinanceDataCapture.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FinanceDataCapture.Designer.cs">
+      <DependentUpon>FinanceDataCapture.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gallery.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Gallery.Designer.cs">
+      <DependentUpon>Gallery.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ImportDRDEmployeeFiles.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ImportDRDEmployeeFiles.Designer.cs">
+      <DependentUpon>ImportDRDEmployeeFiles.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ImportNappiCodes.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ImportNappiCodes.Designer.cs">
+      <DependentUpon>ImportNappiCodes.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Login.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Login.Designer.cs">
+      <DependentUpon>Login.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MedicalAid.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MedicalAid.Designer.cs">
+      <DependentUpon>MedicalAid.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MedicalAidExclusions.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MedicalAidExclusions.Designer.cs">
+      <DependentUpon>MedicalAidExclusions.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MedManage.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MedManage.Designer.cs">
+      <DependentUpon>MedManage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MemberAdd.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MemberAdd.Designer.cs">
+      <DependentUpon>MemberAdd.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MemberLookup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MemberLookup.Designer.cs">
+      <DependentUpon>MemberLookup.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MyCases.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MyCases.Designer.cs">
+      <DependentUpon>MyCases.cs</DependentUpon>
+    </Compile>
+    <Compile Include="NewTariff.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="NewTariff.Designer.cs">
+      <DependentUpon>NewTariff.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ReportsDataSet.cs">
+      <DependentUpon>ReportsDataSet.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="ReportsDataSet.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ReportsDataSet.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="rpt_BillingSummaryMember.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="rpt_BillingSummaryMember.Designer.cs">
+      <DependentUpon>rpt_BillingSummaryMember.cs</DependentUpon>
+    </Compile>
+    <Compile Include="rpt_BillingSummary.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="rpt_BillingSummary.Designer.cs">
+      <DependentUpon>rpt_BillingSummary.cs</DependentUpon>
+    </Compile>
+    <Compile Include="rpt_BillingSummaryCase.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="rpt_BillingSummaryCase.Designer.cs">
+      <DependentUpon>rpt_BillingSummaryCase.cs</DependentUpon>
+    </Compile>
+    <Compile Include="rpt_CaseCommentExport.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="rpt_CaseCommentExport.Designer.cs">
+      <DependentUpon>rpt_CaseCommentExport.cs</DependentUpon>
+    </Compile>
+    <Compile Include="rpt_CaseLetter.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="rpt_CaseLetter.Designer.cs">
+      <DependentUpon>rpt_CaseLetter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="rpt_Cases_BetweenAdmitDates.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="rpt_Cases_BetweenAdmitDates.Designer.cs">
+      <DependentUpon>rpt_Cases_BetweenAdmitDates.cs</DependentUpon>
+    </Compile>
+    <Compile Include="rpt_Cases_BetweenDates_Primary.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="rpt_Cases_BetweenDates_Primary.Designer.cs">
+      <DependentUpon>rpt_Cases_BetweenDates_Primary.cs</DependentUpon>
+    </Compile>
+    <Compile Include="rpt_Cases_BetweenDates.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="rpt_Cases_BetweenDates.Designer.cs">
+      <DependentUpon>rpt_Cases_BetweenDates.cs</DependentUpon>
+    </Compile>
+    <Compile Include="RPT_CaseTariffDetail.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="RPT_CaseTariffDetail.Designer.cs">
+      <DependentUpon>RPT_CaseTariffDetail.cs</DependentUpon>
+    </Compile>
+    <Compile Include="rpt_CaseUpdateExport.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="rpt_CaseUpdateExport.Designer.cs">
+      <DependentUpon>rpt_CaseUpdateExport.cs</DependentUpon>
+    </Compile>
+    <Compile Include="rpt_Finance.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="rpt_Finance.Designer.cs">
+      <DependentUpon>rpt_Finance.cs</DependentUpon>
+    </Compile>
+    <Compile Include="rpt_finWIPExtract.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="rpt_finWIPExtract.Designer.cs">
+      <DependentUpon>rpt_finWIPExtract.cs</DependentUpon>
+    </Compile>
+    <Compile Include="rpt_MyCasesExport.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="rpt_MyCasesExport.Designer.cs">
+      <DependentUpon>rpt_MyCasesExport.cs</DependentUpon>
+    </Compile>
+    <Compile Include="rpt_PrintLinkedCases.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="rpt_PrintLinkedCases.Designer.cs">
+      <DependentUpon>rpt_PrintLinkedCases.cs</DependentUpon>
+    </Compile>
+    <Compile Include="rpt_ReportServer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="rpt_ReportServer.Designer.cs">
+      <DependentUpon>rpt_ReportServer.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SelectDocumentTypeDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SelectDocumentTypeDialog.Designer.cs">
+      <DependentUpon>SelectDocumentTypeDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ServiceProvider.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ServiceProvider.Designer.cs">
+      <DependentUpon>ServiceProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ServiceProviderLookup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ServiceProviderLookup.Designer.cs">
+      <DependentUpon>ServiceProviderLookup.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Settings.cs" />
+    <Compile Include="SystemData.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SystemData.Designer.cs">
+      <DependentUpon>SystemData.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CodeLookup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CodeLookup.Designer.cs">
+      <DependentUpon>CodeLookup.cs</DependentUpon>
+    </Compile>
+    <Compile Include="uc_Gallery.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="uc_Gallery.Designer.cs">
+      <DependentUpon>uc_Gallery.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserChangePassword.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UserChangePassword.Designer.cs">
+      <DependentUpon>UserChangePassword.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserMaintenance.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UserMaintenance.Designer.cs">
+      <DependentUpon>UserMaintenance.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="ActionStatus.resx">
+      <DependentUpon>ActionStatus.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BookingAdd.resx">
+      <DependentUpon>BookingAdd.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Bookings.resx">
+      <DependentUpon>Bookings.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Case.resx">
+      <DependentUpon>Case.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CaseLetterNote.resx">
+      <DependentUpon>CaseLetterNote.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CaseLinkLookup.resx">
+      <DependentUpon>CaseLinkLookup.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CaseTariffDetail.resx">
+      <DependentUpon>CaseTariffDetail.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ChooseClient.resx">
+      <DependentUpon>ChooseClient.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ChronicIllnesses.resx">
+      <DependentUpon>ChronicIllnesses.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CopyCaseDialog.resx">
+      <DependentUpon>CopyCaseDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CustomiseServiceProviderTariff.resx">
+      <DependentUpon>CustomiseServiceProviderTariff.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CustomMessageBox.resx">
+      <DependentUpon>CustomMessageBox.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CustomMessageBoxDateSelector.resx">
+      <DependentUpon>CustomMessageBoxDateSelector.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CustomMessageBoxWithGrid.resx">
+      <DependentUpon>CustomMessageBoxWithGrid.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DeleteUserSession.resx">
+      <DependentUpon>DeleteUserSession.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Exclusions.resx">
+      <DependentUpon>Exclusions.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FinanceBulkPayment.resx">
+      <DependentUpon>FinanceBulkPayment.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FinanceDataCapture.resx">
+      <DependentUpon>FinanceDataCapture.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gallery.resx">
+      <DependentUpon>Gallery.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ImportDRDEmployeeFiles.resx">
+      <DependentUpon>ImportDRDEmployeeFiles.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ImportNappiCodes.resx">
+      <DependentUpon>ImportNappiCodes.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Login.resx">
+      <DependentUpon>Login.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MedicalAid.resx">
+      <DependentUpon>MedicalAid.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MedicalAidExclusions.resx">
+      <DependentUpon>MedicalAidExclusions.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MedManage.resx">
+      <DependentUpon>MedManage.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MemberAdd.resx">
+      <DependentUpon>MemberAdd.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MemberLookup.resx">
+      <DependentUpon>MemberLookup.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MyCases.resx">
+      <DependentUpon>MyCases.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="NewTariff.resx">
+      <DependentUpon>NewTariff.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <EmbeddedResource Include="Reports\BillingSummaryCase.rdlc" />
+    <EmbeddedResource Include="Reports\CaseFinances.rdlc" />
+    <EmbeddedResource Include="Reports\CaseLetter_NEM.rdlc" />
+    <EmbeddedResource Include="Reports\CaseLetter_ARW.rdlc" />
+    <EmbeddedResource Include="Reports\CaseLetter_UNI.rdlc" />
+    <EmbeddedResource Include="Reports\CaseLetter_MZB.rdlc" />
+    <EmbeddedResource Include="Reports\CaseLetter_MAS.rdlc" />
+    <EmbeddedResource Include="Reports\CaseLetter_NGR.rdlc" />
+    <EmbeddedResource Include="Reports\CaseLetter_MHM.rdlc" />
+    <EmbeddedResource Include="Reports\CaseLetter_BAY.rdlc" />
+    <EmbeddedResource Include="Reports\CaseLetter.rdlc" />
+    <EmbeddedResource Include="Reports\CaseLetterDischargeForm.rdlc" />
+    <EmbeddedResource Include="Reports\CaseLetter_AER.rdlc" />
+    <EmbeddedResource Include="Reports\CaseLetter_BW_Local.rdlc" />
+    <EmbeddedResource Include="Reports\Cases_BetweenDates_ParentCase.rdlc" />
+    <EmbeddedResource Include="Reports\CaseTariffDetail.rdlc" />
+    <EmbeddedResource Include="Reports\CaseUpdateExport.rdlc" />
+    <EmbeddedResource Include="Reports\Cases_BetweenDates.rdlc" />
+    <EmbeddedResource Include="Reports\CaseLetter_DRD.rdlc" />
+    <EmbeddedResource Include="Reports\CaseCommentsExport.rdlc" />
+    <EmbeddedResource Include="Reports\CaseLetter_SWZ.rdlc">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Reports\CaseLetter_BW.rdlc" />
+    <EmbeddedResource Include="Reports\MyCasesExport.rdlc" />
+    <EmbeddedResource Include="Reports\PrintLinkedCase.rdlc" />
+    <EmbeddedResource Include="rpt_BillingSummaryMember.resx">
+      <DependentUpon>rpt_BillingSummaryMember.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="rpt_BillingSummary.resx">
+      <DependentUpon>rpt_BillingSummary.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="rpt_BillingSummaryCase.resx">
+      <DependentUpon>rpt_BillingSummaryCase.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="rpt_CaseCommentExport.resx">
+      <DependentUpon>rpt_CaseCommentExport.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="rpt_CaseLetter.resx">
+      <DependentUpon>rpt_CaseLetter.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="rpt_Cases_BetweenAdmitDates.resx">
+      <DependentUpon>rpt_Cases_BetweenAdmitDates.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="rpt_Cases_BetweenDates_Primary.resx">
+      <DependentUpon>rpt_Cases_BetweenDates_Primary.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="rpt_Cases_BetweenDates.resx">
+      <DependentUpon>rpt_Cases_BetweenDates.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RPT_CaseTariffDetail.resx">
+      <DependentUpon>RPT_CaseTariffDetail.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="rpt_CaseUpdateExport.resx">
+      <DependentUpon>rpt_CaseUpdateExport.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="rpt_Finance.resx">
+      <DependentUpon>rpt_Finance.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="rpt_finWIPExtract.resx">
+      <DependentUpon>rpt_finWIPExtract.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="rpt_MyCasesExport.resx">
+      <DependentUpon>rpt_MyCasesExport.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="rpt_PrintLinkedCases.resx">
+      <DependentUpon>rpt_PrintLinkedCases.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="rpt_ReportServer.resx">
+      <DependentUpon>rpt_ReportServer.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SelectDocumentTypeDialog.resx">
+      <DependentUpon>SelectDocumentTypeDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ServiceProvider.resx">
+      <DependentUpon>ServiceProvider.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ServiceProviderLookup.resx">
+      <DependentUpon>ServiceProviderLookup.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SystemData.resx">
+      <DependentUpon>SystemData.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CodeLookup.resx">
+      <DependentUpon>CodeLookup.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserChangePassword.resx">
+      <DependentUpon>UserChangePassword.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserMaintenance.resx">
+      <DependentUpon>UserMaintenance.cs</DependentUpon>
+    </EmbeddedResource>
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="app.manifest">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.8">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.8 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ReportsDataSet.xsc">
+      <DependentUpon>ReportsDataSet.xsd</DependentUpon>
+    </None>
+    <None Include="ReportsDataSet.xsd">
+      <SubType>Designer</SubType>
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>ReportsDataSet.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="ReportsDataSet.xss">
+      <DependentUpon>ReportsDataSet.xsd</DependentUpon>
+    </None>
+    <EmbeddedResource Include="Reports\CasesFinalInvoiceAmountUpdated.rdlc" />
+    <None Include="Resources\MedManageLogo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="cloudservice.ico" />
+    <Content Include="Database Objects\StoredProcedures\Import.usp_BillingFilesPracticeNameMatch_Update_ServiceProvider.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\Import.usp_BillingFiles_DeleteByFileName.storedProcedure.sql" />
+    <Content Include="Database Objects\Tables\audit.CaseManagement_Audit.Table.sql" />
+    <Content Include="Database Objects\Tables\audit.CaseManagement_AuditDetail.Table.sql" />
+    <Content Include="Database Objects\Tables\CaseManagement.CaseComment.Table.sql" />
+    <Content Include="Database Objects\Tables\CaseManagement.CaseLetterNote.Table.sql" />
+    <Content Include="Database Objects\Tables\CaseManagement.CaseNote.Table.sql" />
+    <Content Include="Database Objects\Tables\CaseManagement.Cases.Table.sql" />
+    <Content Include="Database Objects\Tables\CaseManagement.CaseStatus.Table.sql" />
+    <Content Include="Database Objects\Tables\CaseManagement.CaseType.Table.sql" />
+    <Content Include="Database Objects\Tables\CaseManagement.Case_Billing.Table.sql" />
+    <Content Include="Database Objects\Tables\CaseManagement.Case_Billing_Comment.Table.sql" />
+    <Content Include="Database Objects\Tables\CaseManagement.Case_Checklist.Table.sql" />
+    <Content Include="Database Objects\Tables\CaseManagement.Case_CPT.Table.sql" />
+    <Content Include="Database Objects\Tables\CaseManagement.Case_Exclusion.Table.sql" />
+    <Content Include="Database Objects\Tables\CaseManagement.Case_FacilityType.Table.sql" />
+    <Content Include="Database Objects\Tables\CaseManagement.Case_ICD.Table.sql" />
+    <Content Include="Database Objects\Tables\CaseManagement.Case_Link.Table.sql" />
+    <Content Include="Database Objects\Tables\CaseManagement.Case_LinkedFile.Table.sql" />
+    <Content Include="Database Objects\Tables\CaseManagement.Case_NappiCodes.Table.sql" />
+    <Content Include="Database Objects\Tables\CaseManagement.Case_Tariff.Table.sql" />
+    <Content Include="Database Objects\Tables\CaseManagement.ChecklistTemplate.Table.sql" />
+    <Content Include="Database Objects\Tables\CaseManagement.Episode.Table.sql" />
+    <Content Include="Database Objects\Tables\CaseManagement.Episode_Case.Table.sql" />
+    <Content Include="Database Objects\Tables\CaseManagement.Session_User_Case.Table.sql" />
+    <Content Include="Database Objects\Tables\dbo.ChronicIllness.Table.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_BaseTariff_InsertCustom.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_BaseTariff_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_BaseTariff_Select_NewCustomCode.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_BillingStatus_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Bookings_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Bookings_Select_ALL_ByCaseID.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Bookings_Select_ALL_ByMemberNumber.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Bookings_Select_ByBookingID.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Bookings_Select_ByCaseID.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Bookings_Select_ByFilters.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_CaseComment_Delete.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_CaseComment_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_CaseComment_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_CaseComment_Update.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_CaseLetterNote_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_CaseLetterNote_Select_ByCaseID.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_CaseNote_Delete.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_CaseNote_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_CaseNote_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_CaseNote_Update.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_CaseStatus_Delete.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_CaseStatus_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_CaseStatus_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_CaseStatus_Update.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Cases_Delete.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Cases_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Cases_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Cases_Select_ByMemberID.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Cases_Select_ByMemberID_ExclCaseID.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Cases_Select_ByRemittance.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Cases_Select_Filters.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Cases_Select_Last30Cases.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Cases_Select_PossibleDuplicate.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Cases_Select_ServiceProvider_FinalInvoiceAmountUpdated.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Cases_Update.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Cases_Update_Status.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_CaseType_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_CaseType_Select_ForFilters.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_Billing_CheckDuplicates.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_Billing_Comment_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_Billing_Comment_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_Billing_Delete.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_Billing_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_Billing_LinkToCase.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_Billing_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_Billing_SelectAccountNumbers_ByServiceProviderID.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_Billing_SelectAfterAutoComplete.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_Billing_Select_NotLinkedToCase.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_Billing_Select_Summary.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_Billing_Update.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_Billing_UpdateRemittanceNumber.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_Billing_UpdateToPaid.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_Checklist_Delete.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_Checklist_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_Checklist_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_Checklist_Update.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_Copy.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_CPT_Delete.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_CPT_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_CPT_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_CPT_Update.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_Discount_Update.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_Exclusion_Delete.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_Exclusion_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_Exclusion_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_Exclusion_Update.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_FacilityType_Delete.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_FacilityType_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_FacilityType_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_FacilityType_Update.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_ICD_Delete.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_ICD_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_ICD_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_ICD_Update.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_LinkedFile_DeleteByCase_LinkedFileID.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_LinkedFile_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_LinkedFile_SelectByCaseID.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_Link_Delete.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_Link_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_Link_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_NappiCodes_Delete.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_NappiCodes_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_NappiCodes_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_Tariff_Delete.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_Tariff_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_Tariff_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_Tariff_Update.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Case_UpdateMemberMedicalAid.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_ChecklistTemplate_Delete.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_ChecklistTemplate_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_ChecklistTemplate_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_ChecklistTemplate_Update.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_ChronicIllness_Delete.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_ChronicIllness_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_ChronicIllness_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_ChronicIllness_Update.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Country_Delete.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Country_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Country_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Country_Update.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_CPT_Select_ByFilters.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Episode_Case_Delete.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Episode_Case_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Episode_Case_Select_ByEpisodeID.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Episode_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Episode_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Episode_Select_By_Filters.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Episode_Update.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Exclusion_Delete.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Exclusion_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Exclusion_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Exclusion_Update.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_FacilityType_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Gender_Delete.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Gender_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Gender_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Gender_Update.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_ICD_Select_ByFilters.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Images_CaseUpdate_Delete.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Images_CaseUpdate_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Images_CaseUpdate_SelectByCaseID.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Images_CaseUpdate_SelectImageByImageID.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Language_Delete.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Language_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Language_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Language_Update.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_LinkedFile_DeleteByLinkedFileID.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_LinkedFile_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_LinkedFile_SelectByEntityID_EntityType.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_MainClient_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_MainClient_UpdateImage.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_MarritalStatus_Delete.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_MarritalStatus_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_MarritalStatus_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_MarritalStatus_Update.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_MedicalAidProduct_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_MedicalAid_Delete.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_MedicalAid_Exclusion_Delete.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_MedicalAid_Exclusion_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_MedicalAid_Exclusion_Insert_ByHospitalType.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_MedicalAid_Exclusion_Insert_BySpeciality.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_MedicalAid_Exclusion_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_MedicalAid_Exclusion_Select_ByMedicalAid.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_MedicalAid_Exclusion_Update.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_MedicalAid_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_MedicalAid_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_MedicalAid_Select_ByMedicalAidID.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_MedicalAid_Update.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_MemberNote_Delete.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_MemberNote_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_MemberNote_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_MemberNote_Update.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_MemberStatus_Delete.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_MemberStatus_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_MemberStatus_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_MemberStatus_Update.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Member_ChronicIllness_Delete.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Member_ChronicIllness_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Member_ChronicIllness_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Member_ChronicIllness_Update.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Member_Delete.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Member_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Member_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Member_Select_ByFilters.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Member_Select_ExistingMemberNumber.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Member_Update.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_NappiCodes_Select_ByNappiCode_Description_Date.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Nappi_InsertRecord.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Nappi_InsertRecord_Truncate.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_PeriodInCountry_Delete.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_PeriodInCountry_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_PeriodInCountry_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_PeriodInCountry_Update.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_ProviderIDs_TreatmentDate_Select_ByCaseID.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Race_Delete.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Race_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Race_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Race_Update.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_rpt_Audit_BillingAuditing.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_rpt_Billing_Case.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_rpt_Billing_Member.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_rpt_Billing_Provider.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_rpt_CaseNote_SelectLastNote_CaseID.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_rpt_Cases_SelectLinked_CaseID.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_rpt_Cases_Select_CaseID.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_rpt_Cases_Select_Filters.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_rpt_Cases_Select_Filters_BetweenAdmissionDates.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_rpt_Cases_Select_Filters_BetweenDates.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_rpt_Case_Billing_Select_LinkedToCases.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_RPT_Case_Tariff_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_rpt_ChargeFromProviderPerTariff.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_rpt_Finance_Select_Filters.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_ServiceProvider_Delete.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_ServiceProvider_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_ServiceProvider_MainClient_Discount_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_ServiceProvider_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_ServiceProvider_Select_AfterAutocomplete.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_ServiceProvider_Select_Autocomplete.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_ServiceProvider_Select_ByFilters.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_ServiceProvider_Select_ExistingPracticeNr.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_ServiceProvider_Tariff_Custom_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_ServiceProvider_Tariff_Custom_Insert_FromExcel.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_ServiceProvider_Tariff_Select_ById.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_ServiceProvider_Tariff_Update.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_ServiceProvider_Update.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Session_User_Case_Delete.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Session_User_Case_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Session_User_Case_Select_ByCaseID.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_SpecialityID_TariffID_Select_ByServiceProviderID.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Speciality_Delete.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Speciality_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Speciality_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Speciality_Select_ByTariffNameID.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Speciality_Select_WhereThereAreTariffs.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Speciality_Update.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_SuspendedReason_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_SystemData_Delete.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_SystemData_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_SystemData_Update.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_TariffName_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_TariffStructure_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Tariff_CheckPeriodExist.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Tariff_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Tariff_InsertLine.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Tariff_InsertNewPeriod.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Tariff_InsertOldPeriod.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Tariff_Maint_SelectClients.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Tariff_SelectDistinctDetails.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Tariff_SelectDistinctPeriods.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Tariff_SelectPeriodName_ByTariffNameID.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Tariff_Select_ByFilters.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Tariff_Select_ByNameID_Period_HospitalType.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Tariff_Select_ByNameID_Period_Speciality.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Tariff_Select_ByTariffCode_ProviderID_TreatmentDate.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Tariff_Select_Distinct_ByHospitalType.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Tariff_Select_Distinct_BySpeciality.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Tariff_Select_Distinct_BySpecialityID.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Tariff_Update_Tariff.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_Title_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_z_TableColumns_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.usp_z_Tariff_Update.StoredProcedure.sql" />
+    <Content Include="Database Objects\Tables\shared.Member_MedicalAidProduct.Table.sql" />
+    <Content Include="Database Objects\View\dbo.vw_CaseDetail.View.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.xusp_HospitalType_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.xusp_HospitalType_Select_ByTariffNameID.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.zzusp_SystemData_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\dbo.zzusp_Tariff_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\Tables\finance.BillingStatus.Table.sql" />
+    <Content Include="Database Objects\Tables\finance.Case_Discount.Table.sql" />
+    <Content Include="Database Objects\Tables\finance.Remittance.Table.sql" />
+    <Content Include="Database Objects\Tables\finance.ServiceProvider_MainClient_Discount.Table.sql" />
+    <Content Include="Database Objects\Tables\Import.BillingFiles.Table.sql" />
+    <Content Include="Database Objects\Tables\Import.BillingFilesPracticeNameMatch.Table.sql" />
+    <Content Include="Database Objects\Tables\Import.BokomosoTariffs.Table.sql" />
+    <Content Include="Database Objects\Tables\Import.GPHTariff.Table.sql" />
+    <Content Include="Database Objects\Tables\Import.Member.Table.sql" />
+    <Content Include="Database Objects\Tables\Import.mNel2006.Table.sql" />
+    <Content Include="Database Objects\Tables\Import.NappiCodes.Table.sql" />
+    <Content Include="Database Objects\Tables\Import.tmpmember.Table.sql" />
+    <Content Include="Database Objects\StoredProcedures\Import.usp_BillingFilesPracticeNameMatch_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\Import.usp_BillingFilesPracticeNameMatch_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\Import.usp_BillingFilesPracticeNameMatch_Update.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\Import.usp_BillingFiles_FileName_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\Import.usp_BillingFiles_FinalImport.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\Import.usp_Members_Blyvoor_Merge.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\Import.usp_Members_DRD_InsertRecord.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\Import.usp_Members_DRD_Merge.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\Import.usp_Members_DRD_Truncate.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\Import.usp_Members_GoldOne_Merge.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\Import.usp_Nappi_InsertRecord.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\Maintenance.usp_DiffBackup.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\Maintenance.usp_FullBackup.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\Maintenance.usp_LogBackup.StoredProcedure.sql" />
+    <Content Include="Database Objects\Tables\Overnight.AllCodesData.Table.sql" />
+    <Content Include="Database Objects\Tables\Overnight.AllCodesData_bk20150929.Table.sql" />
+    <Content Include="Database Objects\Tables\Overnight.TariffCalc.Table.sql" />
+    <Content Include="Database Objects\StoredProcedures\Overnight.usp_AllCodesData.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\Overnight.usp_TariffCalc.StoredProcedure.sql" />
+    <Content Include="Database Objects\Tables\shared.BaseTariff.Table.sql" />
+    <Content Include="Database Objects\Tables\shared.Bookings.Table.sql" />
+    <Content Include="Database Objects\Tables\shared.ChronicIllness.Table.sql" />
+    <Content Include="Database Objects\Tables\shared.Country.Table.sql" />
+    <Content Include="Database Objects\Tables\shared.CPT.Table.sql" />
+    <Content Include="Database Objects\Tables\shared.Exclusion.Table.sql" />
+    <Content Include="Database Objects\Tables\shared.FacilityType.Table.sql" />
+    <Content Include="Database Objects\Tables\shared.Gender.Table.sql" />
+    <Content Include="Database Objects\Tables\shared.ICD.Table.sql" />
+    <Content Include="Database Objects\Tables\shared.Language.Table.sql" />
+    <Content Include="Database Objects\Tables\shared.LinkedFile.Table.sql" />
+    <Content Include="Database Objects\Tables\shared.MainClient.Table.sql" />
+    <Content Include="Database Objects\Tables\shared.MainClient_Tariff.Table.sql" />
+    <Content Include="Database Objects\Tables\shared.MarritalStatus.Table.sql" />
+    <Content Include="Database Objects\Tables\shared.MedicalAid.Table.sql" />
+    <Content Include="Database Objects\Tables\shared.MedicalAidProduct.Table.sql" />
+    <Content Include="Database Objects\Tables\shared.MedicalAid_Exclusion.Table.sql" />
+    <Content Include="Database Objects\Tables\shared.MedicalAid_Tariff.Table.sql" />
+    <Content Include="Database Objects\Tables\shared.Member.Table.sql" />
+    <Content Include="Database Objects\Tables\shared.MemberNote.Table.sql" />
+    <Content Include="Database Objects\Tables\shared.MemberStatus.Table.sql" />
+    <Content Include="Database Objects\Tables\shared.Member_ChronicIllness.Table.sql" />
+    <Content Include="Database Objects\Tables\shared.NappiCodes.Table.sql" />
+    <Content Include="Database Objects\Tables\shared.PeriodInCountry.Table.sql" />
+    <Content Include="Database Objects\Tables\shared.Race.Table.sql" />
+    <Content Include="Database Objects\Tables\shared.ServiceProvider.Table.sql" />
+    <Content Include="Database Objects\Tables\shared.ServiceProvider_MainClient_Tariff.Table.sql" />
+    <Content Include="Database Objects\Tables\shared.ServiceProvider_Tariff.Table.sql" />
+    <Content Include="Database Objects\Tables\shared.ServiceProvider_Tariff_Custom.Table.sql" />
+    <Content Include="Database Objects\Tables\shared.Speciality.Table.sql" />
+    <Content Include="Database Objects\Tables\shared.SuspendedReason.Table.sql" />
+    <Content Include="Database Objects\Tables\shared.SystemData.Table.sql" />
+    <Content Include="Database Objects\Tables\shared.Tariff.Table.sql" />
+    <Content Include="Database Objects\Tables\shared.TariffName.Table.sql" />
+    <Content Include="Database Objects\Tables\shared.Title.Table.sql" />
+    <Content Include="Database Objects\Tables\shared.xHospitalType.Table.sql" />
+    <Content Include="Database Objects\Tables\Tariff.BaseTariff.Table.sql" />
+    <Content Include="Database Objects\Tables\Tariff.Case_Tariff.Table.sql" />
+    <Content Include="Database Objects\Tables\Tariff.ServiceProvider_Tariff.Table.sql" />
+    <Content Include="Database Objects\Tables\Tariff.ServiceProvider_Tariff_Custom.Table.sql" />
+    <Content Include="Database Objects\Tables\Tariff.Tariff.Table.sql" />
+    <Content Include="Database Objects\Tables\Tariff.TariffName.Table.sql" />
+    <Content Include="Database Objects\StoredProcedures\Tariff.usp_Case_Tariff_Delete.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\Tariff.usp_Case_Tariff_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\Tariff.usp_Case_Tariff_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\Tariff.usp_Case_Tariff_Update.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\Tariff.usp_rpt_Case_Tariff_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\Tariff.usp_ServiceProvider_Tariff_Custom_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\Tariff.usp_ServiceProvider_Tariff_Custom_Insert_FromExcel.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\Tariff.usp_ServiceProvider_Tariff_Select_ById.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\Tariff.usp_ServiceProvider_Tariff_Update.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\Tariff.usp_TariffName_Select.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\Tariff.usp_Tariff_SelectClients.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\Tariff.usp_Tariff_SelectDistinctPeriods.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\Tariff.usp_Tariff_Select_ByTariffCode_ProviderID_TreatmentDate.StoredProcedure.sql" />
+    <Content Include="Database Objects\Tables\Updates.AppUpdates.Table.sql" />
+    <Content Include="Database Objects\Tables\Updates.ClientUpdates.Table.sql" />
+    <Content Include="Database Objects\StoredProcedures\Updates.usp_AppUpdates_Insert.StoredProcedure.sql" />
+    <Content Include="Database Objects\StoredProcedures\Updates.usp_AppUpdates_Select.StoredProcedure.sql" />
+    <Content Include="Resources\Binoculars.png" />
+    <None Include="Resources\Gallery.JPG" />
+    <Content Include="Resources\HealthshareLogo.bmp" />
+    <Content Include="Resources\logosmall.png" />
+    <Content Include="Resources\Update.PNG" />
+    <Content Include="x_DB Script.txt" />
+    <None Include="Resources\block_64.png" />
+    <Content Include="Resources\Book3.png" />
+    <Content Include="Resources\Copy1.png" />
+    <Content Include="Resources\DeleteRed.png" />
+    <None Include="Resources\down_64.png" />
+    <Content Include="Resources\FolderOpened_Yellow.png" />
+    <Content Include="Resources\Hourglass.png" />
+    <None Include="Resources\IconicWebLogo.png" />
+    <None Include="Resources\plus_64.png" />
+    <None Include="Resources\letter_64.png" />
+    <Content Include="Resources\Magnifier21.png" />
+    <None Include="Resources\tick_64.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\DataSources\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{3259AA49-8AA1-44D3-9025-A0B520596A8C}" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MedManageLib\MedManageLib.csproj">
+      <Project>{0CCE5A26-F1D0-4BCD-BF07-6FDA479DAFE3}</Project>
+      <Name>MedManageLib</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

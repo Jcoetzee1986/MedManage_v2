@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29009.5
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{F14B399A-7131-4C87-9E4B-1186C45EF12D}") = "MedManageReports", "MedManageReports.rptproj", "{B7206F34-A259-425A-B30F-2EF052444734}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Default = Debug|Default
+		DebugLocal|Default = DebugLocal|Default
+		Release|Default = Release|Default
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B7206F34-A259-425A-B30F-2EF052444734}.Debug|Default.ActiveCfg = Debug
+		{B7206F34-A259-425A-B30F-2EF052444734}.Debug|Default.Build.0 = Debug
+		{B7206F34-A259-425A-B30F-2EF052444734}.Debug|Default.Deploy.0 = Debug
+		{B7206F34-A259-425A-B30F-2EF052444734}.DebugLocal|Default.ActiveCfg = DebugLocal
+		{B7206F34-A259-425A-B30F-2EF052444734}.DebugLocal|Default.Build.0 = DebugLocal
+		{B7206F34-A259-425A-B30F-2EF052444734}.Release|Default.ActiveCfg = Release
+		{B7206F34-A259-425A-B30F-2EF052444734}.Release|Default.Build.0 = Release
+		{B7206F34-A259-425A-B30F-2EF052444734}.Release|Default.Deploy.0 = Release
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A7EECA7C-5DFB-4DBE-9D64-31600F41CDE2}
+	EndGlobalSection
+EndGlobal

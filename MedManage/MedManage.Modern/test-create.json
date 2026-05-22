@@ -1,0 +1,21 @@
+{
+  "memberNumber": "NOTRIG001",
+  "surname": "NoTriggers",
+  "name": "Test",
+  "idnumber": "8801015800089",
+  "dateOfBirth": "1988-01-01",
+  "titleId": 1,
+  "genderId": 1,
+  "memberStatusId": 1,
+  "medicalAidId": 1,
+  "memberCountryId": 1,
+  "memberLanguageId": 1,
+  "memberRaceId": 1,
+  "marritalStatusId": 1,
+  "employerCountryId": 1,
+  "periodInCountryId": 1,
+  "medAidProductId": 1,
+  "hasMedicalAid": true,
+  "dateJoined": "2026-04-22",
+  "dateOfBenefit": "2026-04-22"
+}

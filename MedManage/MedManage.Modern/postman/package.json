@@ -1,0 +1,31 @@
+{
+  "name": "medmanage-api-tests",
+  "version": "1.0.0",
+  "description": "Postman/Newman test suite for MedManage API",
+  "scripts": {
+    "test": "newman run MedManage.postman_collection.json -e MedManage.postman_environment.json --insecure",
+    "test:report": "newman run MedManage.postman_collection.json -e MedManage.postman_environment.json --insecure -r htmlextra --reporter-htmlextra-export ./reports/test-report.html",
+    "test:crud": "newman run MedManage.postman_collection.json -e MedManage.postman_environment.json --insecure --folder \"Member CRUD Operations\"",
+    "test:validation": "newman run MedManage.postman_collection.json -e MedManage.postman_environment.json --insecure --folder \"Validation Tests\"",
+    "test:performance": "newman run MedManage.postman_collection.json -e MedManage.postman_environment.json --insecure --folder \"Performance Tests\"",
+    "test:verbose": "newman run MedManage.postman_collection.json -e MedManage.postman_environment.json --insecure --verbose",
+    "install:newman": "npm install -g newman newman-reporter-htmlextra"
+  },
+  "keywords": [
+    "api",
+    "testing",
+    "postman",
+    "newman",
+    "medmanage"
+  ],
+  "author": "MedManage Development Team",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "newman": "^6.1.1",
+    "newman-reporter-htmlextra": "^1.23.1"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  }
+}

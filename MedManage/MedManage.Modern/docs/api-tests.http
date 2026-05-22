@@ -1,0 +1,196 @@
+### MedManage API - Authentication Endpoints
+### Base URL
+@baseUrl = https://localhost:5001
+@apiUrl = {{baseUrl}}/api
+
+### Variables (will be set from responses)
+@token = 
+@userId = 
+
+###############################################################################
+### 1. Health Check
+GET {{apiUrl}}/health
+
+###############################################################################
+### 2. Register New User
+POST {{apiUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "email": "testuser@medmanage.com",
+  "password": "TestPassword123!",
+  "confirmPassword": "TestPassword123!"
+}
+
+###############################################################################
+### 3. Login
+# @name login
+POST {{apiUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "password": "TestPassword123!"
+}
+
+###
+# Capture token from login response
+@token = {{login.response.body.token}}
+
+###############################################################################
+### 4. Get Current User Info (Requires Authentication)
+GET {{apiUrl}}/auth/me
+Authorization: Bearer {{token}}
+
+###############################################################################
+### 5. Check Username Availability
+GET {{apiUrl}}/auth/check-username/testuser
+
+###############################################################################
+### 6. Check Username Availability (New User)
+GET {{apiUrl}}/auth/check-username/newuser123
+
+###############################################################################
+### 7. Change Password (Requires Authentication)
+POST {{apiUrl}}/auth/change-password
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "currentPassword": "TestPassword123!",
+  "newPassword": "NewPassword456!",
+  "confirmNewPassword": "NewPassword456!"
+}
+
+###############################################################################
+### 8. Login with New Password
+POST {{apiUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "password": "NewPassword456!"
+}
+
+###############################################################################
+### 9. Invalid Login (Wrong Password)
+POST {{apiUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "password": "WrongPassword123!"
+}
+
+###############################################################################
+### 10. Register with Mismatched Passwords (Should Fail)
+POST {{apiUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "username": "failuser",
+  "email": "fail@medmanage.com",
+  "password": "TestPassword123!",
+  "confirmPassword": "DifferentPassword123!"
+}
+
+###############################################################################
+### 11. Register with Existing Username (Should Fail)
+POST {{apiUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "email": "another@medmanage.com",
+  "password": "TestPassword123!",
+  "confirmPassword": "TestPassword123!"
+}
+
+###############################################################################
+### 12. Access Protected Endpoint Without Token (Should Fail)
+GET {{apiUrl}}/auth/me
+
+###############################################################################
+### 13. Access Protected Endpoint With Invalid Token (Should Fail)
+GET {{apiUrl}}/auth/me
+Authorization: Bearer invalid.token.here
+
+###############################################################################
+### PASSWORD RESET FLOW
+###############################################################################
+
+###############################################################################
+### 14. Forgot Password - Request PIN
+POST {{apiUrl}}/auth/forgot-password
+Content-Type: application/json
+
+{
+  "email": "testuser@medmanage.com"
+}
+
+###############################################################################
+### 15. Verify PIN (Optional - check if PIN is valid before showing reset form)
+POST {{apiUrl}}/auth/verify-pin
+Content-Type: application/json
+
+{
+  "email": "testuser@medmanage.com",
+  "pin": "123456"
+}
+
+###############################################################################
+### 16. Reset Password with PIN
+POST {{apiUrl}}/auth/reset-password
+Content-Type: application/json
+
+{
+  "email": "testuser@medmanage.com",
+  "pin": "123456",
+  "newPassword": "ResetPassword789!",
+  "confirmPassword": "ResetPassword789!"
+}
+
+###############################################################################
+### 17. Login with Reset Password
+POST {{apiUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "password": "ResetPassword789!"
+}
+
+###############################################################################
+### 18. Reset Password with Invalid PIN (Should Fail)
+POST {{apiUrl}}/auth/reset-password
+Content-Type: application/json
+
+{
+  "email": "testuser@medmanage.com",
+  "pin": "000000",
+  "newPassword": "SomePassword123!",
+  "confirmPassword": "SomePassword123!"
+}
+
+###############################################################################
+### 19. Reset Password with Mismatched Passwords (Should Fail)
+POST {{apiUrl}}/auth/reset-password
+Content-Type: application/json
+
+{
+  "email": "testuser@medmanage.com",
+  "pin": "123456",
+  "newPassword": "Password1!",
+  "confirmPassword": "Password2!"
+}
+
+###############################################################################
+### 20. Forgot Password with Non-existent Email (Should Return Success - Security Best Practice)
+POST {{apiUrl}}/auth/forgot-password
+Content-Type: application/json
+
+{
+  "email": "nonexistent@medmanage.com"
+}
+

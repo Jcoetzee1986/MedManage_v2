@@ -1,0 +1,155 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Drawing;
+using System.IO;
+using System.Drawing.Drawing2D;
+
+namespace EscudoLib
+{
+    public class BMImages
+    {
+        public BMImages()
+        {
+
+        }
+
+        public void NewThumbnail(string filePath, string saveLocation, string thumbLocation, string bigLocation)
+        {
+            try
+            {
+                System.Drawing.Image image = new Bitmap(filePath);
+                double x = Convert.ToDouble(image.Width);
+                double y = Convert.ToDouble(image.Height);
+                double z;
+                if (x > 100)
+                {
+                    z = 100 / x;
+                    int NewY = Convert.ToInt32(Math.Round(y * z));
+                    System.Drawing.Image pThumbnail = image.GetThumbnailImage(100, NewY, null, new IntPtr());
+                    pThumbnail.Save(saveLocation, System.Drawing.Imaging.ImageFormat.Jpeg);
+                }
+                else
+                {
+                    image.Save(saveLocation, System.Drawing.Imaging.ImageFormat.Jpeg);
+                }
+            }
+            catch (Exception e)
+            {
+                e.Message.ToString();
+            }
+        }
+
+        public bool DeleteImage(string ImagePath)
+        {
+            try
+            {
+                File.Delete(ImagePath);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public void NewThumbnail(string filePath, double Height, double Width)
+        {
+            try
+            {
+                System.Drawing.Image image = new Bitmap(filePath);
+                double x = Convert.ToDouble(image.Width);
+                double y = Convert.ToDouble(image.Height);
+                //double z;
+                if (x > Width || y > Height)
+                {
+                    //    z = Width / x;
+                    //    int NewY = Convert.ToInt32(Math.Round(y * z));
+                    System.Drawing.Image pThumbnail = image.GetThumbnailImage((int)Math.Round(Width), (int)Math.Round(Height), null, new IntPtr());
+                    pThumbnail.Save(filePath, System.Drawing.Imaging.ImageFormat.Jpeg);
+                }
+                else
+                {
+                    image.Save(filePath, System.Drawing.Imaging.ImageFormat.Jpeg);
+                }
+            }
+            catch (Exception e)
+            {
+                e.Message.ToString();
+            }
+        }
+
+        public void NewThumbnail(string filePath, double Height)
+        {
+            try
+            {
+                System.Drawing.Image image = new Bitmap(filePath);
+                double x = Convert.ToDouble(image.Width);
+                double y = Convert.ToDouble(image.Height);
+                double z;
+                //DeleteImage(filePath);
+                if (y > Height)
+                {
+                    z = y / Height;
+                    int NewX = Convert.ToInt32(Math.Round(x / z));
+                    System.Drawing.Image pThumbnail = image.GetThumbnailImage(NewX, (int)Math.Round(Height), null, new IntPtr());
+                    pThumbnail.Save(filePath.Replace("_Thumb_",""), System.Drawing.Imaging.ImageFormat.Jpeg);
+                }
+                else
+                {
+                    image.Save(filePath, System.Drawing.Imaging.ImageFormat.Jpeg);
+                }
+            }
+            catch (Exception e)
+            {
+                e.Message.ToString();
+            }
+        }
+
+        public void resizeImage(string filePath, double Height, string DestinationPath)
+        {
+            System.Drawing.Image image = new Bitmap(filePath);
+            double x = Convert.ToDouble(image.Width);
+            double y = Convert.ToDouble(image.Height);
+            double z;
+            //DeleteImage(filePath);
+            if (y > Height)
+            {
+                z = y / Height;
+                int Width = Convert.ToInt32(Math.Round(x / z));
+                Bitmap b = new Bitmap(image,Width, (int)Math.Round(Height));
+                b.Save(DestinationPath, System.Drawing.Imaging.ImageFormat.Jpeg);
+                
+            }
+            else
+                image.Save(DestinationPath, System.Drawing.Imaging.ImageFormat.Jpeg);
+            //int sourceWidth = imgToResize.Width;
+            //int sourceHeight = imgToResize.Height;
+
+            //float nPercent = 0;
+            //float nPercentW = 0;
+            //float nPercentH = 0;
+
+            //nPercentW = ((float)size.Width / (float)sourceWidth);
+            //nPercentH = ((float)size.Height / (float)sourceHeight);
+
+            //if (nPercentH < nPercentW)
+            //    nPercent = nPercentH;
+            //else
+            //    nPercent = nPercentW;
+
+            //int destWidth = (int)(sourceWidth * nPercent);
+            //int destHeight = (int)(sourceHeight * nPercent);
+
+            //Bitmap b = new Bitmap(destWidth, destHeight);
+            //Graphics g = Graphics.FromImage((Image)b);
+            //g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+
+            //g.DrawImage(imgToResize, 0, 0, destWidth, destHeight);
+            //g.Dispose();
+
+            //return (Image)b;
+
+        }
+    }
+}

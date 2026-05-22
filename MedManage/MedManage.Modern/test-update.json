@@ -1,0 +1,22 @@
+{
+  "memberId": 32330,
+  "memberNumber": "APITEST001_UPDATED",
+  "surname": "UpdatedSurname",
+  "name": "Updated",
+  "idnumber": "9701015800089",
+  "dateOfBirth": "1997-01-01",
+  "titleId": 1,
+  "genderId": 1,
+  "memberStatusId": 1,
+  "medicalAidId": 1,
+  "memberCountryId": 1,
+  "memberLanguageId": 1,
+  "memberRaceId": 1,
+  "marritalStatusId": 1,
+  "employerCountryId": 1,
+  "periodInCountryId": 1,
+  "medAidProductId": 1,
+  "hasMedicalAid": true,
+  "dateJoined": "2026-04-19",
+  "dateOfBenefit": "2026-04-19"
+}

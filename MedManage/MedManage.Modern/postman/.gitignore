@@ -1,0 +1,23 @@
+# Node modules
+node_modules/
+package-lock.json
+
+# Newman reports
+reports/
+*.html
+*.xml
+*.json.log
+
+# Temporary files
+*.tmp
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo

@@ -1,0 +1,10 @@
+C:\Data\Projects\EntLib50Src\Blocks\bin\Debug\Microsoft.Practices.EnterpriseLibrary.Logging.xml
+C:\Data\Projects\EntLib50Src\Blocks\bin\Debug\Microsoft.Practices.EnterpriseLibrary.Logging.dll
+C:\Data\Projects\EntLib50Src\Blocks\bin\Debug\Microsoft.Practices.EnterpriseLibrary.Logging.pdb
+C:\Data\Projects\EntLib50Src\Blocks\Logging\Src\Logging\obj\Debug\ResolveAssemblyReference.cache
+C:\Data\Projects\EntLib50Src\Blocks\Logging\Src\Logging\obj\Debug\Microsoft.Practices.EnterpriseLibrary.Logging.Configuration.DesignResources.resources
+C:\Data\Projects\EntLib50Src\Blocks\Logging\Src\Logging\obj\Debug\Microsoft.Practices.EnterpriseLibrary.Logging.Configuration.Manageability.Properties.Resources.resources
+C:\Data\Projects\EntLib50Src\Blocks\Logging\Src\Logging\obj\Debug\Microsoft.Practices.EnterpriseLibrary.Logging.Properties.Resources.resources
+C:\Data\Projects\EntLib50Src\Blocks\Logging\Src\Logging\obj\Debug\Logging.csproj.GenerateResource.Cache
+C:\Data\Projects\EntLib50Src\Blocks\Logging\Src\Logging\obj\Debug\Microsoft.Practices.EnterpriseLibrary.Logging.dll
+C:\Data\Projects\EntLib50Src\Blocks\Logging\Src\Logging\obj\Debug\Microsoft.Practices.EnterpriseLibrary.Logging.pdb

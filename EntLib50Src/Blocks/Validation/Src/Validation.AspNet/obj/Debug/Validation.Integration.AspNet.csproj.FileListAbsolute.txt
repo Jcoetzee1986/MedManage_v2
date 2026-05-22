@@ -1,0 +1,8 @@
+C:\Data\Projects\EntLib50Src\Blocks\bin\Debug\Microsoft.Practices.EnterpriseLibrary.Validation.Integration.AspNet.xml
+C:\Data\Projects\EntLib50Src\Blocks\bin\Debug\Microsoft.Practices.EnterpriseLibrary.Validation.Integration.AspNet.dll
+C:\Data\Projects\EntLib50Src\Blocks\bin\Debug\Microsoft.Practices.EnterpriseLibrary.Validation.Integration.AspNet.pdb
+C:\Data\Projects\EntLib50Src\Blocks\Validation\Src\Validation.AspNet\obj\Debug\ResolveAssemblyReference.cache
+C:\Data\Projects\EntLib50Src\Blocks\Validation\Src\Validation.AspNet\obj\Debug\Microsoft.Practices.EnterpriseLibrary.Validation.Integration.AspNet.Properties.Resources.resources
+C:\Data\Projects\EntLib50Src\Blocks\Validation\Src\Validation.AspNet\obj\Debug\Validation.Integration.AspNet.csproj.GenerateResource.Cache
+C:\Data\Projects\EntLib50Src\Blocks\Validation\Src\Validation.AspNet\obj\Debug\Microsoft.Practices.EnterpriseLibrary.Validation.Integration.AspNet.dll
+C:\Data\Projects\EntLib50Src\Blocks\Validation\Src\Validation.AspNet\obj\Debug\Microsoft.Practices.EnterpriseLibrary.Validation.Integration.AspNet.pdb

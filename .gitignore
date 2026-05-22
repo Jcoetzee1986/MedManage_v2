@@ -1,0 +1,20 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/MedManage/.vs/MedManage/v16
+/MedManage/GetUpdates/obj/Debug
+/MedManage/MaintenanceTasks/.vs/MaintenanceTasks/v16
+/MedManage/MaintenanceTasks/obj/x86/Debug
+/MedManage/MedManage/obj/x86/Debug
+/MedManageDeploy
+/MedManage/packages
+/MedManage/MedManageLib/obj/Debug
+/ImportNappiFiles/ImportNappiFiles/obj/Development
+/ImportNappiFiles/.vs/ImportNappiFiles
+/ImportNappiFiles/ImportNappiFiles/bin/Development
+/MedManage/MedManage/bin
+/MedManage/MedManage/obj
+/MedManage/MedManageLib/bin
+/MedManage/MedManageLib/obj
+**.vs

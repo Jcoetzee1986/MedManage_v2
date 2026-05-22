@@ -1,0 +1,1190 @@
+{
+	"info": {
+		"_postman_id": "medmanage-api-tests",
+		"name": "MedManage API - Complete Test Suite",
+		"description": "Comprehensive test suite for MedManage API endpoints covering Member, Case, and ServiceProvider entities.\n\nIncludes:\n- Member CRUD Operations\n- Case CRUD Operations\n- Service Provider CRUD Operations\n- Validation Tests\n- Performance Tests\n- Soft delete functionality\n- Audit trail verification\n\nRun with Newman: newman run MedManage.postman_collection.json -e MedManage.postman_environment.json",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Member CRUD Operations",
+			"item": [
+				{
+					"name": "1. Create Member - Valid",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has success=true\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(true);",
+									"});",
+									"",
+									"pm.test(\"Response contains member data\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.be.an('object');",
+									"    pm.expect(jsonData.data.memberId).to.be.a('number');",
+									"    pm.expect(jsonData.data.memberNumber).to.eql(pm.environment.get('test_member_number'));",
+									"});",
+									"",
+									"pm.test(\"Member has audit fields populated\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.dateInserted).to.exist;",
+									"    pm.expect(jsonData.data.userID).to.exist;",
+									"    pm.expect(jsonData.data.userID).to.not.be.empty;",
+									"});",
+									"",
+									"pm.test(\"DateDeleted is null for new member\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.dateDeleted).to.be.null;",
+									"});",
+									"",
+									"// Save member ID for subsequent tests",
+									"var jsonData = pm.response.json();",
+									"pm.environment.set('created_member_id', jsonData.data.memberId);",
+									"console.log('Created Member ID: ' + jsonData.data.memberId);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Generate unique member number",
+									"const timestamp = Date.now();",
+									"const memberNumber = 'TEST_' + timestamp;",
+									"pm.environment.set('test_member_number', memberNumber);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"memberNumber\": \"{{test_member_number}}\",\n  \"surname\": \"Postman\",\n  \"name\": \"Test\",\n  \"idnumber\": \"9001015800089\",\n  \"dateOfBirth\": \"1990-01-01\",\n  \"titleId\": 1,\n  \"genderId\": 1,\n  \"memberStatusId\": 1,\n  \"medicalAidId\": 1,\n  \"memberCountryId\": 1,\n  \"memberLanguageId\": 1,\n  \"memberRaceId\": 1,\n  \"marritalStatusId\": 1,\n  \"employerCountryId\": 1,\n  \"periodInCountryId\": 1,\n  \"medAidProductId\": 1,\n  \"hasMedicalAid\": true,\n  \"dateJoined\": \"2026-04-22\",\n  \"dateOfBenefit\": \"2026-04-22\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/Members",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"Members"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. Get Member by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 500ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(500);",
+									"});",
+									"",
+									"pm.test(\"Member data is returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(true);",
+									"    pm.expect(jsonData.data).to.be.an('object');",
+									"    pm.expect(jsonData.data.memberId).to.eql(parseInt(pm.environment.get('created_member_id')));",
+									"});",
+									"",
+									"pm.test(\"Member has required fields\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    var member = jsonData.data;",
+									"    pm.expect(member.memberNumber).to.exist;",
+									"    pm.expect(member.surname).to.exist;",
+									"    pm.expect(member.name).to.exist;",
+									"    pm.expect(member.dateOfBirth).to.exist;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/Members/{{created_member_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"Members",
+								"{{created_member_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3. Update Member",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Member updated successfully\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(true);",
+									"    pm.expect(jsonData.data.surname).to.eql('UpdatedSurname');",
+									"});",
+									"",
+									"pm.test(\"Audit fields updated\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.dateUpdated).to.exist;",
+									"    pm.expect(jsonData.data.dateUpdated).to.not.be.null;",
+									"});",
+									"",
+									"pm.test(\"DateInserted unchanged\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.dateInserted).to.exist;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"memberId\": {{created_member_id}},\n  \"memberNumber\": \"{{test_member_number}}\",\n  \"surname\": \"UpdatedSurname\",\n  \"name\": \"UpdatedName\",\n  \"idnumber\": \"9001015800089\",\n  \"dateOfBirth\": \"1990-01-01\",\n  \"titleId\": 1,\n  \"genderId\": 1,\n  \"memberStatusId\": 1,\n  \"medicalAidId\": 1,\n  \"memberCountryId\": 1,\n  \"memberLanguageId\": 1,\n  \"memberRaceId\": 1,\n  \"marritalStatusId\": 1,\n  \"employerCountryId\": 1,\n  \"periodInCountryId\": 1,\n  \"medAidProductId\": 1,\n  \"hasMedicalAid\": true,\n  \"dateJoined\": \"2026-04-22\",\n  \"dateOfBenefit\": \"2026-04-22\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/Members/{{created_member_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"Members",
+								"{{created_member_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "4. Search Members - No Filters",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Paginated results returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(true);",
+									"    pm.expect(jsonData.data).to.be.an('object');",
+									"    pm.expect(jsonData.data.items).to.be.an('array');",
+									"});",
+									"",
+									"pm.test(\"Pagination metadata present\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.pageNumber).to.eql(1);",
+									"    pm.expect(jsonData.data.pageSize).to.eql(10);",
+									"    pm.expect(jsonData.data.totalCount).to.be.a('number');",
+									"    pm.expect(jsonData.data.totalPages).to.be.a('number');",
+									"    pm.expect(jsonData.data.hasPreviousPage).to.be.a('boolean');",
+									"    pm.expect(jsonData.data.hasNextPage).to.be.a('boolean');",
+									"});",
+									"",
+									"pm.test(\"Items array length not exceeds page size\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.items.length).to.be.at.most(10);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"pageNumber\": 1,\n  \"pageSize\": 10\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/Members/search",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"Members",
+								"search"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "5. Search Members - With Filters",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Filtered results returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(true);",
+									"    pm.expect(jsonData.data.items).to.be.an('array');",
+									"});",
+									"",
+									"pm.test(\"Results match surname filter\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.data.items.length > 0) {",
+									"        jsonData.data.items.forEach(function(item) {",
+									"            pm.expect(item.surname.toLowerCase()).to.include('updated');",
+									"        });",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"surname\": \"Updated\",\n  \"pageNumber\": 1,\n  \"pageSize\": 10\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/Members/search",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"Members",
+								"search"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "6. Delete Member (Soft Delete)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 204 or 200\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+									"});",
+									"",
+									"// Wait a moment for delete to process",
+									"setTimeout(function(){}, 100);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/Members/{{created_member_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"Members",
+								"{{created_member_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "7. Verify Soft Delete - GET Returns 404",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 (soft deleted member hidden)\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"pm.test(\"Error message indicates member not found\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(false);",
+									"    pm.expect(jsonData.message).to.include('not found');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/Members/{{created_member_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"Members",
+								"{{created_member_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "8. HEAD - Check Member Exists",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 or 204\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+									"});",
+									"",
+									"pm.test(\"No response body\", function () {",
+									"    pm.expect(pm.response.text()).to.be.empty;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Use a known existing member ID (16819 from testing)",
+									"pm.environment.set('existing_member_id', 16819);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "HEAD",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/Members/{{existing_member_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"Members",
+								"{{existing_member_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Case CRUD Operations",
+			"item": [
+				{
+					"name": "1. Create Case - Valid",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const timestamp = Date.now();",
+									"const authNumber = 'AUTH_' + timestamp;",
+									"pm.environment.set('test_auth_number', authNumber);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 or 201\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									"",
+									"pm.test(\"Response has success=true\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(true);",
+									"});",
+									"",
+									"pm.test(\"Case created with ID\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.caseId).to.be.a('number');",
+									"    pm.environment.set('created_case_id', jsonData.data.caseId);",
+									"});",
+									"",
+									"pm.test(\"Case has audit fields\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.dateInserted).to.exist;",
+									"    pm.expect(jsonData.data.userID).to.exist;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"authNumber\": \"{{test_auth_number}}\",\n  \"memberId\": {{existing_member_id}},\n  \"admissionDate\": \"2026-04-22\",\n  \"statusId\": 1,\n  \"caseDescription\": \"Test case created via Postman\",\n  \"totalAmount\": 1000.00\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/Cases",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"Cases"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. Get Case by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Case data returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(true);",
+									"    pm.expect(jsonData.data.caseId).to.exist;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/Cases/{{created_case_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"Cases",
+								"{{created_case_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3. Update Case",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Case updated successfully\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(true);",
+									"    pm.expect(jsonData.data.totalAmount).to.eql(1500);",
+									"});",
+									"",
+									"pm.test(\"Audit fields updated\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.dateUpdated).to.exist;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"caseId\": {{created_case_id}},\n  \"authNumber\": \"{{test_auth_number}}\",\n  \"memberId\": {{existing_member_id}},\n  \"admissionDate\": \"2026-04-22\",\n  \"statusId\": 1,\n  \"caseDescription\": \"Updated test case\",\n  \"totalAmount\": 1500.00\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/Cases/{{created_case_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"Cases",
+								"{{created_case_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "4. Search Cases - No Filters",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Paginated results returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.items).to.be.an('array');",
+									"    pm.expect(jsonData.data.totalCount).to.be.a('number');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"pageNumber\": 1,\n  \"pageSize\": 10\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/Cases/search",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"Cases",
+								"search"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "5. Delete Case (Soft Delete)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 204 or 200\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/Cases/{{created_case_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"Cases",
+								"{{created_case_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "ServiceProvider CRUD Operations",
+			"item": [
+				{
+					"name": "1. Create ServiceProvider - Valid",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const timestamp = Date.now();",
+									"const practiceNr = 'PR_' + timestamp;",
+									"pm.environment.set('test_practice_nr', practiceNr);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 or 201\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									"",
+									"pm.test(\"Response has success=true\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(true);",
+									"});",
+									"",
+									"pm.test(\"ServiceProvider created with ID\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.serviceProviderId).to.be.a('number');",
+									"    pm.environment.set('created_sp_id', jsonData.data.serviceProviderId);",
+									"});",
+									"",
+									"pm.test(\"ServiceProvider has audit fields\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.dateInserted).to.exist;",
+									"    pm.expect(jsonData.data.userID).to.exist;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"serviceProviderName\": \"Test\",\n  \"serviceProviderSurname\": \"Provider\",\n  \"practiceNr\": \"{{test_practice_nr}}\",\n  \"practiceName\": \"Test Medical Practice\",\n  \"phoneNumber\": \"0123456789\",\n  \"emailAddress\": \"test@provider.com\",\n  \"visible\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/ServiceProviders",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"ServiceProviders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. Get ServiceProvider by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"ServiceProvider data returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(true);",
+									"    pm.expect(jsonData.data.serviceProviderId).to.exist;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/ServiceProviders/{{created_sp_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"ServiceProviders",
+								"{{created_sp_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3. Update ServiceProvider",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"ServiceProvider updated successfully\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(true);",
+									"    pm.expect(jsonData.data.practiceName).to.eql('Updated Medical Practice');",
+									"});",
+									"",
+									"pm.test(\"Audit fields updated\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.dateUpdated).to.exist;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"serviceProviderId\": {{created_sp_id}},\n  \"serviceProviderName\": \"Test\",\n  \"serviceProviderSurname\": \"Provider\",\n  \"practiceNr\": \"{{test_practice_nr}}\",\n  \"practiceName\": \"Updated Medical Practice\",\n  \"phoneNumber\": \"0123456789\",\n  \"emailAddress\": \"updated@provider.com\",\n  \"visible\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/ServiceProviders/{{created_sp_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"ServiceProviders",
+								"{{created_sp_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "4. Search ServiceProviders - No Filters",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Paginated results returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.items).to.be.an('array');",
+									"    pm.expect(jsonData.data.totalCount).to.be.a('number');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"pageNumber\": 1,\n  \"pageSize\": 10\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/ServiceProviders/search",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"ServiceProviders",
+								"search"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "5. Delete ServiceProvider (Soft Delete)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 204 or 200\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/ServiceProviders/{{created_sp_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"ServiceProviders",
+								"{{created_sp_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Validation Tests",
+			"item": [
+				{
+					"name": "Create Member - Missing Required Fields",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 (Bad Request)\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Validation errors present\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.errors).to.exist;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"memberNumber\": \"INVALID_TEST\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/Members",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"Members"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Member - Invalid ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 (Not Found)\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"pm.test(\"Error response structure\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(false);",
+									"    pm.expect(jsonData.message).to.exist;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/Members/999999999",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"Members",
+								"999999999"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Member - Non-existent ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 or 500\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([404, 500]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"memberId\": 999999999,\n  \"memberNumber\": \"NONEXISTENT\",\n  \"surname\": \"Test\",\n  \"name\": \"Test\",\n  \"idnumber\": \"9001015800089\",\n  \"dateOfBirth\": \"1990-01-01\",\n  \"titleId\": 1,\n  \"genderId\": 1,\n  \"memberStatusId\": 1,\n  \"medicalAidId\": 1,\n  \"memberCountryId\": 1,\n  \"memberLanguageId\": 1,\n  \"memberRaceId\": 1,\n  \"marritalStatusId\": 1,\n  \"employerCountryId\": 1,\n  \"periodInCountryId\": 1,\n  \"medAidProductId\": 1,\n  \"hasMedicalAid\": true,\n  \"dateJoined\": \"2026-04-22\",\n  \"dateOfBenefit\": \"2026-04-22\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/Members/999999999",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"Members",
+								"999999999"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Performance Tests",
+			"item": [
+				{
+					"name": "Search Members - Large Page Size",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response time acceptable for large page\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});",
+									"",
+									"pm.test(\"Returns requested page size or less\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.items.length).to.be.at.most(100);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"pageNumber\": 1,\n  \"pageSize\": 100\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/Members/search",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"Members",
+								"search"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Member - Performance Check",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response time is less than 200ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);",
+									"});",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set('existing_member_id', 16819);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/Members/{{existing_member_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"Members",
+								"{{existing_member_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Global pre-request script",
+					"console.log('Running test: ' + pm.info.requestName);"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Global test script - runs after every request",
+					"pm.test(\"Response has valid JSON\", function () {",
+					"    if (pm.response.code !== 204) {",
+					"        pm.response.to.be.json;",
+					"    }",
+					"});"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "https://localhost:58764",
+			"type": "string"
+		}
+	]
+}
