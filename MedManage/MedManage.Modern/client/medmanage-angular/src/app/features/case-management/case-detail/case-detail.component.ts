@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -7,7 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, interval } from 'rxjs';
 import { CaseService } from '../services/case.service';
 import { CaseDto } from '../models/case.models';
 import { CasePrimaryTabComponent } from '../tabs/case-primary-tab/case-primary-tab.component';
@@ -69,11 +69,31 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
   caseId!: number;
   loading = true;
 
+  /** Heartbeat interval: send lock refresh every 5 minutes to prevent expiry */
+  private readonly HEARTBEAT_INTERVAL_MS = 5 * 60 * 1000;
+  private lockAcquired = false;
+
+  /** Release lock when user closes/refreshes the browser tab */
+  @HostListener('window:beforeunload')
+  onBeforeUnload(): void {
+    if (this.caseId && this.lockAcquired) {
+      // Use sendBeacon for reliable fire-and-forget on page unload
+      const url = `${(this.caseService as any).baseUrl}/${this.caseId}/lock`;
+      // navigator.sendBeacon doesn't support DELETE, so use fetch with keepalive
+      fetch(url, {
+        method: 'DELETE',
+        keepalive: true,
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('access_token') || ''}` }
+      }).catch(() => {});
+    }
+  }
+
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
     if (idParam) {
       this.caseId = +idParam;
       this.loadCase();
+      this.startHeartbeat();
     }
   }
 
@@ -81,9 +101,30 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
     // Release lock if we had one
-    if (this.caseId) {
+    if (this.caseId && this.lockAcquired) {
       this.caseService.unlockCase(this.caseId).subscribe();
     }
+  }
+
+  /** Send periodic heartbeats to keep the lock alive while the user is on the page */
+  private startHeartbeat(): void {
+    interval(this.HEARTBEAT_INTERVAL_MS)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        if (this.caseId && this.lockAcquired) {
+          this.caseService.refreshLock(this.caseId).subscribe({
+            error: () => {
+              // Lock expired or was taken — notify the user
+              this.lockAcquired = false;
+              this.snackBar.open(
+                'Your lock on this case has expired. Another user may now edit it.',
+                'Dismiss',
+                { duration: 10000 }
+              );
+            }
+          });
+        }
+      });
   }
 
   private loadCase(): void {
@@ -95,7 +136,16 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
           this.caseData = data;
           this.loading = false;
           // Acquire lock
-          this.caseService.lockCase(this.caseId).subscribe();
+          this.caseService.lockCase(this.caseId).subscribe({
+            next: () => { this.lockAcquired = true; },
+            error: () => {
+              this.snackBar.open(
+                'This case is currently being edited by another user.',
+                'Close',
+                { duration: 5000 }
+              );
+            }
+          });
         },
         error: () => {
           this.loading = false;

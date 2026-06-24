@@ -158,6 +158,15 @@ public static class DependencyInjection
         
         // Document Management Service
         services.AddScoped<IDocumentService, DocumentService>();
+
+        // Billing Comments Service
+        services.AddScoped<ICaseBillingCommentService, CaseBillingCommentService>();
+        
+        // MainClient Tariff Service
+        services.AddScoped<IMainClientTariffService, MainClientTariffService>();
+        
+        // Session Admin Service
+        services.AddScoped<ISessionAdminService, SessionAdminService>();
         
         // Reporting Services (jsreport)
         services.AddHttpClient<IReportService, ReportService>((sp, client) =>

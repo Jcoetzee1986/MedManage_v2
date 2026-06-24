@@ -9,6 +9,7 @@ import {
   EpisodeSearchFilters,
   EpisodeCaseDto,
   LinkCaseToEpisodeDto,
+  PagedResult,
   ApiResponse
 } from '../models/episode.models';
 
@@ -39,9 +40,9 @@ export class EpisodeService {
       .pipe(map(r => r.data));
   }
 
-  search(filters: EpisodeSearchFilters): Observable<EpisodeDto[]> {
+  search(filters: EpisodeSearchFilters): Observable<PagedResult<EpisodeDto>> {
     return this.http
-      .post<ApiResponse<EpisodeDto[]>>(`${this.baseUrl}/search`, filters)
+      .post<ApiResponse<PagedResult<EpisodeDto>>>(`${this.baseUrl}/search`, filters)
       .pipe(map(r => r.data));
   }
 

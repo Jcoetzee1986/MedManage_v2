@@ -33,4 +33,6 @@ public class EpisodeSearchFilters
     public DateTime? DateFrom { get; set; }
     public DateTime? DateTo { get; set; }
     public bool IncludeDeleted { get; set; } = false;
+    public int PageNumber { get; set; } = 1;
+    public int PageSize { get; set; } = 50;
 }

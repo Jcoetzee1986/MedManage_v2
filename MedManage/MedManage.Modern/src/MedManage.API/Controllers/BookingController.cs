@@ -55,11 +55,11 @@ public class BookingController : ControllerBase
     }
 
     [HttpPost("search")]
-    [ProducesResponseType(typeof(ApiResponse<IEnumerable<BookingDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<PagedResult<BookingDto>>), StatusCodes.Status200OK)]
     public async Task<IActionResult> Search([FromBody] BookingSearchFilters filters, CancellationToken cancellationToken)
     {
-        var items = await _service.SearchAsync(filters, cancellationToken);
-        return Ok(ApiResponse<IEnumerable<BookingDto>>.SuccessResponse(items));
+        var result = await _service.SearchAsync(filters, cancellationToken);
+        return Ok(ApiResponse<PagedResult<BookingDto>>.SuccessResponse(result));
     }
 
     [HttpPost]

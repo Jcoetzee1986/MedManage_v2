@@ -27,6 +27,15 @@ export interface EpisodeSearchFilters {
   dateFrom?: string | null;
   dateTo?: string | null;
   includeDeleted?: boolean;
+  pageNumber?: number;
+  pageSize?: number;
+}
+
+export interface PagedResult<T> {
+  items: T[];
+  totalCount: number;
+  pageNumber: number;
+  pageSize: number;
 }
 
 export interface EpisodeCaseDto {

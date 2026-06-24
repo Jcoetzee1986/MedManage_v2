@@ -5,7 +5,7 @@ namespace MedManage.Core.DTOs.Case;
 /// </summary>
 public class CaseLockDto
 {
-    /// <summary>Whether the case is currently locked</summary>
+    /// <summary>Whether the case is currently locked (and the lock is still active/not expired)</summary>
     public bool IsLocked { get; set; }
 
     /// <summary>The case ID</summary>
@@ -17,6 +17,12 @@ public class CaseLockDto
     /// <summary>The username holding the lock (null if not locked)</summary>
     public string? LockedByUserName { get; set; }
 
-    /// <summary>When the lock was acquired</summary>
+    /// <summary>When the lock was originally acquired</summary>
     public DateTime? LockedAt { get; set; }
+
+    /// <summary>When the lock was last refreshed (heartbeat). Used to determine expiry.</summary>
+    public DateTime? LastActivity { get; set; }
+
+    /// <summary>When the lock will expire if not refreshed (informational)</summary>
+    public DateTime? ExpiresAt { get; set; }
 }

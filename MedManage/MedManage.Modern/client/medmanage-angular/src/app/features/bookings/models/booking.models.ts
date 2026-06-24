@@ -60,6 +60,15 @@ export interface BookingSearchFilters {
   serviceProviderId?: number | null;
   memberNumber?: string | null;
   includeDeleted?: boolean;
+  pageNumber?: number;
+  pageSize?: number;
+}
+
+export interface PagedResult<T> {
+  items: T[];
+  totalCount: number;
+  pageNumber: number;
+  pageSize: number;
 }
 
 export interface ApiResponse<T> {

@@ -12,6 +12,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ReferenceDataDropdownComponent } from '../../../shared/components/reference-data-dropdown/reference-data-dropdown.component';
+import { BillingCommentsComponent } from '../billing-comments/billing-comments.component';
 import { BillingService } from '../services/billing.service';
 import { CaseBillingDto, CreateBillingRequest, UpdateBillingRequest } from '../models/billing.models';
 
@@ -30,7 +31,8 @@ import { CaseBillingDto, CreateBillingRequest, UpdateBillingRequest } from '../m
     MatCardModule,
     MatSnackBarModule,
     MatProgressSpinnerModule,
-    ReferenceDataDropdownComponent
+    ReferenceDataDropdownComponent,
+    BillingCommentsComponent
   ],
   templateUrl: './billing-form.component.html',
   styleUrls: ['./billing-form.component.scss']

@@ -1,0 +1,101 @@
+# MedManage.Modern — Podman Compose
+# Runs the API, Angular frontend, and jsreport.
+# The SQL Server database runs on the host — not in a container.
+#
+# Usage:
+#   podman-compose up -d --build
+#   podman-compose down
+#
+# Prerequisite: ensure your SQL Server is accessible from within Podman containers.
+# On Windows with Podman Machine, the host is typically reachable at host.containers.internal
+# or your machine's LAN IP.
+
+version: '3.8'
+
+services:
+  # ──────────────────────────────────────────────────────────────
+  # .NET 8 Web API
+  # ──────────────────────────────────────────────────────────────
+  api:
+    container_name: medmanage-api
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    ports:
+      - "5000:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Server=host.containers.internal;Database=MedManage;User Id=sa;Password=${DB_PASSWORD:-YourPassword123};TrustServerCertificate=true
+      - JwtSettings__SecretKey=${JWT_SECRET:-change-this-to-a-secure-random-string-at-least-32-chars}
+      - JwtSettings__Issuer=MedManage.API
+      - JwtSettings__Audience=MedManage.Angular
+      - JwtSettings__ExpirationMinutes=60
+      - JsReport__ServerUrl=http://jsreport:5488
+      - JsReport__Username=admin
+      - JsReport__Password=${JSREPORT_PASSWORD:-password}
+      - CorsSettings__AllowedOrigins__0=http://localhost:8080
+      - CorsSettings__AllowedOrigins__1=https://localhost:8443
+      - CorsSettings__AllowedOrigins__2=http://localhost:4200
+      - Serilog__WriteTo__2__Args__hostnameOrAddress=host.containers.internal
+    volumes:
+      - medmanage-uploads:/app/uploads
+      - medmanage-logs:/app/logs
+    depends_on:
+      jsreport:
+        condition: service_healthy
+    restart: unless-stopped
+    extra_hosts:
+      - "host.containers.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  # ──────────────────────────────────────────────────────────────
+  # Angular Frontend (served by nginx, proxies /api to the API)
+  # Accessible via HTTP (:8080) and HTTPS (:8443)
+  # ──────────────────────────────────────────────────────────────
+  web:
+    container_name: medmanage-web
+    build:
+      context: .
+      dockerfile: Dockerfile.angular
+    ports:
+      - "8080:80"
+      - "8443:443"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ──────────────────────────────────────────────────────────────
+  # jsreport — PDF/Excel report generation engine
+  # ──────────────────────────────────────────────────────────────
+  jsreport:
+    image: jsreport/jsreport:4.5.0
+    container_name: medmanage-jsreport
+    ports:
+      - "5488:5488"
+    environment:
+      - extensions_authentication_admin_username=admin
+      - extensions_authentication_admin_password=${JSREPORT_PASSWORD:-password}
+      - extensions_authentication_cookieSession_secret=medmanage-jsreport-secret
+    volumes:
+      - jsreport-data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5488/api/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  medmanage-uploads:
+    driver: local
+  medmanage-logs:
+    driver: local
+  jsreport-data:
+    driver: local

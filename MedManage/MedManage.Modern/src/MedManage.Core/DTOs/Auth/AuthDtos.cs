@@ -62,3 +62,20 @@ public class RefreshTokenRequest
 {
     public string RefreshToken { get; set; } = string.Empty;
 }
+
+/// <summary>
+/// Available client DTO for multi-client switching
+/// </summary>
+public class AvailableClientDto
+{
+    public int MainClientId { get; set; }
+    public string? MainClientName { get; set; }
+}
+
+/// <summary>
+/// Switch client request DTO
+/// </summary>
+public class SwitchClientRequest
+{
+    public int MainClientId { get; set; }
+}

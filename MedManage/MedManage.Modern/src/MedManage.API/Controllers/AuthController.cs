@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MedManage.Core.DTOs.Auth;
 using MedManage.Core.Interfaces;
+using MedManage.Core.Interfaces.Services;
 using System.Security.Claims;
 
 namespace MedManage.API.Controllers;
@@ -11,11 +12,13 @@ namespace MedManage.API.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
+    private readonly ICaseLockService _caseLockService;
     private readonly ILogger<AuthController> _logger;
 
-    public AuthController(IAuthService authService, ILogger<AuthController> logger)
+    public AuthController(IAuthService authService, ICaseLockService caseLockService, ILogger<AuthController> logger)
     {
         _authService = authService;
+        _caseLockService = caseLockService;
         _logger = logger;
     }
 
@@ -155,7 +158,8 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
-    /// Revokes all refresh tokens for the current user (logout from all devices)
+    /// Revokes all refresh tokens for the current user (logout from all devices).
+    /// Also releases all case locks held by this user.
     /// </summary>
     /// <returns>Success status</returns>
     [HttpPost("revoke-all")]
@@ -175,8 +179,15 @@ public class AuthController : ControllerBase
 
         await _authService.RevokeAllUserRefreshTokensAsync(userId, "User requested logout from all devices");
 
+        // Release all case locks held by this user
+        var locksReleased = await _caseLockService.ReleaseAllUserLocksAsync(userIdClaim);
+        if (locksReleased > 0)
+        {
+            _logger.LogInformation("Released {Count} case lock(s) for user {UserId} on logout", locksReleased, userId);
+        }
+
         _logger.LogInformation("Successfully revoked all tokens for user: {UserId}", userId);
-        return Ok(new { message = "All tokens revoked successfully" });
+        return Ok(new { message = "All tokens revoked successfully", locksReleased });
     }
 
     /// <summary>
@@ -335,6 +346,55 @@ public class AuthController : ControllerBase
         var isValid = await _authService.VerifyResetPinAsync(request.Email, request.Pin);
 
         return Ok(new { Valid = isValid });
+    }
+
+    /// <summary>
+    /// Gets the list of MainClients the current user has access to
+    /// </summary>
+    [HttpGet("available-clients")]
+    [Authorize]
+    [ProducesResponseType(typeof(IEnumerable<AvailableClientDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> GetAvailableClients()
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        
+        if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+        {
+            return Unauthorized();
+        }
+
+        var clients = await _authService.GetAvailableClientsAsync(userId);
+        return Ok(clients);
+    }
+
+    /// <summary>
+    /// Switches the active MainClient context and returns a new JWT token with updated claims
+    /// </summary>
+    [HttpPost("switch-client")]
+    [Authorize]
+    [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> SwitchClient([FromBody] SwitchClientRequest request)
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        
+        if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+        {
+            return Unauthorized();
+        }
+
+        _logger.LogInformation("Client switch requested by user {UserId} to client {MainClientId}", userId, request.MainClientId);
+
+        var response = await _authService.SwitchClientAsync(userId, request.MainClientId);
+
+        if (!response.Success)
+        {
+            return BadRequest(response);
+        }
+
+        return Ok(response);
     }
 }
 

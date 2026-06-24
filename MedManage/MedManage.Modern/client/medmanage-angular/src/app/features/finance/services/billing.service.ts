@@ -11,7 +11,9 @@ import {
   BulkPaymentRequest,
   BulkPaymentResult,
   RemittanceUpdateRequest,
-  BillingSummary
+  BillingSummary,
+  BillingCommentDto,
+  CreateBillingCommentRequest
 } from '../models/billing.models';
 
 @Injectable({
@@ -63,5 +65,19 @@ export class BillingService {
 
   getSummary(caseId: number): Observable<BillingSummary> {
     return this.http.get<BillingSummary>(`${this.baseUrl}/summary/${caseId}`);
+  }
+
+  // ─── Billing Comments ───────────────────────────────────────
+
+  getComments(billingId: number): Observable<BillingCommentDto[]> {
+    return this.http.get<BillingCommentDto[]>(`${this.baseUrl}/${billingId}/comments`);
+  }
+
+  addComment(billingId: number, request: CreateBillingCommentRequest): Observable<BillingCommentDto> {
+    return this.http.post<BillingCommentDto>(`${this.baseUrl}/${billingId}/comments`, request);
+  }
+
+  deleteComment(billingId: number, commentId: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${billingId}/comments/${commentId}`);
   }
 }

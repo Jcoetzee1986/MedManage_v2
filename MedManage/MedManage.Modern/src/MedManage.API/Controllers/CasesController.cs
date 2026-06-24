@@ -54,6 +54,23 @@ public class CasesController : ControllerBase
     }
 
     /// <summary>
+    /// Get cases where the current user is the creator or has them locked
+    /// </summary>
+    [HttpGet("my-cases")]
+    [ProducesResponseType(typeof(ApiResponse<IEnumerable<CaseDto>>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetMyCases(CancellationToken cancellationToken)
+    {
+        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized();
+        }
+
+        var cases = await _caseService.GetMyCasesAsync(userId, cancellationToken);
+        return Ok(ApiResponse<IEnumerable<CaseDto>>.SuccessResponse(cases));
+    }
+
+    /// <summary>
     /// Search cases with optional filters and pagination.
     /// Supports 14+ filter parameters including auth number, member, dates, practice, status, ICD, CPT.
     /// </summary>

@@ -11,6 +11,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { AgGridModule } from 'ag-grid-angular';
 import { ColDef, GridReadyEvent, GridApi } from 'ag-grid-community';
 import { BookingService } from '../services/booking.service';
@@ -31,6 +32,7 @@ import { BookingDto, BookingSearchFilters } from '../models/booking.models';
     MatCardModule,
     MatSnackBarModule,
     MatTooltipModule,
+    MatPaginatorModule,
     AgGridModule
   ],
   templateUrl: './booking-list.component.html',
@@ -44,6 +46,9 @@ export class BookingListComponent implements OnInit {
 
   private gridApi!: GridApi;
   rowData: BookingDto[] = [];
+  totalCount = 0;
+  pageSize = 25;
+  pageIndex = 0;
   loading = false;
 
   searchForm = this.fb.group({
@@ -126,12 +131,15 @@ export class BookingListComponent implements OnInit {
     const filters: BookingSearchFilters = {
       memberNumber: formValue.memberNumber || undefined,
       dateFrom: formValue.dateFrom ? formValue.dateFrom.toISOString() : undefined,
-      dateTo: formValue.dateTo ? formValue.dateTo.toISOString() : undefined
+      dateTo: formValue.dateTo ? formValue.dateTo.toISOString() : undefined,
+      pageNumber: this.pageIndex + 1,
+      pageSize: this.pageSize
     };
 
     this.bookingService.search(filters).subscribe({
-      next: (data) => {
-        this.rowData = data;
+      next: (result) => {
+        this.rowData = result.items;
+        this.totalCount = result.totalCount;
         this.loading = false;
       },
       error: () => {
@@ -142,11 +150,19 @@ export class BookingListComponent implements OnInit {
   }
 
   onSearch(): void {
+    this.pageIndex = 0;
     this.loadBookings();
   }
 
   onReset(): void {
     this.searchForm.reset();
+    this.pageIndex = 0;
+    this.loadBookings();
+  }
+
+  onPageChange(event: PageEvent): void {
+    this.pageIndex = event.pageIndex;
+    this.pageSize = event.pageSize;
     this.loadBookings();
   }
 

@@ -7,6 +7,7 @@ import {
   CreateBookingDto,
   UpdateBookingDto,
   BookingSearchFilters,
+  PagedResult,
   ApiResponse
 } from '../models/booking.models';
 
@@ -37,9 +38,9 @@ export class BookingService {
       .pipe(map(r => r.data));
   }
 
-  search(filters: BookingSearchFilters): Observable<BookingDto[]> {
+  search(filters: BookingSearchFilters): Observable<PagedResult<BookingDto>> {
     return this.http
-      .post<ApiResponse<BookingDto[]>>(`${this.baseUrl}/search`, filters)
+      .post<ApiResponse<PagedResult<BookingDto>>>(`${this.baseUrl}/search`, filters)
       .pipe(map(r => r.data));
   }
 

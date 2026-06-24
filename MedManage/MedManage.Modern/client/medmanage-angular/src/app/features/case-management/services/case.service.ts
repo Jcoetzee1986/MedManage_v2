@@ -31,6 +31,10 @@ export class CaseService {
     return this.http.post<PagedResult<CaseDto>>(`${this.baseUrl}/search`, request);
   }
 
+  getMyCases(): Observable<CaseDto[]> {
+    return this.http.get<CaseDto[]>(`${this.baseUrl}/my-cases`);
+  }
+
   getById(id: number): Observable<CaseDto> {
     return this.http.get<CaseDto>(`${this.baseUrl}/${id}`);
   }
@@ -259,6 +263,16 @@ export class CaseService {
 
   unlockCase(caseId: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${caseId}/lock`);
+  }
+
+  /** Refresh the lock heartbeat (call periodically to prevent expiry) */
+  refreshLock(caseId: number): Observable<void> {
+    return this.http.put<void>(`${this.baseUrl}/${caseId}/lock`, {});
+  }
+
+  /** Release ALL locks held by the current user (call on logout) */
+  releaseAllMyLocks(): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/locks/mine`);
   }
 
   // ─── Case Status Transition ─────────────────────────────────

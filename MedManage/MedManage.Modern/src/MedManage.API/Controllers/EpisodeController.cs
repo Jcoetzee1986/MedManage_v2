@@ -54,11 +54,11 @@ public class EpisodeController : ControllerBase
     }
 
     [HttpPost("search")]
-    [ProducesResponseType(typeof(ApiResponse<IEnumerable<EpisodeDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<PagedResult<EpisodeDto>>), StatusCodes.Status200OK)]
     public async Task<IActionResult> Search([FromBody] EpisodeSearchFilters filters, CancellationToken cancellationToken)
     {
-        var items = await _service.SearchAsync(filters, cancellationToken);
-        return Ok(ApiResponse<IEnumerable<EpisodeDto>>.SuccessResponse(items));
+        var result = await _service.SearchAsync(filters, cancellationToken);
+        return Ok(ApiResponse<PagedResult<EpisodeDto>>.SuccessResponse(result));
     }
 
     [HttpPost]

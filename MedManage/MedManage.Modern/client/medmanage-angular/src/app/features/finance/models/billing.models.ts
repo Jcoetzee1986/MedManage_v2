@@ -94,3 +94,17 @@ export interface BillingSummary {
   outstanding: number;
   billingCount: number;
 }
+
+// ─── Billing Comments ─────────────────────────────────────────
+
+export interface BillingCommentDto {
+  caseBillingCommentId: number;
+  caseBillingId?: number;
+  comment?: string;
+  dateInserted?: string;
+  userID?: string;
+}
+
+export interface CreateBillingCommentRequest {
+  comment: string;
+}

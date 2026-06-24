@@ -68,3 +68,12 @@ export interface VerifyPinResponse {
   valid: boolean;
   message?: string;
 }
+
+export interface AvailableClientDto {
+  mainClientId: number;
+  mainClientName?: string;
+}
+
+export interface SwitchClientRequest {
+  mainClientId: number;
+}

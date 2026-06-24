@@ -1,0 +1,40 @@
+# MedManage.Modern Angular — multi-stage build
+# Supports HTTP (:80) and HTTPS (:443) via self-signed cert for local testing.
+
+FROM node:20-alpine AS build
+WORKDIR /app
+
+# Copy package files and install
+COPY client/medmanage-angular/package.json client/medmanage-angular/package-lock.json ./
+RUN npm ci
+
+# Copy source and build for production
+COPY client/medmanage-angular/ ./
+RUN npx ng build --configuration production
+
+# Serve with nginx (HTTP + HTTPS)
+FROM nginx:alpine AS runtime
+
+# Install openssl for self-signed cert generation
+RUN apk add --no-cache openssl
+
+# Generate self-signed certificate for local HTTPS testing
+RUN mkdir -p /etc/nginx/certs && \
+    openssl req -x509 -nodes -days 3650 \
+      -newkey rsa:2048 \
+      -keyout /etc/nginx/certs/selfsigned.key \
+      -out /etc/nginx/certs/selfsigned.crt \
+      -subj "/C=ZA/ST=GP/L=Johannesburg/O=MedManage/CN=localhost"
+
+# Copy built Angular app
+COPY --from=build /app/dist/medmanage-angular/browser /usr/share/nginx/html
+
+# Copy nginx configuration
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Remove default nginx config that might conflict
+RUN rm -f /etc/nginx/conf.d/default.conf.bak
+
+EXPOSE 80 443
+
+CMD ["nginx", "-g", "daemon off;"]

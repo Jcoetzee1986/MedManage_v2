@@ -71,4 +71,14 @@ public interface IAuthService
     /// Verifies if a PIN is valid for password reset
     /// </summary>
     Task<bool> VerifyResetPinAsync(string email, string pin);
+
+    /// <summary>
+    /// Gets available main clients the user has access to
+    /// </summary>
+    Task<IEnumerable<DTOs.Auth.AvailableClientDto>> GetAvailableClientsAsync(Guid userId);
+
+    /// <summary>
+    /// Switches the active main client and returns a new token
+    /// </summary>
+    Task<AuthResponse> SwitchClientAsync(Guid userId, int mainClientId);
 }

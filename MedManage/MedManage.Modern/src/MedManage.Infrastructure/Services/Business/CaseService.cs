@@ -283,4 +283,25 @@ public class CaseService : ICaseService
             _ => query.OrderByDescending(c => c.DateCreated).ThenByDescending(c => c.CaseId)
         };
     }
+
+    public async Task<IEnumerable<CaseDto>> GetMyCasesAsync(string userId, CancellationToken cancellationToken = default)
+    {
+        // Get case IDs that are currently locked by this user
+        var lockedCaseIds = await _context.SessionUserCases
+            .Where(s => s.UserID == userId)
+            .Select(s => s.CaseId)
+            .ToListAsync(cancellationToken);
+
+        // Get cases created by or locked by this user
+        var cases = await _context.Cases
+            .Include(c => c.Member)
+            .Include(c => c.Status)
+            .Where(c => c.DateDeleted == null &&
+                (c.UserID == userId || lockedCaseIds.Contains(c.CaseId)))
+            .OrderByDescending(c => c.DateCreated)
+            .Take(100)
+            .ToListAsync(cancellationToken);
+
+        return _mapper.Map<IEnumerable<CaseDto>>(cases);
+    }
 }

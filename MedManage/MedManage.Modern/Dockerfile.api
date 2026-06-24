@@ -1,0 +1,36 @@
+# MedManage.Modern API — multi-stage build
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+
+# Copy solution and project files for restore
+COPY MedManage.Modern.sln ./
+COPY src/MedManage.API/MedManage.API.csproj src/MedManage.API/
+COPY src/MedManage.Core/MedManage.Core.csproj src/MedManage.Core/
+COPY src/MedManage.Infrastructure/MedManage.Infrastructure.csproj src/MedManage.Infrastructure/
+COPY src/MedManage.Identity/MedManage.Identity.csproj src/MedManage.Identity/
+COPY src/MedManage.Shared/MedManage.Shared.csproj src/MedManage.Shared/
+COPY tests/MedManage.Infrastructure.Tests/MedManage.Infrastructure.Tests.csproj tests/MedManage.Infrastructure.Tests/
+
+RUN dotnet restore MedManage.Modern.sln
+
+# Copy everything and build
+COPY src/ src/
+COPY tests/ tests/
+RUN dotnet publish src/MedManage.API/MedManage.API.csproj -c Release -o /app/publish --no-restore
+
+# Runtime image
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+WORKDIR /app
+
+# Create uploads directory
+RUN mkdir -p /app/uploads/documents /app/uploads/thumbnails /app/uploads/cases /app/logs
+
+COPY --from=build /app/publish .
+
+# Expose port
+EXPOSE 8080
+
+ENV ASPNETCORE_URLS=http://+:8080
+ENV ASPNETCORE_ENVIRONMENT=Production
+
+ENTRYPOINT ["dotnet", "MedManage.API.dll"]

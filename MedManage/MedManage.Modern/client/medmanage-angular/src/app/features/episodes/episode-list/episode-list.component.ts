@@ -12,6 +12,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { AgGridModule } from 'ag-grid-angular';
 import { ColDef, GridReadyEvent, GridApi } from 'ag-grid-community';
 import { EpisodeService } from '../services/episode.service';
@@ -33,6 +34,7 @@ import { EpisodeDto, EpisodeSearchFilters } from '../models/episode.models';
     MatSnackBarModule,
     MatTooltipModule,
     MatDialogModule,
+    MatPaginatorModule,
     AgGridModule
   ],
   templateUrl: './episode-list.component.html',
@@ -46,6 +48,9 @@ export class EpisodeListComponent implements OnInit {
 
   private gridApi!: GridApi;
   rowData: EpisodeDto[] = [];
+  totalCount = 0;
+  pageSize = 25;
+  pageIndex = 0;
   loading = false;
 
   searchForm = this.fb.group({
@@ -96,12 +101,15 @@ export class EpisodeListComponent implements OnInit {
       episodeName: formValue.episodeName || undefined,
       memberId: formValue.memberId || undefined,
       dateFrom: formValue.dateFrom ? formValue.dateFrom.toISOString() : undefined,
-      dateTo: formValue.dateTo ? formValue.dateTo.toISOString() : undefined
+      dateTo: formValue.dateTo ? formValue.dateTo.toISOString() : undefined,
+      pageNumber: this.pageIndex + 1,
+      pageSize: this.pageSize
     };
 
     this.episodeService.search(filters).subscribe({
-      next: (data) => {
-        this.rowData = data;
+      next: (result) => {
+        this.rowData = result.items;
+        this.totalCount = result.totalCount;
         this.loading = false;
       },
       error: () => {
@@ -112,11 +120,19 @@ export class EpisodeListComponent implements OnInit {
   }
 
   onSearch(): void {
+    this.pageIndex = 0;
     this.loadEpisodes();
   }
 
   onReset(): void {
     this.searchForm.reset();
+    this.pageIndex = 0;
+    this.loadEpisodes();
+  }
+
+  onPageChange(event: PageEvent): void {
+    this.pageIndex = event.pageIndex;
+    this.pageSize = event.pageSize;
     this.loadEpisodes();
   }
 

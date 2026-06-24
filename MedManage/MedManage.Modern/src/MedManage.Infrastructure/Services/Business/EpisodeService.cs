@@ -1,4 +1,5 @@
 using AutoMapper;
+using MedManage.Core.DTOs.Common;
 using MedManage.Core.DTOs.Episode;
 using MedManage.Core.Entities;
 using MedManage.Core.Interfaces;
@@ -50,15 +51,35 @@ public class EpisodeService : IEpisodeService
         return entity == null ? null : _mapper.Map<EpisodeDto>(entity);
     }
 
-    public async Task<IEnumerable<EpisodeDto>> SearchAsync(EpisodeSearchFilters filters, CancellationToken cancellationToken = default)
+    public async Task<PagedResult<EpisodeDto>> SearchAsync(EpisodeSearchFilters filters, CancellationToken cancellationToken = default)
     {
         var entities = await _unitOfWork.Episodes.SearchByFiltersAsync(
             filters.EpisodeName,
             filters.MemberId,
             filters.DateFrom,
             filters.DateTo);
-        
-        return _mapper.Map<IEnumerable<EpisodeDto>>(entities);
+
+        var query = entities.AsQueryable();
+
+        if (!filters.IncludeDeleted)
+        {
+            query = query.Where(x => x.DateDeleted == null);
+        }
+
+        var totalCount = query.Count();
+
+        var paged = query
+            .Skip((filters.PageNumber - 1) * filters.PageSize)
+            .Take(filters.PageSize)
+            .ToList();
+
+        return new PagedResult<EpisodeDto>
+        {
+            Items = _mapper.Map<IEnumerable<EpisodeDto>>(paged),
+            TotalCount = totalCount,
+            PageNumber = filters.PageNumber,
+            PageSize = filters.PageSize
+        };
     }
 
     public async Task<EpisodeDto> CreateAsync(CreateEpisodeDto dto, CancellationToken cancellationToken = default)

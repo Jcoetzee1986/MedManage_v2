@@ -1,6 +1,7 @@
 using FluentValidation;
 using MedManage.Infrastructure.Persistence;
 using MedManage.Infrastructure.Services;
+using MedManage.Infrastructure.Services.Background;
 using MedManage.Infrastructure;
 using MedManage.Core.Interfaces;
 using MedManage.Core.Configuration;
@@ -58,6 +59,12 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 
 // Configure JsReport Settings
 builder.Services.Configure<JsReportSettings>(builder.Configuration.GetSection(JsReportSettings.SectionName));
+
+// Configure Case Lock Settings (inactivity timeout, cleanup interval)
+builder.Services.Configure<CaseLockSettings>(builder.Configuration.GetSection(CaseLockSettings.SectionName));
+
+// Register background service for expired lock cleanup
+builder.Services.AddHostedService<ExpiredLockCleanupService>();
 
 // Register the session context interceptor (sets SESSION_CONTEXT for SQL audit triggers)
 builder.Services.AddScoped<SessionContextInterceptor>();

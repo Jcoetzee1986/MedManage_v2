@@ -749,5 +749,101 @@ public class AuthService : IAuthService
         var randomNumber = RandomNumberGenerator.GetInt32(100000, 1000000);
         return randomNumber.ToString();
     }
+
+    public async Task<IEnumerable<MedManage.Core.DTOs.Auth.AvailableClientDto>> GetAvailableClientsAsync(Guid userId)
+    {
+        // Return all main clients (in a real multi-tenant setup, this would filter by user access)
+        var clients = await _context.MainClients
+            .Where(c => c.DateDeleted == null)
+            .OrderBy(c => c.MainClientName)
+            .Select(c => new MedManage.Core.DTOs.Auth.AvailableClientDto
+            {
+                MainClientId = c.MainClientId,
+                MainClientName = c.MainClientName
+            })
+            .ToListAsync();
+
+        return clients;
+    }
+
+    public async Task<AuthResponse> SwitchClientAsync(Guid userId, int mainClientId)
+    {
+        // Verify the client exists
+        var client = await _context.MainClients
+            .FirstOrDefaultAsync(c => c.MainClientId == mainClientId && c.DateDeleted == null);
+
+        if (client == null)
+        {
+            return new AuthResponse
+            {
+                Success = false,
+                Message = "Client not found"
+            };
+        }
+
+        // Get user details for token generation
+        var user = await _context.AspnetUsers
+            .Include(u => u.AspnetUsersInRoles)
+                .ThenInclude(ur => ur.Role)
+            .FirstOrDefaultAsync(u => u.UserId == userId);
+
+        if (user == null)
+        {
+            return new AuthResponse
+            {
+                Success = false,
+                Message = "User not found"
+            };
+        }
+
+        var roles = user.AspnetUsersInRoles.Select(ur => ur.Role.RoleName).ToList();
+
+        // Generate new JWT with MainClientID claim
+        var jwtSettings = _configuration.GetSection("JwtSettings");
+        var secretKey = jwtSettings["SecretKey"] ?? throw new InvalidOperationException("JWT SecretKey not configured");
+        var issuer = jwtSettings["Issuer"] ?? "MedManageAPI";
+        var audience = jwtSettings["Audience"] ?? "MedManageClient";
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
+            new Claim(ClaimTypes.Name, user.UserName),
+            new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new Claim("MainClientID", mainClientId.ToString())
+        };
+
+        foreach (var role in roles)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, role));
+        }
+
+        var token = new JwtSecurityToken(
+            issuer: issuer,
+            audience: audience,
+            claims: claims,
+            expires: DateTime.UtcNow.AddMinutes(15),
+            signingCredentials: credentials
+        );
+
+        var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+
+        return new AuthResponse
+        {
+            Success = true,
+            Token = tokenString,
+            ExpiresAt = DateTime.UtcNow.AddMinutes(15),
+            Message = $"Switched to client: {client.MainClientName}",
+            User = new UserInfo
+            {
+                UserId = userId,
+                Username = user.UserName,
+                Roles = roles
+            }
+        };
+    }
 }
 

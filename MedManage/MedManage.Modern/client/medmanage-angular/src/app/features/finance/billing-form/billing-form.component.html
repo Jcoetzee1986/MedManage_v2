@@ -87,6 +87,10 @@
             </button>
           </div>
         </form>
+
+        @if (isEditMode && billingId) {
+          <app-billing-comments [billingId]="billingId"></app-billing-comments>
+        }
       }
     </mat-card-content>
   </mat-card>

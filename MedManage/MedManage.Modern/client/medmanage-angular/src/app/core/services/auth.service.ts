@@ -15,7 +15,9 @@ import {
   UserInfo,
   PasswordResetResponse,
   UsernameCheckResponse,
-  VerifyPinResponse
+  VerifyPinResponse,
+  AvailableClientDto,
+  SwitchClientRequest
 } from '../models/auth.models';
 
 @Injectable({
@@ -162,9 +164,38 @@ export class AuthService {
   }
 
   /**
-   * Logout current user
+   * Get available main clients for the current user
+   */
+  getAvailableClients(): Observable<AvailableClientDto[]> {
+    return this.http.get<AvailableClientDto[]>(`${this.API_URL}/available-clients`);
+  }
+
+  /**
+   * Switch to a different main client context
+   */
+  switchClient(request: SwitchClientRequest): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.API_URL}/switch-client`, request).pipe(
+      tap(response => {
+        if (response.success && response.token) {
+          this.setToken(response.token);
+          if (response.user) {
+            this.setUser(response.user);
+            this.currentUserSubject.next(response.user);
+          }
+        }
+      })
+    );
+  }
+
+  /**
+   * Logout current user. Releases all case locks and revokes tokens.
    */
   logout(): void {
+    // Release all case locks held by this user (fire-and-forget)
+    this.http.delete(`${environment.apiUrl}/cases/locks/mine`).subscribe({
+      error: () => {} // best-effort
+    });
+
     // Try to revoke refresh token if it exists
     const refreshToken = this.getRefreshToken();
     if (refreshToken) {

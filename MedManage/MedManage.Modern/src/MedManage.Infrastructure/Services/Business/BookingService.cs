@@ -1,6 +1,8 @@
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using MedManage.Core.DTOs.Booking;
 using MedManage.Core.DTOs.Case;
+using MedManage.Core.DTOs.Common;
 using MedManage.Core.Entities;
 using MedManage.Core.Interfaces;
 using MedManage.Core.Interfaces.Services;
@@ -56,15 +58,35 @@ public class BookingService : IBookingService
         return _mapper.Map<IEnumerable<BookingDto>>(entities);
     }
 
-    public async Task<IEnumerable<BookingDto>> SearchAsync(BookingSearchFilters filters, CancellationToken cancellationToken = default)
+    public async Task<PagedResult<BookingDto>> SearchAsync(BookingSearchFilters filters, CancellationToken cancellationToken = default)
     {
         var entities = await _unitOfWork.Bookings.SearchByFiltersAsync(
             filters.DateFrom,
             filters.DateTo,
             filters.ServiceProviderId,
             filters.MemberNumber);
-        
-        return _mapper.Map<IEnumerable<BookingDto>>(entities);
+
+        var query = entities.AsQueryable();
+
+        if (!filters.IncludeDeleted)
+        {
+            query = query.Where(x => x.DateDeleted == null);
+        }
+
+        var totalCount = query.Count();
+
+        var paged = query
+            .Skip((filters.PageNumber - 1) * filters.PageSize)
+            .Take(filters.PageSize)
+            .ToList();
+
+        return new PagedResult<BookingDto>
+        {
+            Items = _mapper.Map<IEnumerable<BookingDto>>(paged),
+            TotalCount = totalCount,
+            PageNumber = filters.PageNumber,
+            PageSize = filters.PageSize
+        };
     }
 
     public async Task<BookingDto> CreateAsync(CreateBookingDto dto, CancellationToken cancellationToken = default)
