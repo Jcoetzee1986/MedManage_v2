@@ -208,5 +208,166 @@ public class ReferenceDataProfile : Profile
             .ForMember(dest => dest.DateUpdated, opt => opt.Ignore())
             .ForMember(dest => dest.UpdatedUserID, opt => opt.Ignore())
             .ForMember(dest => dest.DateDeleted, opt => opt.Ignore());
+
+        // Gender mappings
+        CreateMap<Gender, GenderDto>()
+            .ForMember(dest => dest.DateCreated, opt => opt.MapFrom(src => src.DateInserted))
+            .ForMember(dest => dest.DateModified, opt => opt.MapFrom(src => src.DateUpdated));
+        CreateMap<CreateGenderDto, Gender>()
+            .ForMember(dest => dest.GenderId, opt => opt.Ignore())
+            .ForMember(dest => dest.DateInserted, opt => opt.Ignore())
+            .ForMember(dest => dest.UserID, opt => opt.Ignore())
+            .ForMember(dest => dest.DateUpdated, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedUserID, opt => opt.Ignore())
+            .ForMember(dest => dest.DateDeleted, opt => opt.Ignore())
+            .ForMember(dest => dest.Members, opt => opt.Ignore());
+        CreateMap<UpdateGenderDto, Gender>()
+            .ForMember(dest => dest.GenderId, opt => opt.Ignore())
+            .ForMember(dest => dest.DateInserted, opt => opt.Ignore())
+            .ForMember(dest => dest.UserID, opt => opt.Ignore())
+            .ForMember(dest => dest.DateUpdated, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedUserID, opt => opt.Ignore())
+            .ForMember(dest => dest.DateDeleted, opt => opt.Ignore())
+            .ForMember(dest => dest.Members, opt => opt.Ignore());
+
+        // Language mappings
+        CreateMap<Language, LanguageDto>()
+            .ForMember(dest => dest.Language, opt => opt.MapFrom(src => src.Language1))
+            .ForMember(dest => dest.DateCreated, opt => opt.MapFrom(src => src.DateInserted))
+            .ForMember(dest => dest.DateModified, opt => opt.MapFrom(src => src.DateUpdated));
+        CreateMap<CreateLanguageDto, Language>()
+            .ForMember(dest => dest.LanguageId, opt => opt.Ignore())
+            .ForMember(dest => dest.Language1, opt => opt.MapFrom(src => src.Language))
+            .ForMember(dest => dest.DateInserted, opt => opt.Ignore())
+            .ForMember(dest => dest.UserID, opt => opt.Ignore())
+            .ForMember(dest => dest.DateUpdated, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedUserID, opt => opt.Ignore())
+            .ForMember(dest => dest.DateDeleted, opt => opt.Ignore())
+            .ForMember(dest => dest.Members, opt => opt.Ignore());
+        CreateMap<UpdateLanguageDto, Language>()
+            .ForMember(dest => dest.LanguageId, opt => opt.Ignore())
+            .ForMember(dest => dest.Language1, opt => opt.MapFrom(src => src.Language))
+            .ForMember(dest => dest.DateInserted, opt => opt.Ignore())
+            .ForMember(dest => dest.UserID, opt => opt.Ignore())
+            .ForMember(dest => dest.DateUpdated, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedUserID, opt => opt.Ignore())
+            .ForMember(dest => dest.DateDeleted, opt => opt.Ignore())
+            .ForMember(dest => dest.Members, opt => opt.Ignore());
+
+        // Race mappings
+        CreateMap<Race, RaceDto>()
+            .ForMember(dest => dest.Race, opt => opt.MapFrom(src => src.Race1))
+            .ForMember(dest => dest.DateCreated, opt => opt.MapFrom(src => src.DateInserted))
+            .ForMember(dest => dest.DateModified, opt => opt.MapFrom(src => src.DateUpdated));
+        CreateMap<CreateRaceDto, Race>()
+            .ForMember(dest => dest.RaceId, opt => opt.Ignore())
+            .ForMember(dest => dest.Race1, opt => opt.MapFrom(src => src.Race))
+            .ForMember(dest => dest.DateInserted, opt => opt.Ignore())
+            .ForMember(dest => dest.UserID, opt => opt.Ignore())
+            .ForMember(dest => dest.DateUpdated, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedUserID, opt => opt.Ignore())
+            .ForMember(dest => dest.DateDeleted, opt => opt.Ignore())
+            .ForMember(dest => dest.Members, opt => opt.Ignore());
+        CreateMap<UpdateRaceDto, Race>()
+            .ForMember(dest => dest.RaceId, opt => opt.Ignore())
+            .ForMember(dest => dest.Race1, opt => opt.MapFrom(src => src.Race))
+            .ForMember(dest => dest.DateInserted, opt => opt.Ignore())
+            .ForMember(dest => dest.UserID, opt => opt.Ignore())
+            .ForMember(dest => dest.DateUpdated, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedUserID, opt => opt.Ignore())
+            .ForMember(dest => dest.DateDeleted, opt => opt.Ignore())
+            .ForMember(dest => dest.Members, opt => opt.Ignore());
+
+        // Title mappings
+        CreateMap<Title, TitleDto>()
+            .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Title1))
+            .ForMember(dest => dest.DateCreated, opt => opt.MapFrom(src => src.DateInserted))
+            .ForMember(dest => dest.DateModified, opt => opt.MapFrom(src => src.DateUpdated));
+        CreateMap<CreateTitleDto, Title>()
+            .ForMember(dest => dest.TitleId, opt => opt.Ignore())
+            .ForMember(dest => dest.Title1, opt => opt.MapFrom(src => src.Title))
+            .ForMember(dest => dest.DateInserted, opt => opt.Ignore())
+            .ForMember(dest => dest.UserID, opt => opt.Ignore())
+            .ForMember(dest => dest.DateUpdated, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedUserID, opt => opt.Ignore())
+            .ForMember(dest => dest.DateDeleted, opt => opt.Ignore())
+            .ForMember(dest => dest.Members, opt => opt.Ignore());
+        CreateMap<UpdateTitleDto, Title>()
+            .ForMember(dest => dest.TitleId, opt => opt.Ignore())
+            .ForMember(dest => dest.Title1, opt => opt.MapFrom(src => src.Title))
+            .ForMember(dest => dest.DateInserted, opt => opt.Ignore())
+            .ForMember(dest => dest.UserID, opt => opt.Ignore())
+            .ForMember(dest => dest.DateUpdated, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedUserID, opt => opt.Ignore())
+            .ForMember(dest => dest.DateDeleted, opt => opt.Ignore())
+            .ForMember(dest => dest.Members, opt => opt.Ignore());
+
+        // PeriodInCountry mappings
+        CreateMap<PeriodInCountry, PeriodInCountryDto>()
+            .ForMember(dest => dest.PeriodInCountry, opt => opt.MapFrom(src => src.PeriodInCountry1))
+            .ForMember(dest => dest.DateCreated, opt => opt.MapFrom(src => src.DateInserted))
+            .ForMember(dest => dest.DateModified, opt => opt.MapFrom(src => src.DateUpdated));
+        CreateMap<CreatePeriodInCountryDto, PeriodInCountry>()
+            .ForMember(dest => dest.PeriodInCountryId, opt => opt.Ignore())
+            .ForMember(dest => dest.PeriodInCountry1, opt => opt.MapFrom(src => src.PeriodInCountry))
+            .ForMember(dest => dest.DateInserted, opt => opt.Ignore())
+            .ForMember(dest => dest.UserID, opt => opt.Ignore())
+            .ForMember(dest => dest.DateUpdated, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedUserID, opt => opt.Ignore())
+            .ForMember(dest => dest.DateDeleted, opt => opt.Ignore())
+            .ForMember(dest => dest.Members, opt => opt.Ignore());
+        CreateMap<UpdatePeriodInCountryDto, PeriodInCountry>()
+            .ForMember(dest => dest.PeriodInCountryId, opt => opt.Ignore())
+            .ForMember(dest => dest.PeriodInCountry1, opt => opt.MapFrom(src => src.PeriodInCountry))
+            .ForMember(dest => dest.DateInserted, opt => opt.Ignore())
+            .ForMember(dest => dest.UserID, opt => opt.Ignore())
+            .ForMember(dest => dest.DateUpdated, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedUserID, opt => opt.Ignore())
+            .ForMember(dest => dest.DateDeleted, opt => opt.Ignore())
+            .ForMember(dest => dest.Members, opt => opt.Ignore());
+
+        // CaseCategory mappings
+        CreateMap<CaseCategory, CaseCategoryDto>()
+            .ForMember(dest => dest.CaseCategory, opt => opt.MapFrom(src => src.CaseCategory1))
+            .ForMember(dest => dest.DateCreated, opt => opt.MapFrom(src => src.DateInserted))
+            .ForMember(dest => dest.DateModified, opt => opt.MapFrom(src => src.DateUpdated));
+        CreateMap<CreateCaseCategoryDto, CaseCategory>()
+            .ForMember(dest => dest.CaseCategoryId, opt => opt.Ignore())
+            .ForMember(dest => dest.CaseCategory1, opt => opt.MapFrom(src => src.CaseCategory))
+            .ForMember(dest => dest.DateInserted, opt => opt.Ignore())
+            .ForMember(dest => dest.UserID, opt => opt.Ignore())
+            .ForMember(dest => dest.DateUpdated, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedUserID, opt => opt.Ignore())
+            .ForMember(dest => dest.DateDeleted, opt => opt.Ignore());
+        CreateMap<UpdateCaseCategoryDto, CaseCategory>()
+            .ForMember(dest => dest.CaseCategoryId, opt => opt.Ignore())
+            .ForMember(dest => dest.CaseCategory1, opt => opt.MapFrom(src => src.CaseCategory))
+            .ForMember(dest => dest.DateInserted, opt => opt.Ignore())
+            .ForMember(dest => dest.UserID, opt => opt.Ignore())
+            .ForMember(dest => dest.DateUpdated, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedUserID, opt => opt.Ignore())
+            .ForMember(dest => dest.DateDeleted, opt => opt.Ignore());
+
+        // SuspendedReason mappings
+        CreateMap<SuspendedReason, SuspendedReasonDto>()
+            .ForMember(dest => dest.SuspendedReason, opt => opt.MapFrom(src => src.SuspendedReason1))
+            .ForMember(dest => dest.DateCreated, opt => opt.MapFrom(src => src.DateInserted))
+            .ForMember(dest => dest.DateModified, opt => opt.MapFrom(src => src.DateUpdated));
+        CreateMap<CreateSuspendedReasonDto, SuspendedReason>()
+            .ForMember(dest => dest.SuspendedReasonId, opt => opt.Ignore())
+            .ForMember(dest => dest.SuspendedReason1, opt => opt.MapFrom(src => src.SuspendedReason))
+            .ForMember(dest => dest.DateInserted, opt => opt.Ignore())
+            .ForMember(dest => dest.UserID, opt => opt.Ignore())
+            .ForMember(dest => dest.DateUpdated, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedUserID, opt => opt.Ignore())
+            .ForMember(dest => dest.DateDeleted, opt => opt.Ignore());
+        CreateMap<UpdateSuspendedReasonDto, SuspendedReason>()
+            .ForMember(dest => dest.SuspendedReasonId, opt => opt.Ignore())
+            .ForMember(dest => dest.SuspendedReason1, opt => opt.MapFrom(src => src.SuspendedReason))
+            .ForMember(dest => dest.DateInserted, opt => opt.Ignore())
+            .ForMember(dest => dest.UserID, opt => opt.Ignore())
+            .ForMember(dest => dest.DateUpdated, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedUserID, opt => opt.Ignore())
+            .ForMember(dest => dest.DateDeleted, opt => opt.Ignore());
     }
 }

@@ -64,8 +64,6 @@ public class EpisodeService : IEpisodeService
     public async Task<EpisodeDto> CreateAsync(CreateEpisodeDto dto, CancellationToken cancellationToken = default)
     {
         var entity = _mapper.Map<Episode>(dto);
-        entity.DateInserted = DateTime.UtcNow;
-        entity.UserID = _currentUserService.UserId ?? string.Empty;
         
         // If DateCreated is not provided, set it to today
         if (!entity.DateCreated.HasValue)
@@ -88,8 +86,6 @@ public class EpisodeService : IEpisodeService
         }
         
         _mapper.Map(dto, entity);
-        entity.DateUpdated = DateTime.UtcNow;
-        entity.UpdatedUserID = _currentUserService.UserId;
         
         await _unitOfWork.Episodes.UpdateAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

@@ -1,0 +1,42 @@
+.search-field {
+  margin-bottom: 16px;
+
+  .full-width {
+    width: 100%;
+  }
+}
+
+.results-container {
+  min-height: 200px;
+  max-height: 400px;
+  overflow-y: auto;
+
+  mat-spinner {
+    margin: 24px auto;
+    display: block;
+  }
+}
+
+.full-width-table {
+  width: 100%;
+}
+
+.selected-row {
+  background-color: rgba(63, 81, 181, 0.08);
+  cursor: pointer;
+}
+
+tr.mat-mdc-row {
+  cursor: pointer;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+}
+
+.no-results {
+  color: rgba(0, 0, 0, 0.54);
+  text-align: center;
+  padding: 24px;
+  font-style: italic;
+}

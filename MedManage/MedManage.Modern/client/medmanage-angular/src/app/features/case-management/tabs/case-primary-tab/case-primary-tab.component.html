@@ -1,0 +1,48 @@
+<div class="tab-content">
+  <form [formGroup]="form" (ngSubmit)="onSave()">
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Auth Number</mat-label>
+        <input matInput formControlName="authNumber">
+      </mat-form-field>
+
+      <app-reference-data-dropdown
+        resource="case-status"
+        label="Status"
+        formControlName="caseStatusId">
+      </app-reference-data-dropdown>
+    </div>
+
+    <div class="form-row">
+      <app-reference-data-dropdown
+        resource="case-type"
+        label="Type"
+        formControlName="caseTypeId">
+      </app-reference-data-dropdown>
+
+      <app-reference-data-dropdown
+        resource="case-category"
+        label="Category"
+        formControlName="caseCategoryId">
+      </app-reference-data-dropdown>
+    </div>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Diagnosis</mat-label>
+        <textarea matInput formControlName="diagnosis" rows="3"></textarea>
+      </mat-form-field>
+    </div>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Comments</mat-label>
+        <textarea matInput formControlName="comments" rows="3"></textarea>
+      </mat-form-field>
+    </div>
+
+    <div class="form-actions">
+      <button mat-raised-button color="primary" type="submit">Save</button>
+    </div>
+  </form>
+</div>

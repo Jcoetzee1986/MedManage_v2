@@ -11,5 +11,9 @@ public class CaseBillingProfile : Profile
         CreateMap<CaseBilling, CaseBillingDto>();
         CreateMap<CreateCaseBillingDto, CaseBilling>();
         CreateMap<UpdateCaseBillingDto, CaseBilling>();
+
+        // CaseDiscount mappings
+        CreateMap<CaseDiscount, CaseDiscountDto>();
+        CreateMap<CreateCaseDiscountDto, CaseDiscount>();
     }
 }

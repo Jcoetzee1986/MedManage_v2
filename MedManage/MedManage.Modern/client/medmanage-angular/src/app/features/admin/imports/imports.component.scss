@@ -1,0 +1,112 @@
+.imports-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  h2 {
+    margin-bottom: 16px;
+  }
+}
+
+.upload-section {
+  padding: 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.upload-card {
+  mat-card-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .help-text {
+    font-size: 0.85em;
+    color: rgba(0, 0, 0, 0.6);
+    margin: 8px 0 0;
+  }
+}
+
+.progress-card {
+  .progress-text {
+    text-align: center;
+    margin-top: 8px;
+    font-weight: 500;
+  }
+}
+
+.result-card {
+  &.result-success {
+    border-left: 4px solid #4caf50;
+  }
+  &.result-warning {
+    border-left: 4px solid #ff9800;
+  }
+  &.result-error {
+    border-left: 4px solid #f44336;
+  }
+}
+
+.result-stats {
+  display: flex;
+  gap: 32px;
+  margin: 16px 0;
+
+  .stat {
+    text-align: center;
+
+    .stat-value {
+      display: block;
+      font-size: 1.5em;
+      font-weight: 600;
+    }
+
+    .stat-label {
+      display: block;
+      font-size: 0.85em;
+      color: rgba(0, 0, 0, 0.6);
+    }
+
+    &.stat-success .stat-value {
+      color: #4caf50;
+    }
+    &.stat-skip .stat-value {
+      color: #ff9800;
+    }
+    &.stat-error .stat-value {
+      color: #f44336;
+    }
+  }
+}
+
+.validation-errors {
+  margin-top: 16px;
+
+  h4 {
+    margin-bottom: 8px;
+  }
+
+  table {
+    width: 100%;
+  }
+}
+
+.history-section {
+  padding: 16px 0;
+}
+
+.history-filter {
+  margin-bottom: 16px;
+}
+
+.history-table {
+  width: 100%;
+}
+
+.no-data {
+  text-align: center;
+  padding: 32px;
+  color: rgba(0, 0, 0, 0.5);
+}

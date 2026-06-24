@@ -12,7 +12,8 @@ public interface IMemberRepository : IRepository<Member>
         string? lastName,
         string? idNumber,
         int? medicalAidId,
-        int? statusId);
+        int? statusId,
+        bool includeDeleted = false);
     Task<bool> MemberNumberExistsAsync(string memberNumber, int? excludeMemberId = null);
     Task<IEnumerable<Member>> GetByMedicalAidAsync(int medicalAidId);
 }

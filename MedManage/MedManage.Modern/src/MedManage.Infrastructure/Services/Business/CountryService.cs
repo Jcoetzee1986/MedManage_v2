@@ -40,8 +40,6 @@ public class CountryService : ICountryService
     public async Task<CountryDto> CreateAsync(CreateCountryDto dto, CancellationToken cancellationToken = default)
     {
         var entity = _mapper.Map<Country>(dto);
-        entity.DateInserted = DateTime.UtcNow;
-        entity.UserID = _currentUserService.UserId ?? string.Empty;
         
         await _unitOfWork.Countries.AddAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -58,8 +56,6 @@ public class CountryService : ICountryService
         }
         
         _mapper.Map(dto, entity);
-        entity.DateUpdated = DateTime.UtcNow;
-        entity.UpdatedUserID = _currentUserService.UserId;
         
         await _unitOfWork.Countries.UpdateAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

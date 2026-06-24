@@ -51,10 +51,13 @@ public class ServiceProviderRepository : Repository<ServiceProvider>, IServicePr
     public async Task<IEnumerable<ServiceProvider>> AutocompleteSearchAsync(string searchTerm)
     {
         return await _dbSet
-            .Where(sp => (sp.PracticeName != null && sp.PracticeName.Contains(searchTerm))
-                      || (sp.PracticeNr != null && sp.PracticeNr.Contains(searchTerm))
-                      && sp.DateDeleted == null)
-            .OrderBy(sp => sp.PracticeName)
+            .Where(sp => sp.DateDeleted == null &&
+                ((sp.ServiceProviderName != null && sp.ServiceProviderName.Contains(searchTerm))
+              || (sp.ServiceProviderSurname != null && sp.ServiceProviderSurname.Contains(searchTerm))
+              || (sp.PracticeName != null && sp.PracticeName.Contains(searchTerm))
+              || (sp.PracticeNr != null && sp.PracticeNr.Contains(searchTerm))))
+            .OrderBy(sp => sp.ServiceProviderSurname)
+            .ThenBy(sp => sp.ServiceProviderName)
             .Take(20)
             .ToListAsync();
     }

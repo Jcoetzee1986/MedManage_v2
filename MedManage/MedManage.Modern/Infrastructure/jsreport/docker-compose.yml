@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  jsreport:
+    image: jsreport/jsreport:4.5.0
+    container_name: medmanage-jsreport
+    ports:
+      - "5488:5488"
+    environment:
+      - extensions_authentication_admin_username=admin
+      - extensions_authentication_admin_password=password
+      - extensions_authentication_cookieSession_secret=medmanage-secret
+    volumes:
+      - jsreport-data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5488/api/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  jsreport-data:
+    driver: local

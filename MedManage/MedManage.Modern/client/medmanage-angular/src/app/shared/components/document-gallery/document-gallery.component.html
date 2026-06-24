@@ -1,0 +1,109 @@
+<div class="document-gallery">
+  <!-- Upload Area -->
+  <div class="upload-section" *ngIf="allowUpload">
+    <button mat-raised-button color="primary" (click)="fileInput.click()" [disabled]="uploading">
+      <mat-icon>cloud_upload</mat-icon>
+      Upload Document
+    </button>
+    <input
+      #fileInput
+      type="file"
+      hidden
+      (change)="onFileSelected($event)"
+      aria-label="Select file to upload" />
+    <mat-progress-bar
+      *ngIf="uploading"
+      mode="determinate"
+      [value]="uploadProgress"
+      class="upload-progress">
+    </mat-progress-bar>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div class="loading-container" *ngIf="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!loading && documents.length === 0">
+    <mat-icon class="empty-icon">folder_open</mat-icon>
+    <p>No documents found</p>
+  </div>
+
+  <!-- Document Grid -->
+  <div class="document-grid" *ngIf="!loading && documents.length > 0">
+    <mat-card
+      *ngFor="let doc of documents"
+      class="document-card"
+      [class.image-card]="doc.isImage"
+      (click)="onDocumentClick(doc)"
+      tabindex="0"
+      role="button"
+      [attr.aria-label]="'Open ' + doc.fileName">
+
+      <!-- Image Thumbnail -->
+      <div class="thumbnail-container" *ngIf="doc.isImage">
+        <img
+          [src]="getThumbnailUrl(doc)"
+          [alt]="doc.fileName"
+          class="thumbnail-image"
+          loading="lazy" />
+      </div>
+
+      <!-- Non-Image File Icon -->
+      <div class="file-icon-container" *ngIf="!doc.isImage">
+        <mat-icon class="file-icon">{{ getFileIcon(doc) }}</mat-icon>
+      </div>
+
+      <!-- Card Footer -->
+      <mat-card-content class="card-content">
+        <span class="file-name" [matTooltip]="doc.fileName">{{ doc.fileName }}</span>
+        <span class="file-size">{{ formatFileSize(doc.fileSize) }}</span>
+      </mat-card-content>
+
+      <!-- Actions -->
+      <mat-card-actions class="card-actions">
+        <button
+          mat-icon-button
+          (click)="downloadDocument(doc); $event.stopPropagation()"
+          matTooltip="Download"
+          aria-label="Download document">
+          <mat-icon>download</mat-icon>
+        </button>
+        <button
+          mat-icon-button
+          *ngIf="allowDelete"
+          color="warn"
+          (click)="onDelete(doc, $event)"
+          matTooltip="Delete"
+          aria-label="Delete document">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+
+  <!-- Full-size Image Preview Overlay -->
+  <div class="preview-overlay" *ngIf="previewDocument" (click)="closePreview()" role="dialog" aria-label="Image preview">
+    <div class="preview-content" (click)="$event.stopPropagation()">
+      <div class="preview-header">
+        <span class="preview-title">{{ previewDocument.fileName }}</span>
+        <button mat-icon-button (click)="closePreview()" aria-label="Close preview">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      <div class="preview-body">
+        <img
+          [src]="getDownloadUrl(previewDocument)"
+          [alt]="previewDocument.fileName"
+          class="preview-image" />
+      </div>
+      <div class="preview-footer">
+        <button mat-button (click)="downloadDocument(previewDocument)">
+          <mat-icon>download</mat-icon>
+          Download Original
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -2,12 +2,14 @@ using System.Threading.Tasks;
 using MedManage.Core.DTOs.EpisodeCase;
 using MedManage.Core.DTOs.Common;
 using MedManage.Core.Interfaces.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MedManage.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class EpisodeCaseController : ControllerBase
 {
     private readonly IEpisodeCaseService _service;

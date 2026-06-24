@@ -40,8 +40,6 @@ public class SpecialityService : ISpecialityService
     public async Task<SpecialityDto> CreateAsync(CreateSpecialityDto dto, CancellationToken cancellationToken = default)
     {
         var entity = _mapper.Map<Speciality>(dto);
-        entity.DateInserted = DateTime.UtcNow;
-        entity.UserID = _currentUserService.UserId ?? string.Empty;
         
         await _unitOfWork.Specialities.AddAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -58,8 +56,6 @@ public class SpecialityService : ISpecialityService
         }
         
         _mapper.Map(dto, entity);
-        entity.DateUpdated = DateTime.UtcNow;
-        entity.UpdatedUserID = _currentUserService.UserId;
         
         await _unitOfWork.Specialities.UpdateAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

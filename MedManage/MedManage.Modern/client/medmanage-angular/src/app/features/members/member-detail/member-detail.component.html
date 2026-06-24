@@ -1,0 +1,50 @@
+<div class="member-detail-container" *ngIf="!loading; else loadingTpl">
+  <!-- Toolbar -->
+  <mat-toolbar class="member-toolbar">
+    <button mat-icon-button (click)="onBackToList()" aria-label="Back to list">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <span class="member-title" *ngIf="!isNew">
+      {{ memberData?.firstName }} {{ memberData?.lastName }} - {{ memberData?.memberNumber }}
+    </span>
+    <span class="member-title" *ngIf="isNew">New Member</span>
+    <span class="toolbar-spacer"></span>
+    <span class="status-badge" *ngIf="memberData?.memberStatusName">{{ memberData?.memberStatusName }}</span>
+    <button mat-stroked-button color="warn" (click)="onDeleteMember()" *ngIf="!isNew">
+      <mat-icon>delete</mat-icon> Delete
+    </button>
+  </mat-toolbar>
+
+  <!-- Tabbed Content -->
+  <mat-tab-group class="member-tabs" animationDuration="200ms">
+    <!-- Basic Info -->
+    <mat-tab label="Basic Info">
+      <app-member-basic-tab
+        [memberData]="memberData"
+        [isNew]="isNew"
+        (saved)="onMemberSaved($event)">
+      </app-member-basic-tab>
+    </mat-tab>
+
+    <!-- Chronic Illness (only for existing members) -->
+    <mat-tab label="Chronic Illness" *ngIf="!isNew">
+      <app-member-chronic-illness-tab [memberId]="memberId"></app-member-chronic-illness-tab>
+    </mat-tab>
+
+    <!-- Medical Aid Products (only for existing members) -->
+    <mat-tab label="Medical Aid Products" *ngIf="!isNew">
+      <app-member-products-tab [memberId]="memberId"></app-member-products-tab>
+    </mat-tab>
+
+    <!-- Notes (only for existing members) -->
+    <mat-tab label="Notes" *ngIf="!isNew">
+      <app-member-notes-tab [memberId]="memberId"></app-member-notes-tab>
+    </mat-tab>
+  </mat-tab-group>
+</div>
+
+<ng-template #loadingTpl>
+  <div class="loading-container">
+    <p>Loading member...</p>
+  </div>
+</ng-template>

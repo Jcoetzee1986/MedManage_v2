@@ -35,5 +35,8 @@ public class MedicalAidProfile : Profile
             .ForMember(dest => dest.MedicalAidExclusions, opt => opt.Ignore())
             .ForMember(dest => dest.MedicalAidTariffs, opt => opt.Ignore())
             .ForMember(dest => dest.Members, opt => opt.Ignore());
+
+        // MedicalAidProduct -> MedicalAidProductDto
+        CreateMap<MedicalAidProduct, MedicalAidProductDto>();
     }
 }

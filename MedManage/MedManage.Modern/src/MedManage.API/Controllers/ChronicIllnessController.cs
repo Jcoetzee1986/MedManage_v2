@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MedManage.Core.DTOs.Common;
 using MedManage.Core.DTOs.ReferenceData;
@@ -7,6 +8,7 @@ namespace MedManage.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class ChronicIllnessController : ControllerBase
 {
     private readonly IChronicIllnessService _service;

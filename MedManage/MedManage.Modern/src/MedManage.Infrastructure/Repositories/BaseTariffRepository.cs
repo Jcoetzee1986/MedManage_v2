@@ -11,10 +11,13 @@ public class BaseTariffRepository : Repository<BaseTariff>, IBaseTariffRepositor
     {
     }
 
-    public new async Task<IEnumerable<BaseTariff>> GetAllAsync()
+    public override async Task<IEnumerable<BaseTariff>> GetAllAsync(bool includeDeleted = false)
     {
-        return await _dbSet
-            .Where(bt => bt.DateDeleted == null)
+        IQueryable<BaseTariff> query = includeDeleted
+            ? GetQueryableIncludingDeleted()
+            : _dbSet;
+
+        return await query
             .OrderBy(bt => bt.TariffDescription)
             .ToListAsync();
     }
@@ -25,7 +28,6 @@ public class BaseTariffRepository : Repository<BaseTariff>, IBaseTariffRepositor
         // This method needs to be redesigned based on actual entity schema
         // For now, returning the tariff with the highest BaseTariffId
         var maxId = await _dbSet
-            .Where(bt => bt.DateDeleted == null)
             .OrderByDescending(bt => bt.BaseTariffId)
             .Select(bt => bt.BaseTariffId)
             .FirstOrDefaultAsync();

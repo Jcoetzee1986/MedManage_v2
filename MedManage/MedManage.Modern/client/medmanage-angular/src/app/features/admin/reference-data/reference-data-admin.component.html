@@ -1,0 +1,95 @@
+<div class="reference-data-admin">
+  <h1>Reference Data Administration</h1>
+  <p class="subtitle">Manage lookup tables used throughout the application</p>
+
+  <div class="admin-layout">
+    <!-- Left sidebar: resource selector -->
+    <mat-card class="resource-selector">
+      <mat-card-header>
+        <mat-card-title>Lookup Tables</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="resource-list">
+          @for (config of configs; track config.resource) {
+            <button
+              mat-button
+              class="resource-item"
+              [class.active]="selectedConfig?.resource === config.resource"
+              (click)="selectResource(config)">
+              {{ config.displayName }}
+            </button>
+          }
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Right side: data table -->
+    <mat-card class="data-panel">
+      @if (selectedConfig) {
+        <mat-card-header>
+          <mat-card-title>{{ selectedConfig.displayName }}</mat-card-title>
+          <mat-card-subtitle>{{ selectedConfig.description }}</mat-card-subtitle>
+        </mat-card-header>
+
+        @if (loading) {
+          <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+        }
+
+        <mat-card-content>
+          <div class="toolbar">
+            <button mat-raised-button color="primary" (click)="openCreateDialog()">
+              <mat-icon>add</mat-icon>
+              Add New
+            </button>
+            <button mat-button (click)="loadItems()" matTooltip="Refresh data">
+              <mat-icon>refresh</mat-icon>
+            </button>
+          </div>
+
+          <table mat-table [dataSource]="items" class="data-table">
+            <!-- ID Column -->
+            <ng-container matColumnDef="id">
+              <th mat-header-cell *matHeaderCellDef>ID</th>
+              <td mat-cell *matCellDef="let item">{{ item.id }}</td>
+            </ng-container>
+
+            <!-- Name Column -->
+            <ng-container matColumnDef="name">
+              <th mat-header-cell *matHeaderCellDef>Name</th>
+              <td mat-cell *matCellDef="let item">{{ item.name }}</td>
+            </ng-container>
+
+            <!-- Description Column -->
+            <ng-container matColumnDef="description">
+              <th mat-header-cell *matHeaderCellDef>Description</th>
+              <td mat-cell *matCellDef="let item">{{ item.description || '—' }}</td>
+            </ng-container>
+
+            <!-- Actions Column -->
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Actions</th>
+              <td mat-cell *matCellDef="let item">
+                <button mat-icon-button color="primary" matTooltip="Edit" (click)="openEditDialog(item)">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" matTooltip="Delete" (click)="deleteItem(item)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+
+          @if (!loading && items.length === 0) {
+            <div class="empty-state">
+              <mat-icon>inbox</mat-icon>
+              <p>No items found. Click "Add New" to create one.</p>
+            </div>
+          }
+        </mat-card-content>
+      }
+    </mat-card>
+  </div>
+</div>

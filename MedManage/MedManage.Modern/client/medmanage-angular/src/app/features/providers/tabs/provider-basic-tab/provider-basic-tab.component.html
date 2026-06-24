@@ -1,0 +1,73 @@
+<div class="tab-content">
+  <form [formGroup]="form" (ngSubmit)="onSave()" class="provider-form">
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Provider Number</mat-label>
+        <input matInput formControlName="providerNumber" required>
+        <mat-error *ngIf="form.controls.providerNumber.hasError('required')">Required</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Practice Name</mat-label>
+        <input matInput formControlName="practiceName" required>
+        <mat-error *ngIf="form.controls.practiceName.hasError('required')">Required</mat-error>
+      </mat-form-field>
+    </div>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>First Name</mat-label>
+        <input matInput formControlName="firstName" required>
+        <mat-error *ngIf="form.controls.firstName.hasError('required')">Required</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Last Name</mat-label>
+        <input matInput formControlName="lastName" required>
+        <mat-error *ngIf="form.controls.lastName.hasError('required')">Required</mat-error>
+      </mat-form-field>
+    </div>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Contact Number</mat-label>
+        <input matInput formControlName="contactNumber">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input matInput formControlName="email" type="email">
+        <mat-error *ngIf="form.controls.email.hasError('email')">Invalid email</mat-error>
+      </mat-form-field>
+    </div>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Address</mat-label>
+        <input matInput formControlName="address">
+      </mat-form-field>
+    </div>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>BHF Number</mat-label>
+        <input matInput formControlName="bHFNumber">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>HPCSA Number</mat-label>
+        <input matInput formControlName="hpcsaNumber">
+      </mat-form-field>
+    </div>
+
+    <div class="form-row">
+      <mat-checkbox formControlName="isActive">Active</mat-checkbox>
+    </div>
+
+    <div class="form-actions">
+      <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || saving">
+        {{ isNew ? 'Create' : 'Save' }}
+      </button>
+    </div>
+  </form>
+</div>

@@ -40,8 +40,6 @@ public class BillingStatusService : IBillingStatusService
     public async Task<BillingStatusDto> CreateAsync(CreateBillingStatusDto dto, CancellationToken cancellationToken = default)
     {
         var entity = _mapper.Map<BillingStatus>(dto);
-        entity.DateInserted = DateTime.UtcNow;
-        entity.UserID = _currentUserService.UserId ?? string.Empty;
         
         await _unitOfWork.BillingStatuses.AddAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -58,8 +56,6 @@ public class BillingStatusService : IBillingStatusService
         }
         
         _mapper.Map(dto, entity);
-        entity.DateUpdated = DateTime.UtcNow;
-        entity.UpdatedUserID = _currentUserService.UserId;
         
         await _unitOfWork.BillingStatuses.UpdateAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

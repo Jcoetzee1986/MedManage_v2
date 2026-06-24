@@ -1,0 +1,196 @@
+<div class="provider-tariff-container">
+  <h2>Provider Tariff Customization</h2>
+  <p class="subtitle">Provider ID: {{ providerId }}</p>
+
+  <mat-tab-group>
+    <!-- Tariff Assignments Tab -->
+    <mat-tab label="Tariff Assignments">
+      <div class="tab-content">
+        <div class="tab-header">
+          <h3>Assigned Tariffs</h3>
+          <button mat-raised-button color="primary" (click)="onAddAssignment()" *ngIf="!showAssignmentForm">
+            <mat-icon>add</mat-icon> Assign Tariff
+          </button>
+        </div>
+
+        <!-- Assignment Form -->
+        <mat-card class="inline-form-card" *ngIf="showAssignmentForm">
+          <mat-card-content>
+            <form [formGroup]="assignmentForm" (ngSubmit)="onSaveAssignment()">
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="tariff-field">
+                  <mat-label>Tariff</mat-label>
+                  <input matInput formControlName="tariffDisplay" readonly placeholder="Click lookup to select">
+                  <button mat-icon-button matSuffix type="button" (click)="onLookupTariffForAssignment()" aria-label="Lookup tariff">
+                    <mat-icon>search</mat-icon>
+                  </button>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Date From</mat-label>
+                  <input matInput [matDatepicker]="assignFromPicker" formControlName="dateFrom">
+                  <mat-datepicker-toggle matIconSuffix [for]="assignFromPicker"></mat-datepicker-toggle>
+                  <mat-datepicker #assignFromPicker></mat-datepicker>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Date To</mat-label>
+                  <input matInput [matDatepicker]="assignToPicker" formControlName="dateTo">
+                  <mat-datepicker-toggle matIconSuffix [for]="assignToPicker"></mat-datepicker-toggle>
+                  <mat-datepicker #assignToPicker></mat-datepicker>
+                </mat-form-field>
+              </div>
+
+              <div class="form-actions">
+                <button mat-raised-button color="primary" type="submit" [disabled]="assignmentForm.invalid">
+                  {{ editingAssignmentId ? 'Update' : 'Assign' }}
+                </button>
+                <button mat-stroked-button type="button" (click)="onCancelAssignment()">Cancel</button>
+              </div>
+            </form>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Assignments Table -->
+        <table mat-table [dataSource]="assignments" class="full-width-table" *ngIf="assignments.length > 0">
+          <ng-container matColumnDef="tariffCode">
+            <th mat-header-cell *matHeaderCellDef>Code</th>
+            <td mat-cell *matCellDef="let row">{{ row.tariffCode }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="tariffDescription">
+            <th mat-header-cell *matHeaderCellDef>Description</th>
+            <td mat-cell *matCellDef="let row">{{ row.tariffDescription }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="dateFrom">
+            <th mat-header-cell *matHeaderCellDef>Date From</th>
+            <td mat-cell *matCellDef="let row">{{ row.dateFrom | date:'shortDate' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="dateTo">
+            <th mat-header-cell *matHeaderCellDef>Date To</th>
+            <td mat-cell *matCellDef="let row">{{ row.dateTo | date:'shortDate' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let row">
+              <button mat-icon-button (click)="onEditAssignment(row)" aria-label="Edit">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button color="warn" (click)="onDeleteAssignment(row)" aria-label="Delete">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="assignmentColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: assignmentColumns;"></tr>
+        </table>
+
+        <p *ngIf="assignments.length === 0 && !showAssignmentForm" class="no-data">No tariff assignments for this provider.</p>
+      </div>
+    </mat-tab>
+
+    <!-- Custom Tariff Overrides Tab -->
+    <mat-tab label="Custom Overrides">
+      <div class="tab-content">
+        <div class="tab-header">
+          <h3>Custom Tariff Overrides</h3>
+          <button mat-raised-button color="primary" (click)="onAddCustom()" *ngIf="!showCustomForm">
+            <mat-icon>add</mat-icon> Add Override
+          </button>
+        </div>
+
+        <!-- Custom Tariff Form -->
+        <mat-card class="inline-form-card" *ngIf="showCustomForm">
+          <mat-card-content>
+            <form [formGroup]="customForm" (ngSubmit)="onSaveCustom()">
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="tariff-field">
+                  <mat-label>Tariff</mat-label>
+                  <input matInput formControlName="tariffDisplay" readonly placeholder="Click lookup to select">
+                  <button mat-icon-button matSuffix type="button" (click)="onLookupTariffForCustom()" aria-label="Lookup tariff">
+                    <mat-icon>search</mat-icon>
+                  </button>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Custom Value (R)</mat-label>
+                  <input matInput formControlName="customValue" type="number" required>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Date From</mat-label>
+                  <input matInput [matDatepicker]="customFromPicker" formControlName="dateFrom">
+                  <mat-datepicker-toggle matIconSuffix [for]="customFromPicker"></mat-datepicker-toggle>
+                  <mat-datepicker #customFromPicker></mat-datepicker>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Date To</mat-label>
+                  <input matInput [matDatepicker]="customToPicker" formControlName="dateTo">
+                  <mat-datepicker-toggle matIconSuffix [for]="customToPicker"></mat-datepicker-toggle>
+                  <mat-datepicker #customToPicker></mat-datepicker>
+                </mat-form-field>
+              </div>
+
+              <div class="form-actions">
+                <button mat-raised-button color="primary" type="submit" [disabled]="customForm.invalid">
+                  {{ editingCustomId ? 'Update' : 'Create' }}
+                </button>
+                <button mat-stroked-button type="button" (click)="onCancelCustom()">Cancel</button>
+              </div>
+            </form>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Custom Tariffs Table -->
+        <table mat-table [dataSource]="customTariffs" class="full-width-table" *ngIf="customTariffs.length > 0">
+          <ng-container matColumnDef="tariffCode">
+            <th mat-header-cell *matHeaderCellDef>Code</th>
+            <td mat-cell *matCellDef="let row">{{ row.tariffCode }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="tariffDescription">
+            <th mat-header-cell *matHeaderCellDef>Description</th>
+            <td mat-cell *matCellDef="let row">{{ row.tariffDescription }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="customValue">
+            <th mat-header-cell *matHeaderCellDef>Custom Value</th>
+            <td mat-cell *matCellDef="let row">R {{ row.customValue | number:'1.2-2' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="dateFrom">
+            <th mat-header-cell *matHeaderCellDef>Date From</th>
+            <td mat-cell *matCellDef="let row">{{ row.dateFrom | date:'shortDate' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="dateTo">
+            <th mat-header-cell *matHeaderCellDef>Date To</th>
+            <td mat-cell *matCellDef="let row">{{ row.dateTo | date:'shortDate' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let row">
+              <button mat-icon-button (click)="onEditCustom(row)" aria-label="Edit">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button color="warn" (click)="onDeleteCustom(row)" aria-label="Delete">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="customTariffColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: customTariffColumns;"></tr>
+        </table>
+
+        <p *ngIf="customTariffs.length === 0 && !showCustomForm" class="no-data">No custom tariff overrides for this provider.</p>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

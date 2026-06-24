@@ -1,0 +1,21 @@
+<h2 mat-dialog-title>Copy Case #{{ data.caseNumber }}</h2>
+
+<mat-dialog-content>
+  <p>Select which items to include in the copy:</p>
+  <form [formGroup]="form" class="copy-options">
+    <mat-checkbox formControlName="includeCpt">CPT Codes</mat-checkbox>
+    <mat-checkbox formControlName="includeIcd">ICD Codes</mat-checkbox>
+    <mat-checkbox formControlName="includeTariffs">Tariffs</mat-checkbox>
+    <mat-checkbox formControlName="includeFacilityTypes">Facility Types</mat-checkbox>
+    <mat-checkbox formControlName="includeNotes">Notes</mat-checkbox>
+    <mat-checkbox formControlName="includeComments">Comments</mat-checkbox>
+    <mat-checkbox formControlName="includeExclusions">Exclusions</mat-checkbox>
+    <mat-checkbox formControlName="includeNappi">NAPPI Codes</mat-checkbox>
+    <mat-checkbox formControlName="includeChecklist">Checklist</mat-checkbox>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button (click)="onCancel()">Cancel</button>
+  <button mat-raised-button color="primary" (click)="onCopy()">Copy Case</button>
+</mat-dialog-actions>

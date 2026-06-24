@@ -110,9 +110,6 @@ public class MemberService : IMemberService
     {
         var member = _mapper.Map<Member>(request);
         
-        // Set audit fields (DateInserted has database default)
-        member.UserID = _currentUserService.UserId ?? "SYSTEM";
-        
         await _unitOfWork.Members.AddAsync(member);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return _mapper.Map<MemberDto>(member);
@@ -127,10 +124,6 @@ public class MemberService : IMemberService
         }
 
         _mapper.Map(request, existingMember);
-        
-        // Set update audit fields
-        existingMember.DateUpdated = DateTime.UtcNow;
-        existingMember.UpdatedUserID = _currentUserService.UserId ?? "SYSTEM";
         
         await _unitOfWork.Members.UpdateAsync(existingMember);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -153,5 +146,11 @@ public class MemberService : IMemberService
     public async Task<bool> ExistsAsync(int memberId, CancellationToken cancellationToken = default)
     {
         return await _unitOfWork.Members.ExistsAsync(m => m.MemberId == memberId);
+    }
+
+    public async Task<bool> IsMemberNumberUniqueAsync(string memberNumber, int? excludeMemberId = null, CancellationToken cancellationToken = default)
+    {
+        var exists = await _unitOfWork.Members.MemberNumberExistsAsync(memberNumber, excludeMemberId);
+        return !exists;
     }
 }

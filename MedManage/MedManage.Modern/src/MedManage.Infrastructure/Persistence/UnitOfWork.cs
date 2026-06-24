@@ -73,9 +73,13 @@ public class UnitOfWork : IUnitOfWork
     private IServiceProviderTariffRepository? _serviceProviderTariffs;
     private IServiceProviderTariffCustomRepository? _serviceProviderTariffCustoms;
     
+    // Lazy repository fields - Service Provider Sub-Entities
+    private IServiceProviderDiscountRepository? _serviceProviderDiscounts;
+    
     // Lazy repository fields - Other
     private ILinkedFileRepository? _linkedFiles;
     private IMedicalAidExclusionRepository? _medicalAidExclusions;
+    private IMedicalAidTariffRepository? _medicalAidTariffs;
     private IEpisodeCaseRepository? _episodeCases;
     private ISessionUserCaseRepository? _sessionUserCases;
 
@@ -142,9 +146,13 @@ public class UnitOfWork : IUnitOfWork
     public IServiceProviderTariffRepository ServiceProviderTariffs => _serviceProviderTariffs ??= new ServiceProviderTariffRepository(_context);
     public IServiceProviderTariffCustomRepository ServiceProviderTariffCustoms => _serviceProviderTariffCustoms ??= new ServiceProviderTariffCustomRepository(_context);
     
+    // Service Provider Sub-Entity Repository Properties
+    public IServiceProviderDiscountRepository ServiceProviderDiscounts => _serviceProviderDiscounts ??= new ServiceProviderDiscountRepository(_context);
+    
     // Other Repository Properties
     public ILinkedFileRepository LinkedFiles => _linkedFiles ??= new LinkedFileRepository(_context);
     public IMedicalAidExclusionRepository MedicalAidExclusions => _medicalAidExclusions ??= new MedicalAidExclusionRepository(_context);
+    public IMedicalAidTariffRepository MedicalAidTariffs => _medicalAidTariffs ??= new MedicalAidTariffRepository(_context);
     public IEpisodeCaseRepository EpisodeCases => _episodeCases ??= new EpisodeCaseRepository(_context);
     public ISessionUserCaseRepository SessionUserCases => _sessionUserCases ??= new SessionUserCaseRepository(_context);
 

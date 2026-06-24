@@ -1,0 +1,50 @@
+<div class="provider-detail-container" *ngIf="!loading; else loadingTpl">
+  <!-- Toolbar -->
+  <mat-toolbar class="provider-toolbar">
+    <button mat-icon-button (click)="onBackToList()" aria-label="Back to list">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <span class="provider-title" *ngIf="!isNew">
+      {{ providerData?.practiceName }} - {{ providerData?.firstName }} {{ providerData?.lastName }}
+    </span>
+    <span class="provider-title" *ngIf="isNew">New Provider</span>
+    <span class="toolbar-spacer"></span>
+    <span class="status-badge" *ngIf="providerData?.specialityName">{{ providerData?.specialityName }}</span>
+    <button mat-stroked-button color="warn" (click)="onDeleteProvider()" *ngIf="!isNew">
+      <mat-icon>delete</mat-icon> Delete
+    </button>
+  </mat-toolbar>
+
+  <!-- Tabbed Content -->
+  <mat-tab-group class="provider-tabs" animationDuration="200ms">
+    <!-- Basic Info -->
+    <mat-tab label="Basic Info">
+      <app-provider-basic-tab
+        [providerData]="providerData"
+        [isNew]="isNew"
+        (saved)="onProviderSaved($event)">
+      </app-provider-basic-tab>
+    </mat-tab>
+
+    <!-- Tariff Assignments (only for existing providers) -->
+    <mat-tab label="Tariff Assignments" *ngIf="!isNew">
+      <app-provider-tariffs-tab [providerId]="providerId"></app-provider-tariffs-tab>
+    </mat-tab>
+
+    <!-- Custom Tariffs (only for existing providers) -->
+    <mat-tab label="Custom Tariffs" *ngIf="!isNew">
+      <app-provider-custom-tariffs-tab [providerId]="providerId"></app-provider-custom-tariffs-tab>
+    </mat-tab>
+
+    <!-- Discounts (only for existing providers) -->
+    <mat-tab label="Discounts" *ngIf="!isNew">
+      <app-provider-discounts-tab [providerId]="providerId"></app-provider-discounts-tab>
+    </mat-tab>
+  </mat-tab-group>
+</div>
+
+<ng-template #loadingTpl>
+  <div class="loading-container">
+    <p>Loading provider...</p>
+  </div>
+</ng-template>

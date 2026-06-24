@@ -1,0 +1,116 @@
+<div class="booking-form-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>{{ isEditMode ? 'Edit Booking' : 'New Booking' }}</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      @if (loading) {
+        <div class="loading-spinner">
+          <mat-spinner diameter="40"></mat-spinner>
+        </div>
+      } @else {
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="booking-form">
+          <!-- Travel / Appointment -->
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Travel Date</mat-label>
+              <input matInput [matDatepicker]="travelDatePicker" formControlName="travelDate">
+              <mat-datepicker-toggle matIconSuffix [for]="travelDatePicker"></mat-datepicker-toggle>
+              <mat-datepicker #travelDatePicker></mat-datepicker>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Travel Time</mat-label>
+              <input matInput formControlName="travelTime" placeholder="HH:mm">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Appointment Date</mat-label>
+              <input matInput [matDatepicker]="apptDatePicker" formControlName="appointmentDate">
+              <mat-datepicker-toggle matIconSuffix [for]="apptDatePicker"></mat-datepicker-toggle>
+              <mat-datepicker #apptDatePicker></mat-datepicker>
+            </mat-form-field>
+          </div>
+
+          <!-- IDs -->
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Member ID</mat-label>
+              <input matInput type="number" formControlName="memberId">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Case ID</mat-label>
+              <input matInput type="number" formControlName="caseId">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Referring Practice ID</mat-label>
+              <input matInput type="number" formControlName="referringPracticeId">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Current Practice ID</mat-label>
+              <input matInput type="number" formControlName="currentPracticeId">
+            </mat-form-field>
+          </div>
+
+          <!-- Details -->
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Discipline</mat-label>
+              <input matInput formControlName="discipline">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Hospital</mat-label>
+              <input matInput formControlName="hospital">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>TISCH</mat-label>
+              <input matInput formControlName="tisch">
+            </mat-form-field>
+          </div>
+
+          <!-- Flags -->
+          <div class="form-row checkboxes">
+            <mat-checkbox formControlName="consultation">Consultation</mat-checkbox>
+            <mat-checkbox formControlName="admission">Admission</mat-checkbox>
+            <mat-checkbox formControlName="arrived">Arrived</mat-checkbox>
+          </div>
+
+          <!-- Comments -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Comments</mat-label>
+            <textarea matInput formControlName="comments" rows="3"></textarea>
+          </mat-form-field>
+
+          <!-- Actions -->
+          <div class="form-actions">
+            <button mat-raised-button color="primary" type="submit">
+              <mat-icon>save</mat-icon> {{ isEditMode ? 'Update' : 'Create' }}
+            </button>
+
+            @if (isEditMode && currentBooking?.caseId) {
+              <button mat-raised-button color="accent" type="button" (click)="onConvertToCase()">
+                <mat-icon>transform</mat-icon> Convert to Case
+              </button>
+            }
+
+            @if (isEditMode) {
+              <button mat-stroked-button color="warn" type="button" (click)="onDelete()">
+                <mat-icon>delete</mat-icon> Delete
+              </button>
+            }
+
+            <button mat-stroked-button type="button" (click)="onCancel()">
+              Cancel
+            </button>
+          </div>
+        </form>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

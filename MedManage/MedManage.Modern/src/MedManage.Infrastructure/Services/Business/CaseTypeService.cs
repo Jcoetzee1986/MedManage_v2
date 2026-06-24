@@ -40,8 +40,6 @@ public class CaseTypeService : ICaseTypeService
     public async Task<CaseTypeDto> CreateAsync(CreateCaseTypeDto dto, CancellationToken cancellationToken = default)
     {
         var entity = _mapper.Map<CaseType>(dto);
-        entity.DateInserted = DateTime.UtcNow;
-        entity.UserID = _currentUserService.UserId ?? string.Empty;
         
         await _unitOfWork.CaseTypes.AddAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -58,8 +56,6 @@ public class CaseTypeService : ICaseTypeService
         }
         
         _mapper.Map(dto, entity);
-        entity.DateUpdated = DateTime.UtcNow;
-        entity.UpdatedUserID = _currentUserService.UserId;
         
         await _unitOfWork.CaseTypes.UpdateAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

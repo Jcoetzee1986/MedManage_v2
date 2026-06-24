@@ -1,0 +1,111 @@
+export interface ProviderDto {
+  id: number;
+  providerNumber: string;
+  practiceName: string;
+  firstName: string;
+  lastName: string;
+  specialityId: number | null;
+  specialityName: string | null;
+  contactNumber: string | null;
+  email: string | null;
+  address: string | null;
+  bHFNumber: string | null;
+  hpcsaNumber: string | null;
+  isActive: boolean;
+  dateCreated: string | null;
+}
+
+export interface CreateProviderRequest {
+  providerNumber: string;
+  practiceName: string;
+  firstName: string;
+  lastName: string;
+  specialityId?: number | null;
+  contactNumber?: string | null;
+  email?: string | null;
+  address?: string | null;
+  bHFNumber?: string | null;
+  hpcsaNumber?: string | null;
+  isActive?: boolean;
+}
+
+export interface UpdateProviderRequest extends CreateProviderRequest {}
+
+export interface ProviderSearchRequest {
+  providerNumber?: string;
+  practiceName?: string;
+  firstName?: string;
+  lastName?: string;
+  specialityId?: number;
+  pageNumber?: number;
+  pageSize?: number;
+  sortField?: string;
+  sortDirection?: 'asc' | 'desc';
+}
+
+export interface ProviderAutocompleteResult {
+  id: number;
+  providerNumber: string;
+  practiceName: string;
+  firstName: string;
+  lastName: string;
+  specialityName: string | null;
+}
+
+export interface ProviderTariffDto {
+  id: number;
+  serviceProviderId: number;
+  tariffId: number;
+  tariffName: string;
+  tariffCode: string;
+  dateFrom: string | null;
+  dateTo: string | null;
+}
+
+export interface CreateProviderTariffRequest {
+  tariffId: number;
+  dateFrom?: string | null;
+  dateTo?: string | null;
+}
+
+export interface ProviderCustomTariffDto {
+  id: number;
+  serviceProviderId: number;
+  tariffId: number;
+  tariffName: string;
+  tariffCode: string;
+  customValue: number;
+  dateFrom: string | null;
+  dateTo: string | null;
+}
+
+export interface CreateProviderCustomTariffRequest {
+  tariffId: number;
+  customValue: number;
+  dateFrom?: string | null;
+  dateTo?: string | null;
+}
+
+export interface ProviderDiscountDto {
+  id: number;
+  serviceProviderId: number;
+  mainClientId: number;
+  mainClientName: string;
+  discountPercentage: number;
+  dateFrom: string | null;
+  dateTo: string | null;
+}
+
+export interface CreateProviderDiscountRequest {
+  mainClientId: number;
+  discountPercentage: number;
+  dateFrom?: string | null;
+  dateTo?: string | null;
+}
+
+export interface PagedResult<T> {
+  items: T[];
+  totalCount: number;
+  pageNumber: number;
+  pageSize: number;
+}

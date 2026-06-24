@@ -1,0 +1,31 @@
+<div class="tab-content">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Member Information</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">Member Name</span>
+          <span class="info-value">{{ caseData.memberName || '—' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Member Number</span>
+          <span class="info-value">{{ caseData.memberNumber || '—' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Medical Aid</span>
+          <span class="info-value">{{ caseData.medicalAidName || '—' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Product</span>
+          <span class="info-value">{{ caseData.productName || '—' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Main Client</span>
+          <span class="info-value">{{ caseData.mainClientName || '—' }}</span>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

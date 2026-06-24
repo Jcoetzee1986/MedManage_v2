@@ -1,4 +1,103 @@
-<div class="app-content">
-  <h2>Case Details</h2>
-  <p>Case detail component will be implemented in Phase 5</p>
+<div class="case-detail-container" *ngIf="!loading; else loadingTpl">
+  <!-- Toolbar -->
+  <mat-toolbar class="case-toolbar">
+    <button mat-icon-button (click)="onBackToList()" aria-label="Back to list">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <span class="case-title">
+      Case #{{ caseData?.caseNumber }} - {{ caseData?.memberName }}
+    </span>
+    <span class="toolbar-spacer"></span>
+    <span class="status-badge">{{ caseData?.caseStatusName }}</span>
+    <button mat-stroked-button (click)="onCopyCase()">
+      <mat-icon>content_copy</mat-icon> Copy
+    </button>
+    <button mat-stroked-button color="warn" (click)="onDeleteCase()">
+      <mat-icon>delete</mat-icon> Delete
+    </button>
+  </mat-toolbar>
+
+  <!-- Tabbed Content -->
+  <mat-tab-group class="case-tabs" animationDuration="200ms">
+    <!-- Primary Details -->
+    <mat-tab label="Primary">
+      <app-case-primary-tab [caseData]="caseData!" [caseId]="caseId"></app-case-primary-tab>
+    </mat-tab>
+
+    <!-- Member -->
+    <mat-tab label="Member">
+      <app-case-member-tab [caseData]="caseData!" [caseId]="caseId"></app-case-member-tab>
+    </mat-tab>
+
+    <!-- Provider -->
+    <mat-tab label="Provider">
+      <app-case-provider-tab [caseData]="caseData!" [caseId]="caseId"></app-case-provider-tab>
+    </mat-tab>
+
+    <!-- Dates -->
+    <mat-tab label="Dates">
+      <app-case-dates-tab [caseData]="caseData!" [caseId]="caseId"></app-case-dates-tab>
+    </mat-tab>
+
+    <!-- CPT Codes -->
+    <mat-tab label="CPT Codes">
+      <app-case-cpt-tab [caseId]="caseId"></app-case-cpt-tab>
+    </mat-tab>
+
+    <!-- ICD Codes -->
+    <mat-tab label="ICD Codes">
+      <app-case-icd-tab [caseId]="caseId"></app-case-icd-tab>
+    </mat-tab>
+
+    <!-- Tariffs -->
+    <mat-tab label="Tariffs">
+      <app-case-tariffs-tab [caseId]="caseId"></app-case-tariffs-tab>
+    </mat-tab>
+
+    <!-- Facility Types -->
+    <mat-tab label="Facility Types">
+      <app-case-facility-types-tab [caseId]="caseId"></app-case-facility-types-tab>
+    </mat-tab>
+
+    <!-- Exclusions -->
+    <mat-tab label="Exclusions">
+      <app-case-exclusions-tab [caseId]="caseId"></app-case-exclusions-tab>
+    </mat-tab>
+
+    <!-- NAPPI -->
+    <mat-tab label="NAPPI">
+      <app-case-nappi-tab [caseId]="caseId"></app-case-nappi-tab>
+    </mat-tab>
+
+    <!-- Notes -->
+    <mat-tab label="Notes">
+      <app-case-notes-tab [caseId]="caseId"></app-case-notes-tab>
+    </mat-tab>
+
+    <!-- Comments -->
+    <mat-tab label="Comments">
+      <app-case-comments-tab [caseId]="caseId"></app-case-comments-tab>
+    </mat-tab>
+
+    <!-- Checklist -->
+    <mat-tab label="Checklist">
+      <app-case-checklist-tab [caseId]="caseId"></app-case-checklist-tab>
+    </mat-tab>
+
+    <!-- Documents -->
+    <mat-tab label="Documents">
+      <app-case-documents-tab [caseId]="caseId"></app-case-documents-tab>
+    </mat-tab>
+
+    <!-- Linked Cases -->
+    <mat-tab label="Linked Cases">
+      <app-case-linked-cases-tab [caseId]="caseId"></app-case-linked-cases-tab>
+    </mat-tab>
+  </mat-tab-group>
 </div>
+
+<ng-template #loadingTpl>
+  <div class="loading-container">
+    <p>Loading case...</p>
+  </div>
+</ng-template>

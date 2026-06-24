@@ -23,13 +23,13 @@ public class MemberRepository : Repository<Member>, IMemberRepository
             .Include(m => m.MedicalAid)
             .Include(m => m.MemberChronicIllnesses)
                 .ThenInclude(mci => mci.ChronicIllness)
-            .FirstOrDefaultAsync(m => m.MemberId == memberId && m.DateDeleted == null);
+            .FirstOrDefaultAsync(m => m.MemberId == memberId);
     }
 
     public async Task<Member?> GetByMemberNumberAsync(string memberNumber)
     {
         return await _dbSet
-            .FirstOrDefaultAsync(m => m.MemberNumber == memberNumber && m.DateDeleted == null);
+            .FirstOrDefaultAsync(m => m.MemberNumber == memberNumber);
     }
 
     public async Task<IEnumerable<Member>> SearchByFiltersAsync(
@@ -38,12 +38,16 @@ public class MemberRepository : Repository<Member>, IMemberRepository
         string? lastName,
         string? idNumber,
         int? medicalAidId,
-        int? statusId)
+        int? statusId,
+        bool includeDeleted = false)
     {
-        var query = _dbSet
+        IQueryable<Member> query = includeDeleted
+            ? GetQueryableIncludingDeleted()
+            : _dbSet;
+
+        query = query
             .Include(m => m.Title)
-            .Include(m => m.MedicalAid)
-            .Where(m => m.DateDeleted == null);
+            .Include(m => m.MedicalAid);
 
         if (!string.IsNullOrWhiteSpace(memberNumber))
         {
@@ -83,7 +87,7 @@ public class MemberRepository : Repository<Member>, IMemberRepository
 
     public async Task<bool> MemberNumberExistsAsync(string memberNumber, int? excludeMemberId = null)
     {
-        var query = _dbSet.Where(m => m.MemberNumber == memberNumber && m.DateDeleted == null);
+        var query = _dbSet.Where(m => m.MemberNumber == memberNumber);
 
         if (excludeMemberId.HasValue)
         {
@@ -96,7 +100,7 @@ public class MemberRepository : Repository<Member>, IMemberRepository
     public async Task<IEnumerable<Member>> GetByMedicalAidAsync(int medicalAidId)
     {
         return await _dbSet
-            .Where(m => m.MedicalAidId == medicalAidId && m.DateDeleted == null)
+            .Where(m => m.MedicalAidId == medicalAidId)
             .OrderBy(m => m.Surname)
             .ThenBy(m => m.Name)
             .ToListAsync();

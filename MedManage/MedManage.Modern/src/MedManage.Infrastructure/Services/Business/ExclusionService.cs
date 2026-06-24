@@ -53,8 +53,6 @@ public class ExclusionService : IExclusionService
     public async Task<ExclusionDto> CreateAsync(CreateExclusionDto dto, CancellationToken cancellationToken = default)
     {
         var entity = _mapper.Map<Exclusion>(dto);
-        entity.DateInserted = DateTime.UtcNow;
-        entity.UserID = _currentUserService.UserId ?? string.Empty;
         
         await _unitOfWork.Exclusions.AddAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -71,8 +69,6 @@ public class ExclusionService : IExclusionService
         }
         
         _mapper.Map(dto, entity);
-        entity.DateUpdated = DateTime.UtcNow;
-        entity.UpdatedUserID = _currentUserService.UserId;
         
         await _unitOfWork.Exclusions.UpdateAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

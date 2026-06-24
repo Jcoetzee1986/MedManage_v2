@@ -1,5 +1,6 @@
 using AutoMapper;
 using MedManage.Core.DTOs.Booking;
+using MedManage.Core.DTOs.Case;
 using MedManage.Core.Entities;
 using MedManage.Core.Interfaces;
 using MedManage.Core.Interfaces.Services;
@@ -11,15 +12,18 @@ public class BookingService : IBookingService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private readonly ICurrentUserService _currentUserService;
+    private readonly ICaseWorkflowService _caseWorkflowService;
 
     public BookingService(
         IUnitOfWork unitOfWork,
         IMapper mapper,
-        ICurrentUserService currentUserService)
+        ICurrentUserService currentUserService,
+        ICaseWorkflowService caseWorkflowService)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _currentUserService = currentUserService;
+        _caseWorkflowService = caseWorkflowService;
     }
 
     public async Task<IEnumerable<BookingDto>> GetAllAsync(bool includeDeleted = false, CancellationToken cancellationToken = default)
@@ -66,8 +70,6 @@ public class BookingService : IBookingService
     public async Task<BookingDto> CreateAsync(CreateBookingDto dto, CancellationToken cancellationToken = default)
     {
         var entity = _mapper.Map<Booking>(dto);
-        entity.DateInserted = DateTime.UtcNow;
-        entity.UserID = _currentUserService.UserId ?? string.Empty;
         
         await _unitOfWork.Bookings.AddAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -84,8 +86,6 @@ public class BookingService : IBookingService
         }
         
         _mapper.Map(dto, entity);
-        entity.DateUpdated = DateTime.UtcNow;
-        entity.UpdatedUserID = _currentUserService.UserId;
         
         await _unitOfWork.Bookings.UpdateAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -106,5 +106,28 @@ public class BookingService : IBookingService
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
         return true;
+    }
+
+    public async Task<CaseDto> ConvertToCaseAsync(int bookingId, CancellationToken cancellationToken = default)
+    {
+        var booking = await _unitOfWork.Bookings.GetByBookingIdAsync(bookingId);
+        if (booking == null)
+        {
+            throw new KeyNotFoundException($"Booking with ID {bookingId} not found");
+        }
+
+        if (booking.CaseId == null || booking.CaseId == 0)
+        {
+            throw new InvalidOperationException("Booking is not linked to a case. Link the booking to a case before converting.");
+        }
+
+        // Transition the linked case from Booking status to Case status
+        var transitionRequest = new CaseStatusTransitionRequest
+        {
+            TargetStatusName = "Case"
+        };
+
+        var updatedCase = await _caseWorkflowService.TransitionStatusAsync(booking.CaseId.Value, transitionRequest, cancellationToken);
+        return updatedCase;
     }
 }

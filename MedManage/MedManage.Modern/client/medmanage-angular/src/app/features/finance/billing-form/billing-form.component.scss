@@ -1,0 +1,39 @@
+.billing-form-container {
+  padding: 16px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  padding: 32px;
+}
+
+.billing-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+
+  mat-form-field,
+  app-reference-data-dropdown {
+    flex: 1;
+    min-width: 200px;
+  }
+
+  &.full-width mat-form-field {
+    width: 100%;
+  }
+}
+
+.form-actions {
+  display: flex;
+  gap: 8px;
+  padding-top: 16px;
+}

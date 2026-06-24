@@ -56,13 +56,23 @@ builder.Services.Configure<EmailSettings>(options =>
 // Register email service
 builder.Services.AddScoped<IEmailService, EmailService>();
 
+// Configure JsReport Settings
+builder.Services.Configure<JsReportSettings>(builder.Configuration.GetSection(JsReportSettings.SectionName));
+
+// Register the session context interceptor (sets SESSION_CONTEXT for SQL audit triggers)
+builder.Services.AddScoped<SessionContextInterceptor>();
+
 // Configure DbContext
-builder.Services.AddDbContext<MedManageDbContext>(options =>
+builder.Services.AddDbContext<MedManageDbContext>((serviceProvider, options) =>
 {
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection"),
         sqlOptions => sqlOptions.EnableRetryOnFailure()
     );
+
+    // Add the interceptor that sets SESSION_CONTEXT('UserID') on each connection
+    var interceptor = serviceProvider.GetRequiredService<SessionContextInterceptor>();
+    options.AddInterceptors(interceptor);
     
     // Enable detailed logging for development
     if (builder.Environment.IsDevelopment())

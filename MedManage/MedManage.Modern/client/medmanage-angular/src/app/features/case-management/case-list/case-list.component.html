@@ -1,4 +1,84 @@
-<div class="app-content">
-  <h2>Case Management</h2>
-  <p>Case list component will be implemented in Phase 5</p>
+<div class="case-list-container">
+  <!-- Search Filters -->
+  <mat-card class="search-card">
+    <mat-card-header>
+      <mat-card-title>Case Search</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="searchForm" (ngSubmit)="onSearch()" class="search-form">
+        <div class="search-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Auth Number</mat-label>
+            <input matInput formControlName="authNumber" placeholder="Search by auth number">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Member Name</mat-label>
+            <input matInput formControlName="memberName" placeholder="Search by member name">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Member Number</mat-label>
+            <input matInput formControlName="memberNumber" placeholder="Search by member number">
+          </mat-form-field>
+        </div>
+
+        <div class="search-row">
+          <app-reference-data-dropdown
+            resource="case-status"
+            label="Case Status"
+            formControlName="caseStatusId">
+          </app-reference-data-dropdown>
+
+          <app-reference-data-dropdown
+            resource="case-type"
+            label="Case Type"
+            formControlName="caseTypeId">
+          </app-reference-data-dropdown>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Date From</mat-label>
+            <input matInput [matDatepicker]="dateFromPicker" formControlName="dateFrom">
+            <mat-datepicker-toggle matIconSuffix [for]="dateFromPicker"></mat-datepicker-toggle>
+            <mat-datepicker #dateFromPicker></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Date To</mat-label>
+            <input matInput [matDatepicker]="dateToPicker" formControlName="dateTo">
+            <mat-datepicker-toggle matIconSuffix [for]="dateToPicker"></mat-datepicker-toggle>
+            <mat-datepicker #dateToPicker></mat-datepicker>
+          </mat-form-field>
+        </div>
+
+        <div class="search-actions">
+          <button mat-raised-button color="primary" type="submit">
+            <mat-icon>search</mat-icon> Search
+          </button>
+          <button mat-stroked-button type="button" (click)="onReset()">
+            <mat-icon>clear</mat-icon> Reset
+          </button>
+          <button mat-raised-button color="accent" type="button" (click)="onNewCase()">
+            <mat-icon>add</mat-icon> New Case
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- ag-Grid -->
+  <div class="grid-container">
+    <ag-grid-angular
+      class="ag-theme-material"
+      [columnDefs]="columnDefs"
+      [defaultColDef]="defaultColDef"
+      [rowModelType]="rowModelType"
+      [pagination]="true"
+      [paginationPageSize]="50"
+      [cacheBlockSize]="50"
+      [rowSelection]="'single'"
+      (gridReady)="onGridReady($event)"
+      (rowDoubleClicked)="onRowDoubleClicked($event)">
+    </ag-grid-angular>
+  </div>
 </div>

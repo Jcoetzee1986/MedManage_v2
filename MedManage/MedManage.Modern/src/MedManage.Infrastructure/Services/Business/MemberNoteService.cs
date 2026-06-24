@@ -65,9 +65,6 @@ public class MemberNoteService : IMemberNoteService
     {
         var note = _mapper.Map<MemberNote>(dto);
         
-        note.DateInserted = DateTime.Now;
-        note.UserID = _currentUserService.UserId;
-        
         // Set DateCreated to now if not provided
         if (!note.DateCreated.HasValue)
         {
@@ -90,9 +87,6 @@ public class MemberNoteService : IMemberNoteService
         }
         
         _mapper.Map(dto, note);
-        
-        note.DateUpdated = DateTime.Now;
-        note.UpdatedUserID = _currentUserService.UserId;
         
         await _unitOfWork.MemberNotes.UpdateAsync(note);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

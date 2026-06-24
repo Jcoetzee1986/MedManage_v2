@@ -1,0 +1,37 @@
+.tab-content {
+  padding: 16px;
+}
+
+.tab-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.inline-form {
+  margin-bottom: 16px;
+  padding: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 4px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.form-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.full-width-table {
+  width: 100%;
+}
+
+.no-data {
+  color: rgba(0, 0, 0, 0.54);
+  text-align: center;
+  padding: 32px;
+}

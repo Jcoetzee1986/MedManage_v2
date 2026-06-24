@@ -40,8 +40,6 @@ public class FacilityTypeService : IFacilityTypeService
     public async Task<FacilityTypeDto> CreateAsync(CreateFacilityTypeDto dto, CancellationToken cancellationToken = default)
     {
         var entity = _mapper.Map<FacilityType>(dto);
-        entity.DateInserted = DateTime.UtcNow;
-        entity.UserID = _currentUserService.UserId ?? string.Empty;
         
         await _unitOfWork.FacilityTypes.AddAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -58,8 +56,6 @@ public class FacilityTypeService : IFacilityTypeService
         }
         
         _mapper.Map(dto, entity);
-        entity.DateUpdated = DateTime.UtcNow;
-        entity.UpdatedUserID = _currentUserService.UserId;
         
         await _unitOfWork.FacilityTypes.UpdateAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

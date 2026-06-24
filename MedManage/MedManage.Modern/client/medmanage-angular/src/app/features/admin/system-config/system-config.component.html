@@ -1,0 +1,176 @@
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>System Configuration</mat-card-title>
+    <mat-card-subtitle>Manage application settings, email, and facility type defaults</mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content>
+    <mat-progress-bar *ngIf="loading || saving" mode="indeterminate"></mat-progress-bar>
+
+    <form [formGroup]="form" (ngSubmit)="save()">
+      <mat-tab-group>
+        <!-- General / Contact Tab -->
+        <mat-tab label="Contact & Address">
+          <div class="tab-content">
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Email</mat-label>
+                <input matInput formControlName="email" />
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Telephone</mat-label>
+                <input matInput formControlName="telephone" />
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Fax</mat-label>
+                <input matInput formControlName="fax" />
+              </mat-form-field>
+            </div>
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Website</mat-label>
+                <input matInput formControlName="website" />
+              </mat-form-field>
+            </div>
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Address Line 1</mat-label>
+                <input matInput formControlName="address1" />
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Address Line 2</mat-label>
+                <input matInput formControlName="address2" />
+              </mat-form-field>
+            </div>
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Address Line 3</mat-label>
+                <input matInput formControlName="address3" />
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Address Line 4</mat-label>
+                <input matInput formControlName="address4" />
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Postal Code</mat-label>
+                <input matInput formControlName="addressCode" />
+              </mat-form-field>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- SMTP Tab -->
+        <mat-tab label="Email / SMTP">
+          <div class="tab-content">
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>System Email Address</mat-label>
+                <input matInput formControlName="systemEmailAddress" />
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>SMTP Server</mat-label>
+                <input matInput formControlName="smtpServer" />
+              </mat-form-field>
+            </div>
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>SMTP Username</mat-label>
+                <input matInput formControlName="username" />
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>SMTP Password</mat-label>
+                <input matInput type="password" formControlName="password" placeholder="Leave blank to keep unchanged" />
+              </mat-form-field>
+            </div>
+            <div class="form-row">
+              <mat-checkbox formControlName="ssl">Use SSL</mat-checkbox>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- Default Facility Types Tab -->
+        <mat-tab label="Default Facility Types">
+          <div class="tab-content">
+            <p class="hint-text">Set default facility type IDs for each ward category</p>
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Special ICU</mat-label>
+                <input matInput type="number" formControlName="specialIcu" />
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>ICU</mat-label>
+                <input matInput type="number" formControlName="icu" />
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>High Care</mat-label>
+                <input matInput type="number" formControlName="highCare" />
+              </mat-form-field>
+            </div>
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Neuro Ward</mat-label>
+                <input matInput type="number" formControlName="neuroWard" />
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>In Isolation</mat-label>
+                <input matInput type="number" formControlName="inIsolation" />
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>General Ward</mat-label>
+                <input matInput type="number" formControlName="generalWard" />
+              </mat-form-field>
+            </div>
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Paediatric</mat-label>
+                <input matInput type="number" formControlName="paediatric" />
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Maternity</mat-label>
+                <input matInput type="number" formControlName="maternity" />
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Day Case</mat-label>
+                <input matInput type="number" formControlName="dayCase" />
+              </mat-form-field>
+            </div>
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Step Down</mat-label>
+                <input matInput type="number" formControlName="stepDown" />
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Psychiatric</mat-label>
+                <input matInput type="number" formControlName="psychiatric" />
+              </mat-form-field>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- Logo Tab -->
+        <mat-tab label="Logo">
+          <div class="tab-content">
+            <div *ngIf="systemData?.hasLogo" class="logo-preview">
+              <img [src]="adminService.getLogoUrl(systemData!.systemDataId)" alt="System Logo" />
+            </div>
+            <div class="form-row" *ngIf="systemData">
+              <input type="file" accept="image/*" (change)="onLogoSelected($event)" #logoInput hidden />
+              <button mat-raised-button type="button" (click)="logoInput.click()">
+                <mat-icon>upload</mat-icon>
+                Upload Logo
+              </button>
+            </div>
+            <p *ngIf="!systemData" class="hint-text">Save the configuration first to enable logo upload.</p>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+
+      <div class="form-actions">
+        <button mat-raised-button color="primary" type="submit" [disabled]="saving || loading">
+          <mat-icon>save</mat-icon>
+          Save Configuration
+        </button>
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>

@@ -1,0 +1,99 @@
+<div class="billing-list-container">
+  <!-- Search Filters -->
+  <mat-card class="search-card">
+    <mat-card-header>
+      <mat-card-title>Billing Search</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="searchForm" (ngSubmit)="onSearch()" class="search-form">
+        <div class="search-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Provider Name</mat-label>
+            <input matInput formControlName="providerName" placeholder="Search by provider">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Account Number</mat-label>
+            <input matInput formControlName="accountNumber" placeholder="Search by account #">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Member Name</mat-label>
+            <input matInput formControlName="memberName" placeholder="Search by member name">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Member Number</mat-label>
+            <input matInput formControlName="memberNumber" placeholder="Search by member #">
+          </mat-form-field>
+        </div>
+
+        <div class="search-row">
+          <app-reference-data-dropdown
+            resource="billing-status"
+            label="Billing Status"
+            formControlName="billingStatusId">
+          </app-reference-data-dropdown>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Remittance Number</mat-label>
+            <input matInput formControlName="remittanceNumber" placeholder="Search by remittance #">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Date From</mat-label>
+            <input matInput [matDatepicker]="dateFromPicker" formControlName="dateFrom">
+            <mat-datepicker-toggle matIconSuffix [for]="dateFromPicker"></mat-datepicker-toggle>
+            <mat-datepicker #dateFromPicker></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Date To</mat-label>
+            <input matInput [matDatepicker]="dateToPicker" formControlName="dateTo">
+            <mat-datepicker-toggle matIconSuffix [for]="dateToPicker"></mat-datepicker-toggle>
+            <mat-datepicker #dateToPicker></mat-datepicker>
+          </mat-form-field>
+        </div>
+
+        <div class="search-row">
+          <mat-checkbox formControlName="isPaid">Show Paid Only</mat-checkbox>
+        </div>
+
+        <div class="search-actions">
+          <button mat-raised-button color="primary" type="submit">
+            <mat-icon>search</mat-icon> Search
+          </button>
+          <button mat-stroked-button type="button" (click)="onReset()">
+            <mat-icon>clear</mat-icon> Reset
+          </button>
+          <span class="spacer"></span>
+          <button mat-raised-button color="accent" type="button" (click)="onNewBilling()">
+            <mat-icon>add</mat-icon> New Billing
+          </button>
+          <button mat-raised-button type="button" (click)="onBulkPayments()">
+            <mat-icon>payments</mat-icon> Bulk Payments
+          </button>
+          <button mat-raised-button type="button" (click)="onRemittance()">
+            <mat-icon>receipt_long</mat-icon> Remittance
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- ag-Grid -->
+  <div class="grid-container">
+    <ag-grid-angular
+      class="ag-theme-material"
+      [columnDefs]="columnDefs"
+      [defaultColDef]="defaultColDef"
+      [rowModelType]="rowModelType"
+      [pagination]="true"
+      [paginationPageSize]="50"
+      [cacheBlockSize]="50"
+      [rowSelection]="'single'"
+      (gridReady)="onGridReady($event)"
+      (rowDoubleClicked)="onRowDoubleClicked($event)">
+    </ag-grid-angular>
+  </div>
+</div>

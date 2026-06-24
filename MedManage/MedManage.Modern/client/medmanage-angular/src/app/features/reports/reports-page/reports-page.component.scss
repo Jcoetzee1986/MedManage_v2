@@ -1,0 +1,50 @@
+.reports-container {
+  padding: 1.5rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+
+  h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 500;
+  }
+}
+
+.reports-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  flex: 1;
+  min-height: 0;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.params-panel {
+  overflow: auto;
+}
+
+.viewer-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.tab-content {
+  padding: 1.5rem 0;
+}
+
+.report-description {
+  color: rgba(0, 0, 0, 0.6);
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+}

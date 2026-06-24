@@ -1,0 +1,271 @@
+<div class="medical-aid-admin">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Medical Aid Administration</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <mat-tab-group>
+        <!-- Medical Aids List Tab -->
+        <mat-tab label="Medical Aids">
+          <div class="tab-content">
+            <div class="toolbar">
+              <button mat-raised-button color="primary" (click)="onAddMedicalAid()">
+                <mat-icon>add</mat-icon> Add Medical Aid
+              </button>
+            </div>
+
+            <!-- Medical Aid Form -->
+            <mat-card *ngIf="showMedicalAidForm" class="form-card">
+              <mat-card-header>
+                <mat-card-title>{{ editingMedicalAidId ? 'Edit' : 'Add' }} Medical Aid</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <form [formGroup]="medicalAidForm" class="form-grid">
+                  <mat-form-field>
+                    <mat-label>Name</mat-label>
+                    <input matInput formControlName="medicalAidName" />
+                  </mat-form-field>
+                  <mat-form-field>
+                    <mat-label>Case Prefix</mat-label>
+                    <input matInput formControlName="casePrefix" maxlength="3" />
+                  </mat-form-field>
+                  <mat-form-field>
+                    <mat-label>Report Template</mat-label>
+                    <input matInput formControlName="reportTemplate" />
+                  </mat-form-field>
+                  <mat-form-field>
+                    <mat-label>Initiation Date</mat-label>
+                    <input matInput [matDatepicker]="initPicker" formControlName="medicalAidInitiationDate" />
+                    <mat-datepicker-toggle matIconSuffix [for]="initPicker"></mat-datepicker-toggle>
+                    <mat-datepicker #initPicker></mat-datepicker>
+                  </mat-form-field>
+                  <mat-form-field>
+                    <mat-label>Reinstated Date</mat-label>
+                    <input matInput [matDatepicker]="reinstPicker" formControlName="medicalAidReinstatedDate" />
+                    <mat-datepicker-toggle matIconSuffix [for]="reinstPicker"></mat-datepicker-toggle>
+                    <mat-datepicker #reinstPicker></mat-datepicker>
+                  </mat-form-field>
+                  <mat-form-field>
+                    <mat-label>Terminated Date</mat-label>
+                    <input matInput [matDatepicker]="termPicker" formControlName="medicalAidTerminatedDate" />
+                    <mat-datepicker-toggle matIconSuffix [for]="termPicker"></mat-datepicker-toggle>
+                    <mat-datepicker #termPicker></mat-datepicker>
+                  </mat-form-field>
+                </form>
+              </mat-card-content>
+              <mat-card-actions>
+                <button mat-button (click)="onCancelMedicalAid()">Cancel</button>
+                <button mat-raised-button color="primary" (click)="onSaveMedicalAid()" [disabled]="medicalAidForm.invalid">Save</button>
+              </mat-card-actions>
+            </mat-card>
+
+            <!-- Medical Aids Table -->
+            <table mat-table [dataSource]="medicalAids" class="full-width">
+              <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef>Name</th>
+                <td mat-cell *matCellDef="let item">{{ item.medicalAidName }}</td>
+              </ng-container>
+              <ng-container matColumnDef="casePrefix">
+                <th mat-header-cell *matHeaderCellDef>Prefix</th>
+                <td mat-cell *matCellDef="let item">{{ item.casePrefix }}</td>
+              </ng-container>
+              <ng-container matColumnDef="initiationDate">
+                <th mat-header-cell *matHeaderCellDef>Initiation Date</th>
+                <td mat-cell *matCellDef="let item">{{ item.medicalAidInitiationDate }}</td>
+              </ng-container>
+              <ng-container matColumnDef="terminatedDate">
+                <th mat-header-cell *matHeaderCellDef>Terminated Date</th>
+                <td mat-cell *matCellDef="let item">{{ item.medicalAidTerminatedDate }}</td>
+              </ng-container>
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef>Actions</th>
+                <td mat-cell *matCellDef="let item">
+                  <button mat-icon-button (click)="onSelectMedicalAid(item)" matTooltip="View Details">
+                    <mat-icon>visibility</mat-icon>
+                  </button>
+                  <button mat-icon-button (click)="onEditMedicalAid(item)" matTooltip="Edit">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button mat-icon-button color="warn" (click)="onDeleteMedicalAid(item)" matTooltip="Delete">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="medicalAidColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: medicalAidColumns;"></tr>
+            </table>
+          </div>
+        </mat-tab>
+
+        <!-- Products Tab -->
+        <mat-tab label="Products" [disabled]="!selectedMedicalAidId">
+          <div class="tab-content">
+            <div class="section-header" *ngIf="selectedMedicalAidName">
+              <h3>Products for: {{ selectedMedicalAidName }}</h3>
+            </div>
+            <div class="toolbar">
+              <button mat-raised-button color="primary" (click)="onAddProduct()" [disabled]="!selectedMedicalAidId">
+                <mat-icon>add</mat-icon> Add Product
+              </button>
+            </div>
+
+            <!-- Product Form -->
+            <mat-card *ngIf="showProductForm" class="form-card">
+              <mat-card-header>
+                <mat-card-title>{{ editingProductId ? 'Edit' : 'Add' }} Product</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <form [formGroup]="productForm" class="form-grid">
+                  <mat-form-field>
+                    <mat-label>Product Name</mat-label>
+                    <input matInput formControlName="medAidProductName" />
+                  </mat-form-field>
+                  <mat-slide-toggle formControlName="allowServices">Allow Services</mat-slide-toggle>
+                </form>
+              </mat-card-content>
+              <mat-card-actions>
+                <button mat-button (click)="onCancelProduct()">Cancel</button>
+                <button mat-raised-button color="primary" (click)="onSaveProduct()" [disabled]="productForm.invalid">Save</button>
+              </mat-card-actions>
+            </mat-card>
+
+            <!-- Products Table -->
+            <table mat-table [dataSource]="products" class="full-width">
+              <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef>Product Name</th>
+                <td mat-cell *matCellDef="let item">{{ item.medAidProductName }}</td>
+              </ng-container>
+              <ng-container matColumnDef="allowServices">
+                <th mat-header-cell *matHeaderCellDef>Allow Services</th>
+                <td mat-cell *matCellDef="let item">{{ item.allowServices ? 'Yes' : 'No' }}</td>
+              </ng-container>
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef>Actions</th>
+                <td mat-cell *matCellDef="let item">
+                  <button mat-icon-button (click)="onEditProduct(item)" matTooltip="Edit">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button mat-icon-button color="warn" (click)="onDeleteProduct(item)" matTooltip="Delete">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="productColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: productColumns;"></tr>
+            </table>
+          </div>
+        </mat-tab>
+
+        <!-- Exclusions Tab -->
+        <mat-tab label="Exclusions" [disabled]="!selectedMedicalAidId">
+          <div class="tab-content">
+            <div class="section-header" *ngIf="selectedMedicalAidName">
+              <h3>Exclusions for: {{ selectedMedicalAidName }}</h3>
+            </div>
+            <div class="toolbar">
+              <button mat-raised-button color="primary" (click)="onAddExclusion()" [disabled]="!selectedMedicalAidId">
+                <mat-icon>add</mat-icon> Add Exclusion
+              </button>
+            </div>
+
+            <!-- Exclusion Form -->
+            <mat-card *ngIf="showExclusionForm" class="form-card">
+              <mat-card-header>
+                <mat-card-title>Add Exclusion</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <form [formGroup]="exclusionForm" class="form-grid">
+                  <mat-form-field>
+                    <mat-label>Base Tariff ID</mat-label>
+                    <input matInput formControlName="baseTariffId" />
+                  </mat-form-field>
+                </form>
+              </mat-card-content>
+              <mat-card-actions>
+                <button mat-button (click)="onCancelExclusion()">Cancel</button>
+                <button mat-raised-button color="primary" (click)="onSaveExclusion()" [disabled]="exclusionForm.invalid">Add</button>
+              </mat-card-actions>
+            </mat-card>
+
+            <!-- Exclusions Table -->
+            <table mat-table [dataSource]="exclusions" class="full-width">
+              <ng-container matColumnDef="baseTariffId">
+                <th mat-header-cell *matHeaderCellDef>Tariff Code</th>
+                <td mat-cell *matCellDef="let item">{{ item.baseTariffId }}</td>
+              </ng-container>
+              <ng-container matColumnDef="description">
+                <th mat-header-cell *matHeaderCellDef>Description</th>
+                <td mat-cell *matCellDef="let item">{{ item.baseTariffDescription }}</td>
+              </ng-container>
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef>Actions</th>
+                <td mat-cell *matCellDef="let item">
+                  <button mat-icon-button color="warn" (click)="onRemoveExclusion(item)" matTooltip="Remove">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="exclusionColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: exclusionColumns;"></tr>
+            </table>
+          </div>
+        </mat-tab>
+
+        <!-- Tariffs Tab -->
+        <mat-tab label="Tariffs" [disabled]="!selectedMedicalAidId">
+          <div class="tab-content">
+            <div class="section-header" *ngIf="selectedMedicalAidName">
+              <h3>Tariffs for: {{ selectedMedicalAidName }}</h3>
+            </div>
+            <div class="toolbar">
+              <button mat-raised-button color="primary" (click)="onAddTariff()" [disabled]="!selectedMedicalAidId">
+                <mat-icon>add</mat-icon> Add Tariff
+              </button>
+            </div>
+
+            <!-- Tariff Form -->
+            <mat-card *ngIf="showTariffForm" class="form-card">
+              <mat-card-header>
+                <mat-card-title>Add Tariff</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <form [formGroup]="tariffForm" class="form-grid">
+                  <mat-form-field>
+                    <mat-label>Tariff Name ID</mat-label>
+                    <input matInput type="number" formControlName="tariffNameId" />
+                  </mat-form-field>
+                </form>
+              </mat-card-content>
+              <mat-card-actions>
+                <button mat-button (click)="onCancelTariff()">Cancel</button>
+                <button mat-raised-button color="primary" (click)="onSaveTariff()" [disabled]="tariffForm.invalid">Add</button>
+              </mat-card-actions>
+            </mat-card>
+
+            <!-- Tariffs Table -->
+            <table mat-table [dataSource]="tariffs" class="full-width">
+              <ng-container matColumnDef="tariffNameId">
+                <th mat-header-cell *matHeaderCellDef>ID</th>
+                <td mat-cell *matCellDef="let item">{{ item.tariffNameId }}</td>
+              </ng-container>
+              <ng-container matColumnDef="tariffName">
+                <th mat-header-cell *matHeaderCellDef>Tariff Name</th>
+                <td mat-cell *matCellDef="let item">{{ item.tariffName }}</td>
+              </ng-container>
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef>Actions</th>
+                <td mat-cell *matCellDef="let item">
+                  <button mat-icon-button color="warn" (click)="onRemoveTariff(item)" matTooltip="Remove">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="tariffColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: tariffColumns;"></tr>
+            </table>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MedManage.Core.Interfaces.Services;
 using MedManage.Core.DTOs.CaseComment;
@@ -5,8 +6,12 @@ using MedManage.Core.DTOs.Common;
 
 namespace MedManage.API.Controllers;
 
+/// <summary>
+/// Case Comments API — simple CRUD (text, user, date)
+/// </summary>
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/cases/{caseId}/comments")]
+[Authorize]
 public class CaseCommentController : ControllerBase
 {
     private readonly ICaseCommentService _caseCommentService;
@@ -18,40 +23,11 @@ public class CaseCommentController : ControllerBase
         _logger = logger;
     }
 
+    /// <summary>
+    /// Get all comments for a case
+    /// </summary>
     [HttpGet]
-    public async Task<ActionResult<ApiResponse<IEnumerable<CaseCommentDto>>>> GetAll()
-    {
-        try
-        {
-            var caseComments = await _caseCommentService.GetAllAsync();
-            return Ok(ApiResponse<IEnumerable<CaseCommentDto>>.SuccessResponse(caseComments));
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving all case comments");
-            return StatusCode(500, ApiResponse<IEnumerable<CaseCommentDto>>.ErrorResponse("An error occurred while retrieving case comments"));
-        }
-    }
-
-    [HttpGet("{id}")]
-    public async Task<ActionResult<ApiResponse<CaseCommentDto>>> GetById(int id)
-    {
-        try
-        {
-            var caseComment = await _caseCommentService.GetByIdAsync(id);
-            if (caseComment == null)
-                return NotFound(ApiResponse<CaseCommentDto>.ErrorResponse($"CaseComment with ID {id} not found"));
-
-            return Ok(ApiResponse<CaseCommentDto>.SuccessResponse(caseComment));
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving case comment {Id}", id);
-            return StatusCode(500, ApiResponse<CaseCommentDto>.ErrorResponse("An error occurred while retrieving the case comment"));
-        }
-    }
-
-    [HttpGet("case/{caseId}")]
+    [ProducesResponseType(typeof(ApiResponse<IEnumerable<CaseCommentDto>>), StatusCodes.Status200OK)]
     public async Task<ActionResult<ApiResponse<IEnumerable<CaseCommentDto>>>> GetByCaseId(int caseId)
     {
         try
@@ -66,11 +42,42 @@ public class CaseCommentController : ControllerBase
         }
     }
 
-    [HttpPost]
-    public async Task<ActionResult<ApiResponse<CaseCommentDto>>> Create([FromBody] CreateCaseCommentDto dto)
+    /// <summary>
+    /// Get a specific comment by ID
+    /// </summary>
+    [HttpGet("{id}")]
+    [ProducesResponseType(typeof(ApiResponse<CaseCommentDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<CaseCommentDto>), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ApiResponse<CaseCommentDto>>> GetById(int caseId, int id)
     {
         try
         {
+            var caseComment = await _caseCommentService.GetByIdAsync(id);
+            if (caseComment == null || caseComment.CaseId != caseId)
+                return NotFound(ApiResponse<CaseCommentDto>.ErrorResponse($"CaseComment with ID {id} not found for case {caseId}"));
+
+            return Ok(ApiResponse<CaseCommentDto>.SuccessResponse(caseComment));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving case comment {Id}", id);
+            return StatusCode(500, ApiResponse<CaseCommentDto>.ErrorResponse("An error occurred while retrieving the case comment"));
+        }
+    }
+
+    /// <summary>
+    /// Create a new comment for a case
+    /// </summary>
+    [HttpPost]
+    [ProducesResponseType(typeof(ApiResponse<CaseCommentDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<CaseCommentDto>), StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<ApiResponse<CaseCommentDto>>> Create(int caseId, [FromBody] CreateCaseCommentDto dto)
+    {
+        try
+        {
+            // Ensure the CaseId from route is used
+            dto.CaseId = caseId;
+
             var caseComment = await _caseCommentService.CreateAsync(dto);
             return Ok(ApiResponse<CaseCommentDto>.SuccessResponse(caseComment));
         }
@@ -81,8 +88,13 @@ public class CaseCommentController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Update an existing comment
+    /// </summary>
     [HttpPut("{id}")]
-    public async Task<ActionResult<ApiResponse<CaseCommentDto>>> Update(int id, [FromBody] UpdateCaseCommentDto dto)
+    [ProducesResponseType(typeof(ApiResponse<CaseCommentDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<CaseCommentDto>), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ApiResponse<CaseCommentDto>>> Update(int caseId, int id, [FromBody] UpdateCaseCommentDto dto)
     {
         try
         {
@@ -100,8 +112,13 @@ public class CaseCommentController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Delete a comment (soft delete)
+    /// </summary>
     [HttpDelete("{id}")]
-    public async Task<ActionResult<ApiResponse<bool>>> Delete(int id)
+    [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ApiResponse<bool>>> Delete(int caseId, int id)
     {
         try
         {
@@ -114,7 +131,7 @@ public class CaseCommentController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting case comment {Id}", id);
-            return StatusCode(500, ApiResponse<bool>.ErrorResponse("An error occurred while dleting the case comment"));
+            return StatusCode(500, ApiResponse<bool>.ErrorResponse("An error occurred while deleting the case comment"));
         }
     }
 }

@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 namespace MedManage.Infrastructure.Repositories;
 
 /// <summary>
-/// Generic repository implementation with multi-tenant support
+/// Generic repository implementation with multi-tenant support and soft delete
 /// </summary>
 public class Repository<T> : IRepository<T> where T : class
 {
@@ -26,16 +26,29 @@ public class Repository<T> : IRepository<T> where T : class
         return await _dbSet.FindAsync(id);
     }
 
-    public virtual async Task<IEnumerable<T>> GetAllAsync()
+    public virtual async Task<IEnumerable<T>> GetAllAsync(bool includeDeleted = false)
     {
         IQueryable<T> query = _dbSet;
+
+        if (includeDeleted)
+        {
+            query = query.IgnoreQueryFilters();
+        }
+
         query = ApplyTenantFilter(query);
         return await query.ToListAsync();
     }
 
-    public virtual async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate)
+    public virtual async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate, bool includeDeleted = false)
     {
-        IQueryable<T> query = _dbSet.Where(predicate);
+        IQueryable<T> query = _dbSet;
+
+        if (includeDeleted)
+        {
+            query = query.IgnoreQueryFilters();
+        }
+
+        query = query.Where(predicate);
         query = ApplyTenantFilter(query);
         return await query.ToListAsync();
     }
@@ -93,6 +106,18 @@ public class Repository<T> : IRepository<T> where T : class
         return Task.CompletedTask;
     }
 
+    public virtual Task RestoreAsync(T entity)
+    {
+        // Restore a soft-deleted entity by clearing DateDeleted
+        if (entity is BaseEntity baseEntity)
+        {
+            baseEntity.DateDeleted = null;
+            _dbSet.Update(entity);
+        }
+
+        return Task.CompletedTask;
+    }
+
     public virtual async Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate)
     {
         IQueryable<T> query = _dbSet.Where(predicate);
@@ -111,6 +136,15 @@ public class Repository<T> : IRepository<T> where T : class
 
         query = ApplyTenantFilter(query);
         return await query.CountAsync();
+    }
+
+    /// <summary>
+    /// Get a queryable that ignores soft-delete filters for admin views.
+    /// Useful in derived repositories that need to build custom queries including deleted records.
+    /// </summary>
+    protected IQueryable<T> GetQueryableIncludingDeleted()
+    {
+        return _dbSet.IgnoreQueryFilters();
     }
 
     /// <summary>

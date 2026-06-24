@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MedManage.Core.DTOs.Booking;
+using MedManage.Core.DTOs.Case;
 using MedManage.Core.DTOs.Common;
 using MedManage.Core.Interfaces.Services;
 
@@ -7,6 +9,7 @@ namespace MedManage.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class BookingController : ControllerBase
 {
     private readonly IBookingService _service;
@@ -103,5 +106,30 @@ public class BookingController : ControllerBase
         if (!result)
             return NotFound(ApiResponse<bool>.ErrorResponse($"Booking with ID {id} not found"));
         return Ok(ApiResponse<bool>.SuccessResponse(true));
+    }
+
+    /// <summary>
+    /// Converts a booking to a case by transitioning the linked case status from Booking to Case.
+    /// Sets HasBooking=true and ChangeToCaseDate on the case.
+    /// </summary>
+    [HttpPost("{id}/convert-to-case")]
+    [ProducesResponseType(typeof(ApiResponse<CaseDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<CaseDto>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse<CaseDto>), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ConvertToCase(int id, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var updatedCase = await _service.ConvertToCaseAsync(id, cancellationToken);
+            return Ok(ApiResponse<CaseDto>.SuccessResponse(updatedCase, "Booking successfully converted to case"));
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ApiResponse<CaseDto>.ErrorResponse(ex.Message));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ApiResponse<CaseDto>.ErrorResponse(ex.Message));
+        }
     }
 }

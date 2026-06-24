@@ -40,8 +40,6 @@ public class MemberStatusService : IMemberStatusService
     public async Task<MemberStatusDto> CreateAsync(CreateMemberStatusDto dto, CancellationToken cancellationToken = default)
     {
         var entity = _mapper.Map<MemberStatus>(dto);
-        entity.DateInserted = DateTime.UtcNow;
-        entity.UserID = _currentUserService.UserId ?? string.Empty;
         
         await _unitOfWork.MemberStatuses.AddAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -58,8 +56,6 @@ public class MemberStatusService : IMemberStatusService
         }
         
         _mapper.Map(dto, entity);
-        entity.DateUpdated = DateTime.UtcNow;
-        entity.UpdatedUserID = _currentUserService.UserId;
         
         await _unitOfWork.MemberStatuses.UpdateAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

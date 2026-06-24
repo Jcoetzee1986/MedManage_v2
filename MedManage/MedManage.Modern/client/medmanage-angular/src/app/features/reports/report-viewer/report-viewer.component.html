@@ -1,0 +1,35 @@
+<mat-card class="report-viewer-card">
+  @if (loading) {
+    <div class="loading-container">
+      <mat-spinner diameter="48"></mat-spinner>
+      <p>Generating report&hellip;</p>
+    </div>
+  }
+
+  @if (errorMessage) {
+    <div class="error-container">
+      <p class="error-message">{{ errorMessage }}</p>
+    </div>
+  }
+
+  @if (safeUrl && !loading && !errorMessage) {
+    <div class="pdf-container">
+      <object
+        [data]="safeUrl"
+        type="application/pdf"
+        class="pdf-object"
+        aria-label="Report PDF preview">
+        <p>
+          Your browser does not support inline PDF viewing.
+          The report has been downloaded to your device.
+        </p>
+      </object>
+    </div>
+  }
+
+  @if (!safeUrl && !loading && !errorMessage) {
+    <div class="placeholder-container">
+      <p>Select a report type, fill in the parameters, and click Generate to preview.</p>
+    </div>
+  }
+</mat-card>

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MedManage.Core.DTOs.MemberNote;
 using MedManage.Core.DTOs.Common;
@@ -6,7 +7,8 @@ using MedManage.Core.Interfaces.Services;
 namespace MedManage.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/members/{memberId}/notes")]
+[Authorize]
 public class MemberNoteController : ControllerBase
 {
     private readonly IMemberNoteService _service;
@@ -18,15 +20,24 @@ public class MemberNoteController : ControllerBase
         _logger = logger;
     }
 
+    /// <summary>
+    /// Get all notes for a member
+    /// </summary>
     [HttpGet]
-    public async Task<IActionResult> GetAll([FromQuery] bool includeDeleted = false, CancellationToken cancellationToken = default)
+    [ProducesResponseType(typeof(ApiResponse<IEnumerable<MemberNoteDto>>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetByMemberId(int memberId, [FromQuery] bool includeDeleted = false, CancellationToken cancellationToken = default)
     {
-        var notes = await _service.GetAllAsync(includeDeleted, cancellationToken);
+        var notes = await _service.GetByMemberIdAsync(memberId, includeDeleted, cancellationToken);
         return Ok(ApiResponse<IEnumerable<MemberNoteDto>>.SuccessResponse(notes));
     }
 
+    /// <summary>
+    /// Get a specific member note by ID
+    /// </summary>
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken = default)
+    [ProducesResponseType(typeof(ApiResponse<MemberNoteDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<MemberNoteDto>), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetById(int memberId, int id, CancellationToken cancellationToken = default)
     {
         var note = await _service.GetByIdAsync(id, cancellationToken);
         
@@ -38,28 +49,34 @@ public class MemberNoteController : ControllerBase
         return Ok(ApiResponse<MemberNoteDto>.SuccessResponse(note));
     }
 
-    [HttpGet("member/{memberId}")]
-    public async Task<IActionResult> GetByMemberId(int memberId, [FromQuery] bool includeDeleted = false, CancellationToken cancellationToken = default)
-    {
-        var notes = await _service.GetByMemberIdAsync(memberId, includeDeleted, cancellationToken);
-        return Ok(ApiResponse<IEnumerable<MemberNoteDto>>.SuccessResponse(notes));
-    }
-
+    /// <summary>
+    /// Create a new note for a member
+    /// </summary>
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateMemberNoteDto dto, CancellationToken cancellationToken = default)
+    [ProducesResponseType(typeof(ApiResponse<MemberNoteDto>), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ApiResponse<MemberNoteDto>), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> Create(int memberId, [FromBody] CreateMemberNoteDto dto, CancellationToken cancellationToken = default)
     {
         if (!ModelState.IsValid)
         {
             return BadRequest(ApiResponse<MemberNoteDto>.ErrorResponse("Invalid model state", 
                 ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList()));
         }
+
+        // Ensure the note is associated with the correct member from the route
+        dto.MemberId = memberId;
         
         var created = await _service.CreateAsync(dto, cancellationToken);
-        return CreatedAtAction(nameof(GetById), new { id = created.MemberNoteId }, ApiResponse<MemberNoteDto>.SuccessResponse(created));
+        return CreatedAtAction(nameof(GetById), new { memberId, id = created.MemberNoteId }, ApiResponse<MemberNoteDto>.SuccessResponse(created));
     }
 
+    /// <summary>
+    /// Update a member note
+    /// </summary>
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, [FromBody] UpdateMemberNoteDto dto, CancellationToken cancellationToken = default)
+    [ProducesResponseType(typeof(ApiResponse<MemberNoteDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<MemberNoteDto>), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Update(int memberId, int id, [FromBody] UpdateMemberNoteDto dto, CancellationToken cancellationToken = default)
     {
         if (!ModelState.IsValid)
         {
@@ -78,8 +95,13 @@ public class MemberNoteController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Delete a member note (soft delete)
+    /// </summary>
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken = default)
+    [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Delete(int memberId, int id, CancellationToken cancellationToken = default)
     {
         var result = await _service.DeleteAsync(id, cancellationToken);
         

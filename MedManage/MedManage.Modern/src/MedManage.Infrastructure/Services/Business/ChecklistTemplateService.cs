@@ -40,8 +40,6 @@ public class ChecklistTemplateService : IChecklistTemplateService
     public async Task<ChecklistTemplateDto> CreateAsync(CreateChecklistTemplateDto dto, CancellationToken cancellationToken = default)
     {
         var entity = _mapper.Map<ChecklistTemplate>(dto);
-        entity.DateInserted = DateTime.UtcNow;
-        entity.UserID = _currentUserService.UserId ?? string.Empty;
         
         await _unitOfWork.ChecklistTemplates.AddAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -58,8 +56,6 @@ public class ChecklistTemplateService : IChecklistTemplateService
         }
         
         _mapper.Map(dto, entity);
-        entity.DateUpdated = DateTime.UtcNow;
-        entity.UpdatedUserID = _currentUserService.UserId;
         
         await _unitOfWork.ChecklistTemplates.UpdateAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

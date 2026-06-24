@@ -1,0 +1,90 @@
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>User Management</mat-card-title>
+    <mat-card-subtitle>Manage user accounts, approvals, and role assignments</mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content>
+    <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
+
+    <table mat-table [dataSource]="users" class="user-table">
+      <!-- Username Column -->
+      <ng-container matColumnDef="userName">
+        <th mat-header-cell *matHeaderCellDef>Username</th>
+        <td mat-cell *matCellDef="let user">{{ user.userName }}</td>
+      </ng-container>
+
+      <!-- Email Column -->
+      <ng-container matColumnDef="email">
+        <th mat-header-cell *matHeaderCellDef>Email</th>
+        <td mat-cell *matCellDef="let user">{{ user.email || '—' }}</td>
+      </ng-container>
+
+      <!-- Status Column -->
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let user">
+          <span class="status-chip" [class]="'status-' + getStatusColor(user)">
+            <mat-icon class="status-icon">{{ getStatusIcon(user) }}</mat-icon>
+            {{ getStatusText(user) }}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Roles Column -->
+      <ng-container matColumnDef="roles">
+        <th mat-header-cell *matHeaderCellDef>Roles</th>
+        <td mat-cell *matCellDef="let user">
+          <mat-chip-set>
+            <mat-chip *ngFor="let role of user.roles" class="role-chip">
+              {{ role }}
+            </mat-chip>
+          </mat-chip-set>
+        </td>
+      </ng-container>
+
+      <!-- Last Login Column -->
+      <ng-container matColumnDef="lastLogin">
+        <th mat-header-cell *matHeaderCellDef>Last Login</th>
+        <td mat-cell *matCellDef="let user">
+          {{ user.lastLoginDate | date:'short' }}
+        </td>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let user">
+          <button mat-icon-button
+                  *ngIf="!user.isApproved"
+                  matTooltip="Approve user"
+                  (click)="approveUser(user)">
+            <mat-icon>how_to_reg</mat-icon>
+          </button>
+          <button mat-icon-button
+                  *ngIf="!user.isLockedOut && user.isApproved"
+                  matTooltip="Lock account"
+                  (click)="lockUser(user)">
+            <mat-icon>lock</mat-icon>
+          </button>
+          <button mat-icon-button
+                  *ngIf="user.isLockedOut"
+                  matTooltip="Unlock account"
+                  (click)="unlockUser(user)">
+            <mat-icon>lock_open</mat-icon>
+          </button>
+          <button mat-icon-button
+                  matTooltip="Assign roles"
+                  (click)="openRoleDialog(user)">
+            <mat-icon>manage_accounts</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+
+    <p *ngIf="!loading && users.length === 0" class="no-data">No users found.</p>
+  </mat-card-content>
+</mat-card>

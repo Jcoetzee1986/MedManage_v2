@@ -1,0 +1,48 @@
+<div class="tab-content">
+  <div class="tab-header">
+    <h3>Documents</h3>
+    <button mat-raised-button color="primary" (click)="fileInput.click()">
+      <mat-icon>upload</mat-icon> Upload File
+    </button>
+    <input #fileInput type="file" hidden (change)="onFileSelected($event)">
+  </div>
+
+  <table mat-table [dataSource]="items" class="full-width">
+    <ng-container matColumnDef="fileName">
+      <th mat-header-cell *matHeaderCellDef>File Name</th>
+      <td mat-cell *matCellDef="let item">{{ item.fileName }}</td>
+    </ng-container>
+    <ng-container matColumnDef="fileType">
+      <th mat-header-cell *matHeaderCellDef>Type</th>
+      <td mat-cell *matCellDef="let item">{{ item.fileType }}</td>
+    </ng-container>
+    <ng-container matColumnDef="fileSize">
+      <th mat-header-cell *matHeaderCellDef>Size</th>
+      <td mat-cell *matCellDef="let item">{{ formatSize(item.fileSize) }}</td>
+    </ng-container>
+    <ng-container matColumnDef="dateUploaded">
+      <th mat-header-cell *matHeaderCellDef>Uploaded</th>
+      <td mat-cell *matCellDef="let item">{{ item.dateUploaded | date:'short' }}</td>
+    </ng-container>
+    <ng-container matColumnDef="uploadedBy">
+      <th mat-header-cell *matHeaderCellDef>By</th>
+      <td mat-cell *matCellDef="let item">{{ item.uploadedBy }}</td>
+    </ng-container>
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef>Actions</th>
+      <td mat-cell *matCellDef="let item">
+        <button mat-icon-button (click)="onDownload(item)" aria-label="Download">
+          <mat-icon>download</mat-icon>
+        </button>
+        <button mat-icon-button color="warn" (click)="onDelete(item)" aria-label="Delete">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
+
+  <p *ngIf="items.length === 0" class="empty-message">No documents attached.</p>
+</div>

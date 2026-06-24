@@ -1,0 +1,274 @@
+<div class="tariff-admin-container">
+  <h2>Tariff Administration</h2>
+
+  <mat-tab-group>
+    <!-- Base Tariffs Tab -->
+    <mat-tab label="Base Tariffs">
+      <div class="tab-content">
+        <div class="tab-header">
+          <h3>Base Tariffs</h3>
+          <button mat-raised-button color="primary" (click)="onAddBase()" *ngIf="!showBaseForm">
+            <mat-icon>add</mat-icon> Add Tariff
+          </button>
+        </div>
+
+        <!-- Base Tariff Form -->
+        <mat-card class="inline-form-card" *ngIf="showBaseForm">
+          <mat-card-content>
+            <form [formGroup]="baseForm" (ngSubmit)="onSaveBase()">
+              <div class="form-row">
+                <mat-form-field appearance="outline">
+                  <mat-label>Code</mat-label>
+                  <input matInput formControlName="code" required>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Description</mat-label>
+                  <input matInput formControlName="description" required>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Category</mat-label>
+                  <input matInput formControlName="category">
+                </mat-form-field>
+
+                <mat-slide-toggle formControlName="isActive">Active</mat-slide-toggle>
+              </div>
+
+              <div class="form-actions">
+                <button mat-raised-button color="primary" type="submit" [disabled]="baseForm.invalid">
+                  {{ editingBaseId ? 'Update' : 'Create' }}
+                </button>
+                <button mat-stroked-button type="button" (click)="onCancelBase()">Cancel</button>
+              </div>
+            </form>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Base Tariff Table -->
+        <table mat-table [dataSource]="baseTariffs" matSort class="full-width-table" *ngIf="baseTariffs.length > 0">
+          <ng-container matColumnDef="code">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Code</th>
+            <td mat-cell *matCellDef="let row">{{ row.code }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="description">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Description</th>
+            <td mat-cell *matCellDef="let row">{{ row.description }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="category">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Category</th>
+            <td mat-cell *matCellDef="let row">{{ row.category }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="isActive">
+            <th mat-header-cell *matHeaderCellDef>Active</th>
+            <td mat-cell *matCellDef="let row">
+              <mat-icon [color]="row.isActive ? 'primary' : 'warn'">
+                {{ row.isActive ? 'check_circle' : 'cancel' }}
+              </mat-icon>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let row">
+              <button mat-icon-button (click)="onEditBase(row)" aria-label="Edit">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button color="warn" (click)="onDeleteBase(row)" aria-label="Delete">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="baseTariffColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: baseTariffColumns;"></tr>
+        </table>
+
+        <p *ngIf="baseTariffs.length === 0 && !showBaseForm" class="no-data">No base tariffs configured.</p>
+      </div>
+    </mat-tab>
+
+    <!-- Tariff Rates Tab -->
+    <mat-tab label="Rates">
+      <div class="tab-content">
+        <div class="tab-header">
+          <h3>Tariff Rates</h3>
+          <button mat-raised-button color="primary" (click)="onAddRate()" *ngIf="!showRateForm">
+            <mat-icon>add</mat-icon> Add Rate
+          </button>
+        </div>
+
+        <!-- Rate Form -->
+        <mat-card class="inline-form-card" *ngIf="showRateForm">
+          <mat-card-content>
+            <form [formGroup]="rateForm" (ngSubmit)="onSaveRate()">
+              <div class="form-row">
+                <mat-form-field appearance="outline">
+                  <mat-label>Tariff ID</mat-label>
+                  <input matInput formControlName="tariffId" type="number" required>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Value</mat-label>
+                  <input matInput formControlName="value" type="number" required>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Date From</mat-label>
+                  <input matInput [matDatepicker]="rateFromPicker" formControlName="dateFrom" required>
+                  <mat-datepicker-toggle matIconSuffix [for]="rateFromPicker"></mat-datepicker-toggle>
+                  <mat-datepicker #rateFromPicker></mat-datepicker>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Date To</mat-label>
+                  <input matInput [matDatepicker]="rateToPicker" formControlName="dateTo">
+                  <mat-datepicker-toggle matIconSuffix [for]="rateToPicker"></mat-datepicker-toggle>
+                  <mat-datepicker #rateToPicker></mat-datepicker>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Rate Type</mat-label>
+                  <input matInput formControlName="rateType">
+                </mat-form-field>
+              </div>
+
+              <div class="form-actions">
+                <button mat-raised-button color="primary" type="submit" [disabled]="rateForm.invalid">
+                  {{ editingRateId ? 'Update' : 'Create' }}
+                </button>
+                <button mat-stroked-button type="button" (click)="onCancelRate()">Cancel</button>
+              </div>
+            </form>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Rates Table -->
+        <table mat-table [dataSource]="rates" class="full-width-table" *ngIf="rates.length > 0">
+          <ng-container matColumnDef="tariffCode">
+            <th mat-header-cell *matHeaderCellDef>Tariff Code</th>
+            <td mat-cell *matCellDef="let row">{{ row.tariffCode }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="value">
+            <th mat-header-cell *matHeaderCellDef>Value</th>
+            <td mat-cell *matCellDef="let row">R {{ row.value | number:'1.2-2' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="dateFrom">
+            <th mat-header-cell *matHeaderCellDef>Date From</th>
+            <td mat-cell *matCellDef="let row">{{ row.dateFrom | date:'shortDate' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="dateTo">
+            <th mat-header-cell *matHeaderCellDef>Date To</th>
+            <td mat-cell *matCellDef="let row">{{ row.dateTo | date:'shortDate' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="rateType">
+            <th mat-header-cell *matHeaderCellDef>Rate Type</th>
+            <td mat-cell *matCellDef="let row">{{ row.rateType }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let row">
+              <button mat-icon-button (click)="onEditRate(row)" aria-label="Edit">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button color="warn" (click)="onDeleteRate(row)" aria-label="Delete">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="rateColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: rateColumns;"></tr>
+        </table>
+
+        <p *ngIf="rates.length === 0 && !showRateForm" class="no-data">No rates configured.</p>
+      </div>
+    </mat-tab>
+
+    <!-- Tariff Names Tab -->
+    <mat-tab label="Names">
+      <div class="tab-content">
+        <div class="tab-header">
+          <h3>Tariff Names</h3>
+          <button mat-raised-button color="primary" (click)="onAddName()" *ngIf="!showNameForm">
+            <mat-icon>add</mat-icon> Add Name
+          </button>
+        </div>
+
+        <!-- Name Form -->
+        <mat-card class="inline-form-card" *ngIf="showNameForm">
+          <mat-card-content>
+            <form [formGroup]="nameForm" (ngSubmit)="onSaveName()">
+              <div class="form-row">
+                <mat-form-field appearance="outline">
+                  <mat-label>Tariff ID</mat-label>
+                  <input matInput formControlName="tariffId" type="number" required>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Name</mat-label>
+                  <input matInput formControlName="name" required>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Language</mat-label>
+                  <input matInput formControlName="language">
+                </mat-form-field>
+              </div>
+
+              <div class="form-actions">
+                <button mat-raised-button color="primary" type="submit" [disabled]="nameForm.invalid">
+                  {{ editingNameId ? 'Update' : 'Create' }}
+                </button>
+                <button mat-stroked-button type="button" (click)="onCancelName()">Cancel</button>
+              </div>
+            </form>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Names Table -->
+        <table mat-table [dataSource]="names" class="full-width-table" *ngIf="names.length > 0">
+          <ng-container matColumnDef="tariffCode">
+            <th mat-header-cell *matHeaderCellDef>Tariff Code</th>
+            <td mat-cell *matCellDef="let row">{{ row.tariffCode }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Name</th>
+            <td mat-cell *matCellDef="let row">{{ row.name }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="language">
+            <th mat-header-cell *matHeaderCellDef>Language</th>
+            <td mat-cell *matCellDef="let row">{{ row.language }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let row">
+              <button mat-icon-button (click)="onEditName(row)" aria-label="Edit">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button color="warn" (click)="onDeleteName(row)" aria-label="Delete">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="nameColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: nameColumns;"></tr>
+        </table>
+
+        <p *ngIf="names.length === 0 && !showNameForm" class="no-data">No names configured.</p>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

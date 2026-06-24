@@ -64,9 +64,13 @@ public interface IUnitOfWork : IDisposable
     IServiceProviderTariffRepository ServiceProviderTariffs { get; }
     IServiceProviderTariffCustomRepository ServiceProviderTariffCustoms { get; }
     
+    // Service Provider Sub-Entity Repositories
+    IServiceProviderDiscountRepository ServiceProviderDiscounts { get; }
+    
     // Other Repositories
     ILinkedFileRepository LinkedFiles { get; }
     IMedicalAidExclusionRepository MedicalAidExclusions { get; }
+    IMedicalAidTariffRepository MedicalAidTariffs { get; }
     IEpisodeCaseRepository EpisodeCases { get; }
     ISessionUserCaseRepository SessionUserCases { get; }
     

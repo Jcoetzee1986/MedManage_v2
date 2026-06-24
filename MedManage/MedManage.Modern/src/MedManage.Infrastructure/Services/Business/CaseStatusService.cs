@@ -40,8 +40,6 @@ public class CaseStatusService : ICaseStatusService
     public async Task<CaseStatusDto> CreateAsync(CreateCaseStatusDto dto, CancellationToken cancellationToken = default)
     {
         var entity = _mapper.Map<CaseStatus>(dto);
-        entity.DateInserted = DateTime.UtcNow;
-        entity.UserID = _currentUserService.UserId ?? string.Empty;
         
         await _unitOfWork.CaseStatuses.AddAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -58,8 +56,6 @@ public class CaseStatusService : ICaseStatusService
         }
         
         _mapper.Map(dto, entity);
-        entity.DateUpdated = DateTime.UtcNow;
-        entity.UpdatedUserID = _currentUserService.UserId;
         
         await _unitOfWork.CaseStatuses.UpdateAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

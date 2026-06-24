@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { roleGuard } from './core/guards/role.guard';
 
 export const routes: Routes = [
   {
@@ -33,6 +34,51 @@ export const routes: Routes = [
   {
     path: 'cases',
     loadChildren: () => import('./features/case-management/case-management.routes').then(m => m.CASE_ROUTES),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'finance',
+    loadChildren: () => import('./features/finance/finance.routes').then(m => m.FINANCE_ROUTES),
+    canActivate: [roleGuard('Admin', 'BillingOfficer', 'CaseManager')]
+  },
+  {
+    path: 'members',
+    loadChildren: () => import('./features/members/members.routes').then(m => m.MEMBER_ROUTES),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'providers',
+    loadChildren: () => import('./features/providers/providers.routes').then(m => m.PROVIDER_ROUTES),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'tariffs',
+    loadChildren: () => import('./features/tariffs/tariffs.routes').then(m => m.TARIFF_ROUTES),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'bookings',
+    loadChildren: () => import('./features/bookings/bookings.routes').then(m => m.BOOKING_ROUTES),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'admin',
+    loadChildren: () => import('./features/admin/admin.routes').then(m => m.ADMIN_ROUTES),
+    canActivate: [roleGuard('Admin')]
+  },
+  {
+    path: 'medical-aids',
+    loadChildren: () => import('./features/medical-aids/medical-aids.routes').then(m => m.MEDICAL_AID_ROUTES),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'episodes',
+    loadChildren: () => import('./features/episodes/episodes.routes').then(m => m.EPISODE_ROUTES),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'reports',
+    loadChildren: () => import('./features/reports/reports.routes').then(m => m.REPORT_ROUTES),
     canActivate: [authGuard]
   },
   // Wildcard Route

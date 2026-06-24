@@ -14,7 +14,8 @@ public interface ICaseRepository : IRepository<Case>
         int? serviceProviderId,
         int? statusId,
         DateTime? admissionDateFrom,
-        DateTime? admissionDateTo);
+        DateTime? admissionDateTo,
+        bool includeDeleted = false);
     Task<IEnumerable<Case>> GetPossibleDuplicatesAsync(int memberId, DateTime admissionDate);
     Task<IEnumerable<Case>> GetByRemittanceNumberAsync(string remittanceNumber);
     Task CopyCaseAsync(int sourceCaseId, int newMemberId);

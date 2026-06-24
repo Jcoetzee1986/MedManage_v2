@@ -121,6 +121,7 @@ public partial class MedManageDbContext : DbContext
     public virtual DbSet<VwCaseDetailWithAmount> VwCaseDetailWithAmounts { get; set; }
     public virtual DbSet<VwServiceProvider> VwServiceProviders { get; set; }
     public virtual DbSet<XHospitalType> XHospitalTypes { get; set; }
+    public virtual DbSet<ImportHistory> ImportHistories { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -132,11 +133,22 @@ public partial class MedManageDbContext : DbContext
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        // Set audit fields before saving
+        SetAuditFields();
+        return base.SaveChangesAsync(cancellationToken);
+    }
+
+    public override int SaveChanges()
+    {
+        SetAuditFields();
+        return base.SaveChanges();
+    }
+
+    private void SetAuditFields()
+    {
         var entries = ChangeTracker.Entries()
             .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified);
 
-        var currentUserId = _currentUserService?.UserId;
+        var currentUserId = _currentUserService?.UserId ?? "SYSTEM";
 
         foreach (var entry in entries)
         {
@@ -144,8 +156,8 @@ public partial class MedManageDbContext : DbContext
             {
                 if (entry.State == EntityState.Added)
                 {
-                    baseEntity.DateInserted = DateTime.UtcNow;
-                    baseEntity.UserID = currentUserId ?? "SYSTEM";
+                    baseEntity.DateInserted ??= DateTime.UtcNow;
+                    baseEntity.UserID ??= currentUserId;
                 }
                 else if (entry.State == EntityState.Modified)
                 {
@@ -154,7 +166,5 @@ public partial class MedManageDbContext : DbContext
                 }
             }
         }
-
-        return base.SaveChangesAsync(cancellationToken);
     }
 }

@@ -13,28 +13,43 @@ namespace MedManage.Infrastructure.Services.Business;
 public class CaseService : ICaseService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly MedManageDbContext _context;
     private readonly IMapper _mapper;
     private readonly ICurrentUserService _currentUserService;
 
-    public CaseService(IUnitOfWork unitOfWork, IMapper mapper, ICurrentUserService currentUserService)
+    public CaseService(
+        IUnitOfWork unitOfWork,
+        MedManageDbContext context,
+        IMapper mapper,
+        ICurrentUserService currentUserService)
     {
         _unitOfWork = unitOfWork;
+        _context = context;
         _mapper = mapper;
         _currentUserService = currentUserService;
     }
 
     public async Task<CaseDto?> GetByIdAsync(int caseId, CancellationToken cancellationToken = default)
     {
-        var caseEntity = await _unitOfWork.Cases.GetByIdAsync(caseId);
+        var caseEntity = await _context.Cases
+            .Include(c => c.Member)
+            .Include(c => c.Status)
+            .Include(c => c.ReferTo)
+            .Include(c => c.ReferFrom)
+            .FirstOrDefaultAsync(c => c.CaseId == caseId && c.DateDeleted == null, cancellationToken);
+
         return caseEntity == null ? null : _mapper.Map<CaseDto>(caseEntity);
     }
 
     public async Task<PagedResult<CaseDto>> SearchAsync(CaseSearchRequest request, CancellationToken cancellationToken = default)
     {
-        var allCases = await _unitOfWork.Cases.GetAllAsync();
-        var query = allCases.AsQueryable();
+        var query = _context.Cases
+            .Include(c => c.Member)
+            .Include(c => c.Status)
+            .Where(c => c.DateDeleted == null)
+            .AsQueryable();
 
-        // Apply filters
+        // Core case filters
         if (!string.IsNullOrWhiteSpace(request.AuthNumber))
         {
             query = query.Where(c => c.AuthNumber != null && c.AuthNumber.Contains(request.AuthNumber));
@@ -45,11 +60,34 @@ public class CaseService : ICaseService
             query = query.Where(c => c.MemberId == request.MemberId.Value);
         }
 
+        if (!string.IsNullOrWhiteSpace(request.MemberNumber))
+        {
+            query = query.Where(c => c.Member != null && c.Member.MemberNumber != null
+                && c.Member.MemberNumber.Contains(request.MemberNumber));
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.MemberSurname))
+        {
+            query = query.Where(c => c.Member != null && c.Member.Surname != null
+                && c.Member.Surname.Contains(request.MemberSurname));
+        }
+
         if (request.StatusId.HasValue)
         {
             query = query.Where(c => c.StatusId == request.StatusId.Value);
         }
 
+        if (request.CaseCategoryId.HasValue)
+        {
+            query = query.Where(c => c.CaseCategoryId == request.CaseCategoryId.Value);
+        }
+
+        if (request.AuthTypeId.HasValue)
+        {
+            query = query.Where(c => c.AuthTypeId == request.AuthTypeId.Value);
+        }
+
+        // Provider filters
         if (request.ReferToId.HasValue)
         {
             query = query.Where(c => c.ReferToId == request.ReferToId.Value);
@@ -60,6 +98,7 @@ public class CaseService : ICaseService
             query = query.Where(c => c.ReferFromId == request.ReferFromId.Value);
         }
 
+        // Date filters
         if (request.AdmissionDateFrom.HasValue)
         {
             query = query.Where(c => c.AdmissionDate >= request.AdmissionDateFrom.Value);
@@ -80,24 +119,57 @@ public class CaseService : ICaseService
             query = query.Where(c => c.DischargeDate <= request.DischargeDateTo.Value);
         }
 
-        if (request.CaseCategoryId.HasValue)
+        if (request.DateCreatedFrom.HasValue)
         {
-            query = query.Where(c => c.CaseCategoryId == request.CaseCategoryId.Value);
+            query = query.Where(c => c.DateCreated >= request.DateCreatedFrom.Value);
         }
 
-        // Apply soft delete filter
-        query = query.Where(c => c.DateDeleted == null);
+        if (request.DateCreatedTo.HasValue)
+        {
+            query = query.Where(c => c.DateCreated <= request.DateCreatedTo.Value);
+        }
 
-        // Get total count
-        var totalCount = query.Count();
+        // Medical aid filter (through member)
+        if (request.MedicalAidId.HasValue)
+        {
+            query = query.Where(c => c.Member != null && c.Member.MedicalAidId == request.MedicalAidId.Value);
+        }
+
+        // ICD code filter - find cases that have a matching ICD code
+        if (!string.IsNullOrWhiteSpace(request.IcdCode))
+        {
+            var icdCode = request.IcdCode;
+            var caseIdsWithIcd = _context.CaseIcds
+                .Include(ci => ci.Icd)
+                .Where(ci => ci.Icd.DiagnosisCode != null && ci.Icd.DiagnosisCode.Contains(icdCode))
+                .Select(ci => ci.CaseId);
+
+            query = query.Where(c => caseIdsWithIcd.Contains(c.CaseId));
+        }
+
+        // CPT code filter - find cases that have a matching CPT code
+        if (!string.IsNullOrWhiteSpace(request.CptCode))
+        {
+            var cptCode = request.CptCode;
+            var caseIdsWithCpt = _context.CaseCpts
+                .Include(cc => cc.Cpt)
+                .Where(cc => cc.Cpt.Code != null && cc.Cpt.Code.Contains(cptCode))
+                .Select(cc => cc.CaseId);
+
+            query = query.Where(c => caseIdsWithCpt.Contains(c.CaseId));
+        }
+
+        // Get total count before pagination
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        // Apply sorting
+        query = ApplySorting(query, request.SortBy, request.SortDescending);
 
         // Apply pagination
-        var cases = query
-            .OrderByDescending(c => c.DateCreated)
-            .ThenByDescending(c => c.CaseId)
+        var cases = await query
             .Skip((request.PageNumber - 1) * request.PageSize)
             .Take(request.PageSize)
-            .ToList();
+            .ToListAsync(cancellationToken);
 
         return new PagedResult<CaseDto>
         {
@@ -111,10 +183,7 @@ public class CaseService : ICaseService
     public async Task<CaseDto> CreateAsync(CreateCaseRequest request, CancellationToken cancellationToken = default)
     {
         var caseEntity = _mapper.Map<Case>(request);
-        
-        // Set audit fields
-        caseEntity.UserID = _currentUserService.UserId ?? "SYSTEM";
-        
+
         await _unitOfWork.Cases.AddAsync(caseEntity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return _mapper.Map<CaseDto>(caseEntity);
@@ -129,11 +198,7 @@ public class CaseService : ICaseService
         }
 
         _mapper.Map(request, existingCase);
-        
-        // Set update audit fields
-        existingCase.DateUpdated = DateTime.UtcNow;
-        existingCase.UpdatedUserID = _currentUserService.UserId ?? "SYSTEM";
-        
+
         await _unitOfWork.Cases.UpdateAsync(existingCase);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return _mapper.Map<CaseDto>(existingCase);
@@ -154,7 +219,68 @@ public class CaseService : ICaseService
 
     public async Task<bool> ExistsAsync(int caseId, CancellationToken cancellationToken = default)
     {
-        var caseEntity = await _unitOfWork.Cases.GetByIdAsync(caseId);
-        return caseEntity != null;
+        return await _context.Cases
+            .AnyAsync(c => c.CaseId == caseId && c.DateDeleted == null, cancellationToken);
+    }
+
+    public async Task<DuplicateCheckResult> CheckDuplicateAsync(DuplicateCheckRequest request, CancellationToken cancellationToken = default)
+    {
+        var admissionDate = request.AdmissionDate;
+
+        var query = _context.Cases
+            .Include(c => c.Member)
+            .Include(c => c.ReferTo)
+            .Where(c => c.DateDeleted == null
+                && c.MemberId == request.MemberId
+                && c.AdmissionDate == admissionDate);
+
+        // Also match on provider if specified
+        if (request.ReferToId.HasValue)
+        {
+            query = query.Where(c => c.ReferToId == request.ReferToId.Value);
+        }
+
+        // Exclude a specific case (for update scenarios)
+        if (request.ExcludeCaseId.HasValue)
+        {
+            query = query.Where(c => c.CaseId != request.ExcludeCaseId.Value);
+        }
+
+        var duplicates = await query.ToListAsync(cancellationToken);
+
+        return new DuplicateCheckResult
+        {
+            HasDuplicates = duplicates.Any(),
+            PossibleDuplicates = _mapper.Map<List<CaseDto>>(duplicates),
+            Message = duplicates.Any()
+                ? $"Found {duplicates.Count} possible duplicate case(s) for the same member, provider, and admission date."
+                : null
+        };
+    }
+
+    private static IQueryable<Case> ApplySorting(IQueryable<Case> query, string? sortBy, bool sortDescending)
+    {
+        return sortBy?.ToLowerInvariant() switch
+        {
+            "authnumber" => sortDescending
+                ? query.OrderByDescending(c => c.AuthNumber)
+                : query.OrderBy(c => c.AuthNumber),
+            "admissiondate" => sortDescending
+                ? query.OrderByDescending(c => c.AdmissionDate)
+                : query.OrderBy(c => c.AdmissionDate),
+            "dischargedate" => sortDescending
+                ? query.OrderByDescending(c => c.DischargeDate)
+                : query.OrderBy(c => c.DischargeDate),
+            "status" => sortDescending
+                ? query.OrderByDescending(c => c.StatusId)
+                : query.OrderBy(c => c.StatusId),
+            "member" => sortDescending
+                ? query.OrderByDescending(c => c.Member != null ? c.Member.Surname : "")
+                : query.OrderBy(c => c.Member != null ? c.Member.Surname : ""),
+            "datecreated" => sortDescending
+                ? query.OrderByDescending(c => c.DateCreated)
+                : query.OrderBy(c => c.DateCreated),
+            _ => query.OrderByDescending(c => c.DateCreated).ThenByDescending(c => c.CaseId)
+        };
     }
 }

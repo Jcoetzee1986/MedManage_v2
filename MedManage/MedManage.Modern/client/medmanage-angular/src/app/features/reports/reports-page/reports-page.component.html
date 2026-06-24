@@ -1,0 +1,64 @@
+<div class="reports-container">
+  <header class="page-header">
+    <h1>Reports</h1>
+    @if (lastBlob) {
+      <button mat-raised-button color="accent" (click)="onDownload()">
+        <mat-icon>download</mat-icon>
+        Download {{ lastFilename }}
+      </button>
+    }
+  </header>
+
+  <div class="reports-layout">
+    <!-- Report Parameters Panel -->
+    <mat-card class="params-panel">
+      <mat-card-header>
+        <mat-card-title>Report Parameters</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-tab-group animationDuration="200ms">
+          <!-- Case Letter -->
+          <mat-tab label="Case Letter">
+            <div class="tab-content">
+              <p class="report-description">{{ reportDefinitions[0].description }}</p>
+              <app-case-letter-params (generate)="onGenerateCaseLetter($event)"></app-case-letter-params>
+            </div>
+          </mat-tab>
+
+          <!-- Cases Between Dates -->
+          <mat-tab label="Cases Between Dates">
+            <div class="tab-content">
+              <p class="report-description">{{ reportDefinitions[1].description }}</p>
+              <app-cases-between-dates-params (generate)="onGenerateCasesBetweenDates($event)"></app-cases-between-dates-params>
+            </div>
+          </mat-tab>
+
+          <!-- WIP Extract -->
+          <mat-tab label="WIP Extract">
+            <div class="tab-content">
+              <p class="report-description">{{ reportDefinitions[2].description }}</p>
+              <app-wip-extract-params (generate)="onGenerateWipExtract($event)"></app-wip-extract-params>
+            </div>
+          </mat-tab>
+
+          <!-- Billing Summary -->
+          <mat-tab label="Billing Summary">
+            <div class="tab-content">
+              <p class="report-description">{{ reportDefinitions[3].description }}</p>
+              <app-billing-summary-params (generate)="onGenerateBillingSummary($event)"></app-billing-summary-params>
+            </div>
+          </mat-tab>
+        </mat-tab-group>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Report Preview Panel -->
+    <div class="viewer-panel">
+      <app-report-viewer
+        [pdfUrl]="previewUrl"
+        [loading]="loading"
+        [errorMessage]="errorMessage">
+      </app-report-viewer>
+    </div>
+  </div>
+</div>

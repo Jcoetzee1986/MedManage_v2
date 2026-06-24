@@ -64,9 +64,6 @@ public class CaseNoteService : ICaseNoteService
     {
         var note = _mapper.Map<CaseNote>(dto);
         
-        note.DateInserted = DateTime.Now;
-        note.UserID = _currentUserService.UserId;
-        
         // Set DateCreated to now if not provided
         if (!note.DateCreated.HasValue)
         {
@@ -89,9 +86,6 @@ public class CaseNoteService : ICaseNoteService
         }
         
         _mapper.Map(dto, note);
-        
-        note.DateUpdated = DateTime.Now;
-        note.UpdatedUserID = _currentUserService.UserId;
         
         await _unitOfWork.CaseNotes.UpdateAsync(note);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

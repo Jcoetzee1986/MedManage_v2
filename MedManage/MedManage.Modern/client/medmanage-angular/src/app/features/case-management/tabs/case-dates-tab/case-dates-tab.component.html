@@ -1,0 +1,30 @@
+<div class="tab-content">
+  <form [formGroup]="form" (ngSubmit)="onSave()">
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Date of Service</mat-label>
+        <input matInput [matDatepicker]="servicePicker" formControlName="dateOfService">
+        <mat-datepicker-toggle matIconSuffix [for]="servicePicker"></mat-datepicker-toggle>
+        <mat-datepicker #servicePicker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Date Admitted</mat-label>
+        <input matInput [matDatepicker]="admitPicker" formControlName="dateAdmitted">
+        <mat-datepicker-toggle matIconSuffix [for]="admitPicker"></mat-datepicker-toggle>
+        <mat-datepicker #admitPicker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Date Discharged</mat-label>
+        <input matInput [matDatepicker]="dischargePicker" formControlName="dateDischarged">
+        <mat-datepicker-toggle matIconSuffix [for]="dischargePicker"></mat-datepicker-toggle>
+        <mat-datepicker #dischargePicker></mat-datepicker>
+      </mat-form-field>
+    </div>
+
+    <div class="form-actions">
+      <button mat-raised-button color="primary" type="submit">Save</button>
+    </div>
+  </form>
+</div>

@@ -22,6 +22,8 @@ public class MedicalAidService : IMedicalAidService
         _currentUserService = currentUserService;
     }
 
+    // ─── Medical Aid CRUD ──────────────────────────────────────────
+
     public async Task<IEnumerable<MedicalAidDto>> GetAllAsync(bool includeDeleted = false, CancellationToken cancellationToken = default)
     {
         var entities = await _unitOfWork.MedicalAids.GetAllAsync();
@@ -82,8 +84,6 @@ public class MedicalAidService : IMedicalAidService
     public async Task<MedicalAidDto> CreateAsync(CreateMedicalAidDto dto, CancellationToken cancellationToken = default)
     {
         var entity = _mapper.Map<MedicalAid>(dto);
-        entity.DateInserted = DateTime.UtcNow;
-        entity.UserID = _currentUserService.UserId ?? string.Empty;
         
         await _unitOfWork.MedicalAids.AddAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -100,8 +100,6 @@ public class MedicalAidService : IMedicalAidService
         }
         
         _mapper.Map(dto, entity);
-        entity.DateUpdated = DateTime.UtcNow;
-        entity.UpdatedUserID = _currentUserService.UserId;
         
         await _unitOfWork.MedicalAids.UpdateAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -121,6 +119,168 @@ public class MedicalAidService : IMedicalAidService
         await _unitOfWork.MedicalAids.UpdateAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
+        return true;
+    }
+
+    // ─── Product CRUD ──────────────────────────────────────────────
+
+    public async Task<IEnumerable<MedicalAidProductDto>> GetProductsByMedicalAidIdAsync(int medicalAidId, CancellationToken cancellationToken = default)
+    {
+        var entities = await _unitOfWork.MedicalAidProducts.GetByMedicalAidIdAsync(medicalAidId);
+        return _mapper.Map<IEnumerable<MedicalAidProductDto>>(entities);
+    }
+
+    public async Task<MedicalAidProductDto?> GetProductByIdAsync(int productId, CancellationToken cancellationToken = default)
+    {
+        var entity = await _unitOfWork.MedicalAidProducts.GetByIdAsync(productId);
+        return entity == null ? null : _mapper.Map<MedicalAidProductDto>(entity);
+    }
+
+    public async Task<MedicalAidProductDto> CreateProductAsync(int medicalAidId, CreateMedicalAidProductDto dto, CancellationToken cancellationToken = default)
+    {
+        var entity = new MedicalAidProduct
+        {
+            MainClientId = medicalAidId,
+            MedAidProductName = dto.MedAidProductName,
+            AllowServices = dto.AllowServices ?? true
+        };
+
+        await _unitOfWork.MedicalAidProducts.AddAsync(entity);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return _mapper.Map<MedicalAidProductDto>(entity);
+    }
+
+    public async Task<MedicalAidProductDto> UpdateProductAsync(UpdateMedicalAidProductDto dto, CancellationToken cancellationToken = default)
+    {
+        var entity = await _unitOfWork.MedicalAidProducts.GetByIdAsync(dto.MedAidProductId);
+        if (entity == null)
+        {
+            throw new KeyNotFoundException($"Medical aid product with ID {dto.MedAidProductId} not found");
+        }
+
+        entity.MedAidProductName = dto.MedAidProductName;
+        entity.AllowServices = dto.AllowServices;
+
+        await _unitOfWork.MedicalAidProducts.UpdateAsync(entity);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return _mapper.Map<MedicalAidProductDto>(entity);
+    }
+
+    public async Task<bool> DeleteProductAsync(int productId, CancellationToken cancellationToken = default)
+    {
+        var entity = await _unitOfWork.MedicalAidProducts.GetByIdAsync(productId);
+        if (entity == null)
+        {
+            return false;
+        }
+
+        entity.DateDeleted = DateTime.UtcNow;
+        await _unitOfWork.MedicalAidProducts.UpdateAsync(entity);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return true;
+    }
+
+    // ─── Exclusion CRUD ────────────────────────────────────────────
+
+    public async Task<IEnumerable<MedicalAidExclusionDto>> GetExclusionsByMedicalAidIdAsync(int medicalAidId, CancellationToken cancellationToken = default)
+    {
+        var entities = await _unitOfWork.MedicalAidExclusions.GetByMedicalAidIdAsync(medicalAidId);
+        return entities.Select(e => new MedicalAidExclusionDto
+        {
+            MedicalAidId = e.MedicalAidId,
+            BaseTariffId = e.BaseTariffId,
+            BaseTariffDescription = e.BaseTariff?.TariffDescription
+        }).ToList();
+    }
+
+    public async Task<MedicalAidExclusionDto> AddExclusionAsync(int medicalAidId, CreateMedicalAidExclusionDto dto, CancellationToken cancellationToken = default)
+    {
+        var entity = new MedicalAidExclusion
+        {
+            MedicalAidId = medicalAidId,
+            BaseTariffId = dto.BaseTariffId
+        };
+
+        await _unitOfWork.MedicalAidExclusions.AddAsync(entity);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return new MedicalAidExclusionDto
+        {
+            MedicalAidId = entity.MedicalAidId,
+            BaseTariffId = entity.BaseTariffId
+        };
+    }
+
+    public async Task<bool> RemoveExclusionAsync(int medicalAidId, string baseTariffId, CancellationToken cancellationToken = default)
+    {
+        var entities = await _unitOfWork.MedicalAidExclusions.FindAsync(
+            e => e.MedicalAidId == medicalAidId && e.BaseTariffId == baseTariffId);
+        
+        var entity = entities.FirstOrDefault();
+        if (entity == null)
+        {
+            return false;
+        }
+
+        await _unitOfWork.MedicalAidExclusions.DeleteAsync(entity);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return true;
+    }
+
+    // ─── Tariff Association ────────────────────────────────────────
+
+    public async Task<IEnumerable<MedicalAidTariffDto>> GetTariffsByMedicalAidIdAsync(int medicalAidId, CancellationToken cancellationToken = default)
+    {
+        var medicalAid = await _unitOfWork.MedicalAids.GetByIdWithDetailsAsync(medicalAidId);
+        if (medicalAid == null)
+        {
+            return Enumerable.Empty<MedicalAidTariffDto>();
+        }
+
+        return medicalAid.MedicalAidTariffs.Select(t => new MedicalAidTariffDto
+        {
+            MedicalAidId = t.MedicalAidId,
+            TariffNameId = t.TariffNameId,
+            TariffName = t.TariffName?.TariffName1
+        }).ToList();
+    }
+
+    public async Task<MedicalAidTariffDto> AddTariffAsync(int medicalAidId, CreateMedicalAidTariffDto dto, CancellationToken cancellationToken = default)
+    {
+        var entity = new MedicalAidTariff
+        {
+            MedicalAidId = medicalAidId,
+            TariffNameId = dto.TariffNameId
+        };
+
+        await _unitOfWork.MedicalAidTariffs.AddAsync(entity);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return new MedicalAidTariffDto
+        {
+            MedicalAidId = entity.MedicalAidId,
+            TariffNameId = entity.TariffNameId
+        };
+    }
+
+    public async Task<bool> RemoveTariffAsync(int medicalAidId, int tariffNameId, CancellationToken cancellationToken = default)
+    {
+        var entities = await _unitOfWork.MedicalAidTariffs.FindAsync(
+            t => t.MedicalAidId == medicalAidId && t.TariffNameId == tariffNameId);
+        
+        var entity = entities.FirstOrDefault();
+        if (entity == null)
+        {
+            return false;
+        }
+
+        await _unitOfWork.MedicalAidTariffs.DeleteAsync(entity);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
         return true;
     }
 }

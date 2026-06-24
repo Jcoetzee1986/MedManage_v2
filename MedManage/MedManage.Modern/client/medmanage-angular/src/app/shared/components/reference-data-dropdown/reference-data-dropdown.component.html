@@ -1,0 +1,46 @@
+<!-- Select Mode -->
+@if (mode === 'select') {
+  <mat-form-field appearance="outline" class="ref-data-dropdown">
+    <mat-label>{{ label }}</mat-label>
+    @if (loading) {
+      <mat-spinner diameter="18" class="loading-spinner"></mat-spinner>
+    }
+    <mat-select
+      [value]="selectedValue"
+      [disabled]="disabled"
+      [required]="required"
+      [placeholder]="placeholder"
+      (selectionChange)="onSelectChange($event.value)">
+      <mat-option [value]="null">-- None --</mat-option>
+      @for (item of items; track item.id) {
+        <mat-option [value]="item.id">{{ item.name }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+}
+
+<!-- Autocomplete Mode -->
+@if (mode === 'autocomplete') {
+  <mat-form-field appearance="outline" class="ref-data-dropdown">
+    <mat-label>{{ label }}</mat-label>
+    @if (loading) {
+      <mat-spinner diameter="18" class="loading-spinner"></mat-spinner>
+    }
+    <input
+      matInput
+      [formControl]="searchControl"
+      [matAutocomplete]="auto"
+      [placeholder]="placeholder"
+      [required]="required"
+      (blur)="onAutocompleteClear()"
+      aria-label="Reference data search">
+    <mat-autocomplete
+      #auto="matAutocomplete"
+      [displayWith]="displayFn"
+      (optionSelected)="onAutocompleteSelected($event.option.value)">
+      @for (item of filteredItems$ | async; track item.id) {
+        <mat-option [value]="item">{{ item.name }}</mat-option>
+      }
+    </mat-autocomplete>
+  </mat-form-field>
+}

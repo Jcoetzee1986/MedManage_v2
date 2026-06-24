@@ -1,0 +1,118 @@
+import { Component, inject, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatCardModule } from '@angular/material/card';
+import { MatTableModule } from '@angular/material/table';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatSortModule, Sort } from '@angular/material/sort';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { ProviderService } from '../services/provider.service';
+import { ProviderDto, ProviderSearchRequest } from '../models/provider.models';
+
+@Component({
+  selector: 'app-provider-list',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatCardModule,
+    MatTableModule,
+    MatPaginatorModule,
+    MatSortModule,
+    MatProgressSpinnerModule
+  ],
+  templateUrl: './provider-list.component.html',
+  styleUrls: ['./provider-list.component.scss']
+})
+export class ProviderListComponent implements OnInit {
+  private readonly providerService = inject(ProviderService);
+  private readonly router = inject(Router);
+  private readonly fb = inject(FormBuilder);
+
+  displayedColumns = ['providerNumber', 'practiceName', 'firstName', 'lastName', 'specialityName', 'contactNumber'];
+  dataSource: ProviderDto[] = [];
+  totalCount = 0;
+  pageSize = 25;
+  pageIndex = 0;
+  loading = false;
+  sortField = 'practiceName';
+  sortDirection: 'asc' | 'desc' = 'asc';
+
+  searchForm = this.fb.group({
+    providerNumber: [''],
+    practiceName: [''],
+    firstName: [''],
+    lastName: ['']
+  });
+
+  ngOnInit(): void {
+    this.loadProviders();
+  }
+
+  loadProviders(): void {
+    this.loading = true;
+    const formValue = this.searchForm.value;
+
+    const request: ProviderSearchRequest = {
+      providerNumber: formValue.providerNumber || undefined,
+      practiceName: formValue.practiceName || undefined,
+      firstName: formValue.firstName || undefined,
+      lastName: formValue.lastName || undefined,
+      pageNumber: this.pageIndex + 1,
+      pageSize: this.pageSize,
+      sortField: this.sortField,
+      sortDirection: this.sortDirection
+    };
+
+    this.providerService.search(request).subscribe({
+      next: (result) => {
+        this.dataSource = result.items;
+        this.totalCount = result.totalCount;
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+      }
+    });
+  }
+
+  onSearch(): void {
+    this.pageIndex = 0;
+    this.loadProviders();
+  }
+
+  onReset(): void {
+    this.searchForm.reset();
+    this.pageIndex = 0;
+    this.loadProviders();
+  }
+
+  onPageChange(event: PageEvent): void {
+    this.pageIndex = event.pageIndex;
+    this.pageSize = event.pageSize;
+    this.loadProviders();
+  }
+
+  onSortChange(sort: Sort): void {
+    this.sortField = sort.active;
+    this.sortDirection = sort.direction as 'asc' | 'desc' || 'asc';
+    this.loadProviders();
+  }
+
+  onRowClick(provider: ProviderDto): void {
+    this.router.navigate(['/providers', provider.id]);
+  }
+
+  onNewProvider(): void {
+    this.router.navigate(['/providers', 'new']);
+  }
+}

@@ -1,0 +1,217 @@
+<div class="imports-container">
+  <h2>Data Import</h2>
+
+  <mat-tab-group>
+    <!-- Upload Tab -->
+    <mat-tab label="Import Files">
+      <div class="upload-section">
+        <!-- DRD Member Import -->
+        <mat-card class="upload-card">
+          <mat-card-header>
+            <mat-icon mat-card-avatar>people</mat-icon>
+            <mat-card-title>DRD Member Import</mat-card-title>
+            <mat-card-subtitle>Import member data from DRD/medical aid administrator files (CSV)</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <p class="help-text">
+              Supported columns: MemberNumber, Surname, Name, Initials, IDNumber, DateOfBirth
+            </p>
+          </mat-card-content>
+          <mat-card-actions>
+            <button mat-raised-button color="primary"
+                    [disabled]="uploading"
+                    (click)="memberFileInput.click()">
+              <mat-icon>upload_file</mat-icon>
+              Select Member File
+            </button>
+            <input #memberFileInput type="file" hidden
+                   accept=".csv,.txt,.dat"
+                   (change)="onFileSelected($event, 'members')">
+          </mat-card-actions>
+        </mat-card>
+
+        <!-- NAPPI Code Import -->
+        <mat-card class="upload-card">
+          <mat-card-header>
+            <mat-icon mat-card-avatar>medication</mat-icon>
+            <mat-card-title>NAPPI Code Import</mat-card-title>
+            <mat-card-subtitle>Update NAPPI medicine code lookup table from file (CSV)</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <p class="help-text">
+              Supported columns: NappiCode/Code, Description, Price/Price1/SEP, Units/PackSize, Measure/UOM
+            </p>
+          </mat-card-content>
+          <mat-card-actions>
+            <button mat-raised-button color="primary"
+                    [disabled]="uploading"
+                    (click)="nappiFileInput.click()">
+              <mat-icon>upload_file</mat-icon>
+              Select NAPPI File
+            </button>
+            <input #nappiFileInput type="file" hidden
+                   accept=".csv,.txt,.dat"
+                   (change)="onFileSelected($event, 'nappi')">
+          </mat-card-actions>
+        </mat-card>
+
+        <!-- Billing Import -->
+        <mat-card class="upload-card">
+          <mat-card-header>
+            <mat-icon mat-card-avatar>receipt_long</mat-icon>
+            <mat-card-title>Billing File Import</mat-card-title>
+            <mat-card-subtitle>Bulk create billing records from external file (CSV)</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <p class="help-text">
+              Supported columns: AccountNumber, CaseID, InvoiceNumber, AmountDue, AccountDate, PatientName, PatientSurname, ServiceProviderID
+            </p>
+          </mat-card-content>
+          <mat-card-actions>
+            <button mat-raised-button color="primary"
+                    [disabled]="uploading"
+                    (click)="billingFileInput.click()">
+              <mat-icon>upload_file</mat-icon>
+              Select Billing File
+            </button>
+            <input #billingFileInput type="file" hidden
+                   accept=".csv,.txt,.dat"
+                   (change)="onFileSelected($event, 'billing')">
+          </mat-card-actions>
+        </mat-card>
+
+        <!-- Progress Indicator -->
+        @if (uploading) {
+          <mat-card class="progress-card">
+            <mat-card-content>
+              <p>Importing {{ currentImportType }} file...</p>
+              <mat-progress-bar mode="determinate" [value]="uploadProgress"></mat-progress-bar>
+              <p class="progress-text">{{ uploadProgress }}%</p>
+            </mat-card-content>
+          </mat-card>
+        }
+
+        <!-- Result Display -->
+        @if (lastResult) {
+          <mat-card class="result-card" [class.result-success]="lastResult.status === 'Completed'"
+                    [class.result-warning]="lastResult.status === 'CompletedWithErrors'"
+                    [class.result-error]="lastResult.status === 'Failed'">
+            <mat-card-header>
+              <mat-icon mat-card-avatar>
+                {{ lastResult.status === 'Completed' ? 'check_circle' : lastResult.status === 'Failed' ? 'error' : 'warning' }}
+              </mat-icon>
+              <mat-card-title>Import Result - {{ lastResult.importType }}</mat-card-title>
+              <mat-card-subtitle>{{ lastResult.fileName }}</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="result-stats">
+                <div class="stat">
+                  <span class="stat-value">{{ lastResult.totalRecords }}</span>
+                  <span class="stat-label">Total</span>
+                </div>
+                <div class="stat stat-success">
+                  <span class="stat-value">{{ lastResult.importedRecords }}</span>
+                  <span class="stat-label">Imported</span>
+                </div>
+                <div class="stat stat-skip">
+                  <span class="stat-value">{{ lastResult.skippedRecords }}</span>
+                  <span class="stat-label">Skipped</span>
+                </div>
+                <div class="stat stat-error">
+                  <span class="stat-value">{{ lastResult.errorRecords }}</span>
+                  <span class="stat-label">Errors</span>
+                </div>
+              </div>
+
+              @if (lastResult.validationErrors && lastResult.validationErrors.length > 0) {
+                <div class="validation-errors">
+                  <h4>Validation Errors (first {{ lastResult.validationErrors.length > 10 ? 10 : lastResult.validationErrors.length }})</h4>
+                  <table mat-table [dataSource]="lastResult.validationErrors.slice(0, 10)">
+                    <ng-container matColumnDef="row">
+                      <th mat-header-cell *matHeaderCellDef>Row</th>
+                      <td mat-cell *matCellDef="let e">{{ e.row }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="field">
+                      <th mat-header-cell *matHeaderCellDef>Field</th>
+                      <td mat-cell *matCellDef="let e">{{ e.field }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="message">
+                      <th mat-header-cell *matHeaderCellDef>Message</th>
+                      <td mat-cell *matCellDef="let e">{{ e.message }}</td>
+                    </ng-container>
+                    <tr mat-header-row *matHeaderRowDef="['row', 'field', 'message']"></tr>
+                    <tr mat-row *matRowDef="let row; columns: ['row', 'field', 'message']"></tr>
+                  </table>
+                </div>
+              }
+            </mat-card-content>
+          </mat-card>
+        }
+      </div>
+    </mat-tab>
+
+    <!-- History Tab -->
+    <mat-tab label="Import History">
+      <div class="history-section">
+        <div class="history-filter">
+          <mat-form-field appearance="outline">
+            <mat-label>Filter by type</mat-label>
+            <mat-select (selectionChange)="onFilterChange($event.value)" [value]="historyFilter">
+              <mat-option value="">All</mat-option>
+              <mat-option value="Members">Members</mat-option>
+              <mat-option value="NappiCodes">NAPPI Codes</mat-option>
+              <mat-option value="Billing">Billing</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        @if (historyLoading) {
+          <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+        }
+
+        <table mat-table [dataSource]="history" class="history-table">
+          <ng-container matColumnDef="importDate">
+            <th mat-header-cell *matHeaderCellDef>Date</th>
+            <td mat-cell *matCellDef="let h">{{ h.importDate | date:'short' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="importType">
+            <th mat-header-cell *matHeaderCellDef>Type</th>
+            <td mat-cell *matCellDef="let h">{{ h.importType }}</td>
+          </ng-container>
+          <ng-container matColumnDef="fileName">
+            <th mat-header-cell *matHeaderCellDef>File</th>
+            <td mat-cell *matCellDef="let h">{{ h.fileName }}</td>
+          </ng-container>
+          <ng-container matColumnDef="totalRecords">
+            <th mat-header-cell *matHeaderCellDef>Total</th>
+            <td mat-cell *matCellDef="let h">{{ h.totalRecords }}</td>
+          </ng-container>
+          <ng-container matColumnDef="importedRecords">
+            <th mat-header-cell *matHeaderCellDef>Imported</th>
+            <td mat-cell *matCellDef="let h">{{ h.importedRecords }}</td>
+          </ng-container>
+          <ng-container matColumnDef="skippedRecords">
+            <th mat-header-cell *matHeaderCellDef>Skipped</th>
+            <td mat-cell *matCellDef="let h">{{ h.skippedRecords }}</td>
+          </ng-container>
+          <ng-container matColumnDef="errorRecords">
+            <th mat-header-cell *matHeaderCellDef>Errors</th>
+            <td mat-cell *matCellDef="let h">{{ h.errorRecords }}</td>
+          </ng-container>
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let h">
+              <mat-chip [color]="getStatusColor(h.status)" selected>{{ h.status }}</mat-chip>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="historyColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: historyColumns"></tr>
+        </table>
+
+        @if (!historyLoading && history.length === 0) {
+          <p class="no-data">No import history found.</p>
+        }
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

@@ -1,0 +1,23 @@
+<div class="tab-content">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Provider Information</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">Refer To</span>
+          <span class="info-value">{{ caseData.referToName || '—' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Refer From</span>
+          <span class="info-value">{{ caseData.referFromName || '—' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Practice</span>
+          <span class="info-value">{{ caseData.practiceName || '—' }}</span>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,0 +1,51 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="params-form">
+  <div class="date-row">
+    <mat-form-field appearance="outline">
+      <mat-label>Date From</mat-label>
+      <input matInput [matDatepicker]="pickerFrom" formControlName="dateFrom">
+      <mat-datepicker-toggle matIconSuffix [for]="pickerFrom"></mat-datepicker-toggle>
+      <mat-datepicker #pickerFrom></mat-datepicker>
+      @if (form.controls.dateFrom.hasError('required')) {
+        <mat-error>Start date is required</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Date To</mat-label>
+      <input matInput [matDatepicker]="pickerTo" formControlName="dateTo">
+      <mat-datepicker-toggle matIconSuffix [for]="pickerTo"></mat-datepicker-toggle>
+      <mat-datepicker #pickerTo></mat-datepicker>
+      @if (form.controls.dateTo.hasError('required')) {
+        <mat-error>End date is required</mat-error>
+      }
+    </mat-form-field>
+  </div>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Case Status ID (optional)</mat-label>
+    <input matInput type="number" formControlName="caseStatusId">
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Case Type ID (optional)</mat-label>
+    <input matInput type="number" formControlName="caseTypeId">
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Medical Aid ID (optional)</mat-label>
+    <input matInput type="number" formControlName="medicalAidId">
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Output Format</mat-label>
+    <mat-select formControlName="format">
+      <mat-option value="pdf">PDF</mat-option>
+      <mat-option value="excel">Excel</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">
+    <mat-icon>description</mat-icon>
+    Generate
+  </button>
+</form>

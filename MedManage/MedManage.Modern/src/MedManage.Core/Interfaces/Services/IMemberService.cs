@@ -11,4 +11,5 @@ public interface IMemberService
     Task<MemberDto> UpdateAsync(UpdateMemberRequest request, CancellationToken cancellationToken = default);
     Task<bool> DeleteAsync(int memberId, CancellationToken cancellationToken = default);
     Task<bool> ExistsAsync(int memberId, CancellationToken cancellationToken = default);
+    Task<bool> IsMemberNumberUniqueAsync(string memberNumber, int? excludeMemberId = null, CancellationToken cancellationToken = default);
 }

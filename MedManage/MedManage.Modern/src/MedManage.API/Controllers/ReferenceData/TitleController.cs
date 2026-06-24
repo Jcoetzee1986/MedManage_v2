@@ -1,0 +1,14 @@
+using Microsoft.AspNetCore.Mvc;
+using MedManage.Core.DTOs.ReferenceData;
+using MedManage.Core.Interfaces.Services;
+
+namespace MedManage.API.Controllers.ReferenceData;
+
+[Route("api/[controller]")]
+public class TitleController : ReferenceDataController<TitleDto, CreateTitleDto, UpdateTitleDto>
+{
+    public TitleController(IReferenceDataService<TitleDto, CreateTitleDto, UpdateTitleDto> service)
+        : base(service, "Title") { }
+
+    protected override int GetIdFromDto(TitleDto dto) => dto.TitleId;
+}

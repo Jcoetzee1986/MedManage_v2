@@ -23,14 +23,14 @@ public class CaseRepository : Repository<Case>, ICaseRepository
                 .ThenInclude(ci => ci.Icd)
             .Include(c => c.CaseNotes)
             .Include(c => c.CaseComments)
-            .FirstOrDefaultAsync(c => c.CaseId == caseId && c.DateDeleted == null);
+            .FirstOrDefaultAsync(c => c.CaseId == caseId);
     }
 
     public async Task<IEnumerable<Case>> GetByMemberIdAsync(int memberId)
     {
         return await _dbSet
             .Include(c => c.Status)
-            .Where(c => c.MemberId == memberId && c.DateDeleted == null)
+            .Where(c => c.MemberId == memberId)
             .OrderByDescending(c => c.AdmissionDate)
             .ToListAsync();
     }
@@ -39,7 +39,7 @@ public class CaseRepository : Repository<Case>, ICaseRepository
     {
         return await _dbSet
             .Include(c => c.Status)
-            .Where(c => c.MemberId == memberId && c.CaseId != excludeCaseId && c.DateDeleted == null)
+            .Where(c => c.MemberId == memberId && c.CaseId != excludeCaseId)
             .OrderByDescending(c => c.AdmissionDate)
             .ToListAsync();
     }
@@ -49,7 +49,6 @@ public class CaseRepository : Repository<Case>, ICaseRepository
         return await _dbSet
             .Include(c => c.Member)
             .Include(c => c.Status)
-            .Where(c => c.DateDeleted == null)
             .OrderByDescending(c => c.DateCreated)
             .Take(30)
             .ToListAsync();
@@ -61,12 +60,16 @@ public class CaseRepository : Repository<Case>, ICaseRepository
         int? serviceProviderId,
         int? statusId,
         DateTime? admissionDateFrom,
-        DateTime? admissionDateTo)
+        DateTime? admissionDateTo,
+        bool includeDeleted = false)
     {
-        var query = _dbSet
+        IQueryable<Case> query = includeDeleted
+            ? GetQueryableIncludingDeleted()
+            : _dbSet;
+
+        query = query
             .Include(c => c.Member)
-            .Include(c => c.Status)
-            .Where(c => c.DateDeleted == null);
+            .Include(c => c.Status);
 
         if (!string.IsNullOrWhiteSpace(claimNumber))
         {
@@ -109,8 +112,7 @@ public class CaseRepository : Repository<Case>, ICaseRepository
         var admissionDateOnly = DateOnly.FromDateTime(admissionDate);
         return await _dbSet
             .Where(c => c.MemberId == memberId 
-                      && c.AdmissionDate == admissionDateOnly
-                      && c.DateDeleted == null)
+                      && c.AdmissionDate == admissionDateOnly)
             .ToListAsync();
     }
 
@@ -118,14 +120,14 @@ public class CaseRepository : Repository<Case>, ICaseRepository
     {
         // Note: CaseBillings navigation not scaffolded - need to join with CaseBilling table
         var caseIds = await _context.Set<CaseBilling>()
-            .Where(cb => cb.Remittance == remittanceNumber && cb.DateDeleted == null)
+            .Where(cb => cb.Remittance == remittanceNumber)
             .Select(cb => cb.CaseId)
             .Distinct()
             .ToListAsync();
 
         return await _dbSet
             .Include(c => c.Member)
-            .Where(c => caseIds.Contains(c.CaseId) && c.DateDeleted == null)
+            .Where(c => caseIds.Contains(c.CaseId))
             .ToListAsync();
     }
 

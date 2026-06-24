@@ -1,4 +1,5 @@
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MedManage.Core.DTOs.Common;
 using MedManage.Core.DTOs.Member;
@@ -8,6 +9,7 @@ namespace MedManage.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class MembersController : ControllerBase
 {
     private readonly IMemberService _memberService;
@@ -136,4 +138,41 @@ public class MembersController : ControllerBase
         var exists = await _memberService.ExistsAsync(id, cancellationToken);
         return exists ? Ok() : NotFound();
     }
+
+    /// <summary>
+    /// Check if a member number is unique (not already in use)
+    /// </summary>
+    /// <param name="memberNumber">The member number to check</param>
+    /// <param name="excludeMemberId">Optional member ID to exclude from the check (for update scenarios)</param>
+    [HttpGet("check-unique")]
+    [ProducesResponseType(typeof(ApiResponse<MemberNumberUniqueResult>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<MemberNumberUniqueResult>), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> CheckMemberNumberUnique(
+        [FromQuery] string? memberNumber,
+        [FromQuery] int? excludeMemberId,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(memberNumber))
+        {
+            return BadRequest(ApiResponse<MemberNumberUniqueResult>.ErrorResponse("memberNumber query parameter is required"));
+        }
+
+        var isUnique = await _memberService.IsMemberNumberUniqueAsync(memberNumber, excludeMemberId, cancellationToken);
+        var result = new MemberNumberUniqueResult
+        {
+            MemberNumber = memberNumber,
+            IsUnique = isUnique
+        };
+
+        return Ok(ApiResponse<MemberNumberUniqueResult>.SuccessResponse(result));
+    }
+}
+
+/// <summary>
+/// Result of member number uniqueness check
+/// </summary>
+public class MemberNumberUniqueResult
+{
+    public string MemberNumber { get; set; } = null!;
+    public bool IsUnique { get; set; }
 }

@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  jsreport:
+    image: docker.io/jsreport/jsreport:latest
+    container_name: jsreport
+    ports:
+      - "5488:5488"
+    volumes:
+      - jsreport-data:/jsreport
+    restart: always
+    environment:
+      - extensions_authentication_enabled=false
+
+volumes:
+  jsreport-data:
