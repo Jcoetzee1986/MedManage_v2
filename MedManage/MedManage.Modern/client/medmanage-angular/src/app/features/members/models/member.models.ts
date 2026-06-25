@@ -3,37 +3,138 @@ export interface MemberDto {
   memberNumber: string;
   firstName: string;
   lastName: string;
+  initials: string | null;
   dateOfBirth: string | null;
   genderId: number | null;
   genderName: string | null;
+  titleId: number | null;
+  titleName: string | null;
   idNumber: string | null;
-  contactNumber: string | null;
-  email: string | null;
-  address: string | null;
+  marritalStatusId: number | null;
+  marritalStatusName: string | null;
+  languageId: number | null;
+  languageName: string | null;
+  raceId: number | null;
+  raceName: string | null;
+  isPensioner: boolean;
+  isMbodRma: boolean;
+
+  // Medical Aid
   medicalAidId: number | null;
   medicalAidName: string | null;
   medicalAidProductId: number | null;
   medicalAidProductName: string | null;
   memberStatusId: number | null;
   memberStatusName: string | null;
+  dateOfBenefit: string | null;
+  dateJoined: string | null;
+  isMedAidExhausted: boolean;
+  dateExhausted: string | null;
+  isWaitingPeriod: boolean;
+  isReinstated: boolean;
+  dateReinstated: string | null;
+  isDeceased: boolean;
+  dateDeceased: string | null;
+
+  // Logistics
+  countryId: number | null;
+  countryName: string | null;
+  passportNumber: string | null;
+  passportExpiryDate: string | null;
+  periodInCountryId: number | null;
+  periodInCountryName: string | null;
+  addressLine1: string | null;
+  addressLine2: string | null;
+  addressLine3: string | null;
+  addressCode: string | null;
+  phoneNumber: string | null;
+  cellNumber: string | null;
+
+  // Other (Next of Kin & Employer)
+  dependents: string | null;
+  nextOfKin: string | null;
+  relationship: string | null;
+  contactNumber: string | null;
+  employerCountryId: number | null;
+  employerCountryName: string | null;
+  employerAddress: string | null;
+  employerAddressCode: string | null;
+  employerPhoneNumber: string | null;
+
+  // Suspension
+  isSuspended: boolean;
+  dateSuspended: string | null;
+  suspendReasonId: number | null;
+  suspendReasonName: string | null;
+
+  // System
   allowServices: boolean;
   dateCreated: string | null;
+
+  // Legacy compat
+  email: string | null;
+  address: string | null;
 }
 
 export interface CreateMemberRequest {
   memberNumber: string;
   firstName: string;
   lastName: string;
+  initials?: string | null;
   dateOfBirth?: string | null;
   genderId?: number | null;
+  titleId?: number | null;
   idNumber?: string | null;
-  contactNumber?: string | null;
-  email?: string | null;
-  address?: string | null;
+  marritalStatusId?: number | null;
+  languageId?: number | null;
+  raceId?: number | null;
+  isPensioner?: boolean;
+  isMbodRma?: boolean;
+
+  // Medical Aid
   medicalAidId?: number | null;
   medicalAidProductId?: number | null;
   memberStatusId?: number | null;
+  dateOfBenefit?: string | null;
+  dateJoined?: string | null;
+  isMedAidExhausted?: boolean;
+  dateExhausted?: string | null;
+  isWaitingPeriod?: boolean;
+  isReinstated?: boolean;
+  dateReinstated?: string | null;
+  isDeceased?: boolean;
+  dateDeceased?: string | null;
+
+  // Logistics
+  countryId?: number | null;
+  passportNumber?: string | null;
+  passportExpiryDate?: string | null;
+  periodInCountryId?: number | null;
+  addressLine1?: string | null;
+  addressLine2?: string | null;
+  addressLine3?: string | null;
+  addressCode?: string | null;
+  phoneNumber?: string | null;
+  cellNumber?: string | null;
+
+  // Other
+  dependents?: string | null;
+  nextOfKin?: string | null;
+  relationship?: string | null;
+  contactNumber?: string | null;
+  employerCountryId?: number | null;
+  employerAddress?: string | null;
+  employerAddressCode?: string | null;
+  employerPhoneNumber?: string | null;
+
+  // Suspension
+  isSuspended?: boolean;
+  dateSuspended?: string | null;
+  suspendReasonId?: number | null;
+
   allowServices?: boolean;
+  email?: string | null;
+  address?: string | null;
 }
 
 export interface UpdateMemberRequest extends CreateMemberRequest {}
@@ -43,6 +144,8 @@ export interface MemberSearchRequest {
   firstName?: string;
   lastName?: string;
   idNumber?: string;
+  passportNumber?: string;
+  dateOfBirth?: string;
   medicalAidId?: number;
   memberStatusId?: number;
   pageNumber?: number;
@@ -72,12 +175,14 @@ export interface MemberNoteDto {
   id: number;
   memberId: number;
   note: string;
+  noteDate: string | null;
   createdBy: string | null;
   dateCreated: string | null;
 }
 
 export interface CreateMemberNoteRequest {
   note: string;
+  noteDate?: string | null;
 }
 
 export interface MemberMedicalAidProductDto {

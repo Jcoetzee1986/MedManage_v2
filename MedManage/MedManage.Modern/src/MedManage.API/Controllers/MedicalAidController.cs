@@ -32,9 +32,16 @@ public class MedicalAidController : ControllerBase
 
     [HttpGet("active")]
     [ProducesResponseType(typeof(ApiResponse<IEnumerable<MedicalAidDto>>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetActive(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetActive([FromQuery] int? mainClientId, CancellationToken cancellationToken)
     {
         var items = await _service.GetActiveAsync(cancellationToken);
+        
+        // Filter by MainClientID if provided (matches legacy behavior: usp_MedicalAid_Select(@MainClientID))
+        if (mainClientId.HasValue)
+        {
+            items = items.Where(x => x.MainClientId == mainClientId.Value);
+        }
+        
         return Ok(ApiResponse<IEnumerable<MedicalAidDto>>.SuccessResponse(items));
     }
 

@@ -4,7 +4,7 @@ using MedManage.Core.Interfaces.Services;
 
 namespace MedManage.API.Controllers.ReferenceData;
 
-[Route("api/[controller]")]
+[Route("api/marrital-status")]
 public class MarritalStatusController : ReferenceDataController<MarritalStatusDto, CreateMarritalStatusDto, UpdateMarritalStatusDto>
 {
     public MarritalStatusController(IReferenceDataService<MarritalStatusDto, CreateMarritalStatusDto, UpdateMarritalStatusDto> service)

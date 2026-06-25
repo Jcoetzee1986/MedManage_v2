@@ -89,6 +89,9 @@ builder.Services.AddDbContext<MedManageDbContext>((serviceProvider, options) =>
     }
 });
 
+// Register DbContext as its base type so Repository<T> (which depends on DbContext) can resolve it
+builder.Services.AddScoped<DbContext>(sp => sp.GetRequiredService<MedManageDbContext>());
+
 // Configure JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 var secretKey = jwtSettings["SecretKey"] ?? throw new InvalidOperationException("JWT SecretKey not configured");

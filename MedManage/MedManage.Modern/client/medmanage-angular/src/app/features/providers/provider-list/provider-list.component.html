@@ -1,42 +1,55 @@
 <div class="provider-list-container">
+  <!-- Toolbar -->
+  <mat-toolbar class="list-toolbar">
+    <span class="toolbar-title">Provider Lookup</span>
+    <span class="toolbar-spacer"></span>
+    <button mat-raised-button color="primary" (click)="onOpenSelected()" [disabled]="!selectedProvider">
+      <mat-icon>open_in_new</mat-icon> Open
+    </button>
+    <button mat-raised-button color="primary" (click)="onSearch()">
+      <mat-icon>search</mat-icon> Search
+    </button>
+    <button mat-raised-button color="accent" (click)="onNewProvider()">
+      <mat-icon>person_add</mat-icon> Add New
+    </button>
+  </mat-toolbar>
+
   <!-- Search Filters -->
   <mat-card class="search-card">
-    <mat-card-header>
-      <mat-card-title>Provider Search</mat-card-title>
-    </mat-card-header>
     <mat-card-content>
-      <form [formGroup]="searchForm" (ngSubmit)="onSearch()" class="search-form">
+      <form [formGroup]="searchForm" (ngSubmit)="onSearch()" class="search-form" (keydown)="onSearchKeydown($event)">
         <div class="search-row">
           <mat-form-field appearance="outline">
-            <mat-label>Provider Number</mat-label>
-            <input matInput formControlName="providerNumber" placeholder="Search by provider number">
+            <mat-label>Surname</mat-label>
+            <input matInput formControlName="lastName" placeholder="Search by surname">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Name</mat-label>
+            <input matInput formControlName="firstName" placeholder="Search by name">
           </mat-form-field>
 
           <mat-form-field appearance="outline">
             <mat-label>Practice Name</mat-label>
             <input matInput formControlName="practiceName" placeholder="Search by practice name">
           </mat-form-field>
+        </div>
 
+        <div class="search-row">
           <mat-form-field appearance="outline">
-            <mat-label>First Name</mat-label>
-            <input matInput formControlName="firstName" placeholder="Search by first name">
+            <mat-label>Practice Number</mat-label>
+            <input matInput formControlName="providerNumber" placeholder="Search by practice number">
           </mat-form-field>
 
           <mat-form-field appearance="outline">
-            <mat-label>Last Name</mat-label>
-            <input matInput formControlName="lastName" placeholder="Search by last name">
+            <mat-label>Speciality</mat-label>
+            <input matInput formControlName="speciality" placeholder="Search by speciality">
           </mat-form-field>
         </div>
 
         <div class="search-actions">
-          <button mat-raised-button color="primary" type="submit">
-            <mat-icon>search</mat-icon> Search
-          </button>
           <button mat-stroked-button type="button" (click)="onReset()">
             <mat-icon>clear</mat-icon> Reset
-          </button>
-          <button mat-raised-button color="accent" type="button" (click)="onNewProvider()">
-            <mat-icon>add</mat-icon> New Provider
           </button>
         </div>
       </form>
@@ -81,7 +94,11 @@
       </ng-container>
 
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="onRowClick(row)" class="clickable-row"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+          (click)="onRowClick(row)"
+          (dblclick)="onRowDoubleClick(row)"
+          [class.selected-row]="selectedProvider?.id === row.id"
+          class="clickable-row"></tr>
     </table>
 
     <mat-paginator

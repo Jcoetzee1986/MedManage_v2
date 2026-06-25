@@ -66,9 +66,12 @@ public class CaseLockService : ICaseLockService
                 existingLock.DateDeleted = now;
                 // Fall through to create a new lock below
             }
-            else if (existingLock.UserID == currentUserId)
+            else if (existingLock.UserID == currentUserId 
+                     || existingLock.UserID == "unknown" 
+                     || currentUserId == "unknown")
             {
-                // Already locked by this user — refresh the heartbeat
+                // Already locked by this user (or dev/unknown user) — refresh the heartbeat
+                existingLock.UserID = currentUserId; // Update to current identity
                 existingLock.DateUpdated = now;
                 await _context.SaveChangesAsync(cancellationToken);
 
@@ -106,8 +109,10 @@ public class CaseLockService : ICaseLockService
         if (existingLock == null)
             return false;
 
-        // Only the lock owner can release
-        if (existingLock.UserID != currentUserId)
+        // Allow release if same user, or if either side is "unknown" (dev mode)
+        if (existingLock.UserID != currentUserId 
+            && existingLock.UserID != "unknown" 
+            && currentUserId != "unknown")
             return false;
 
         existingLock.DateDeleted = DateTime.UtcNow;
@@ -150,7 +155,10 @@ public class CaseLockService : ICaseLockService
         if (existingLock == null)
             return false;
 
-        if (existingLock.UserID != currentUserId)
+        // Allow refresh if same user, or if either side is "unknown" (dev mode)
+        if (existingLock.UserID != currentUserId 
+            && existingLock.UserID != "unknown" 
+            && currentUserId != "unknown")
             return false;
 
         // Update the activity timestamp (heartbeat)

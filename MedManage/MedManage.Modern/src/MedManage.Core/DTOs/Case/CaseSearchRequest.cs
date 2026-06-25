@@ -10,6 +10,7 @@ public class CaseSearchRequest
     public int? MemberId { get; set; }
     public string? MemberNumber { get; set; }
     public string? MemberSurname { get; set; }
+    public string? MemberName { get; set; }
     public int? StatusId { get; set; }
     public int? CaseCategoryId { get; set; }
     public int? AuthTypeId { get; set; }
@@ -17,6 +18,7 @@ public class CaseSearchRequest
     // Provider filters
     public int? ReferToId { get; set; }
     public int? ReferFromId { get; set; }
+    public string? PracticeName { get; set; }
 
     // Date filters
     public DateOnly? AdmissionDateFrom { get; set; }

@@ -129,4 +129,7 @@ public partial class Case : BaseEntity
     [ForeignKey("StatusId")]
     [InverseProperty("Cases")]
     public virtual CaseStatus? Status { get; set; }
+
+    [ForeignKey("AuthTypeId")]
+    public virtual CaseType? AuthType { get; set; }
 }

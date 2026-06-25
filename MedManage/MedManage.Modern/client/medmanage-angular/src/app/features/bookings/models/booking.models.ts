@@ -13,6 +13,7 @@ export interface BookingDto {
   hospital: string | null;
   arrived: boolean | null;
   tisch: string | null;
+  authNumber: string | null;
   comments: string | null;
   dateCreated: string;
   dateModified: string | null;
@@ -33,6 +34,7 @@ export interface CreateBookingDto {
   hospital?: string | null;
   arrived?: boolean | null;
   tisch?: string | null;
+  authNumber?: string | null;
   comments?: string | null;
 }
 
@@ -51,10 +53,13 @@ export interface UpdateBookingDto {
   hospital?: string | null;
   arrived?: boolean | null;
   tisch?: string | null;
+  authNumber?: string | null;
   comments?: string | null;
 }
 
 export interface BookingSearchFilters {
+  surname?: string | null;
+  name?: string | null;
   dateFrom?: string | null;
   dateTo?: string | null;
   serviceProviderId?: number | null;

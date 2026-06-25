@@ -7,11 +7,12 @@ export const CASE_ROUTES: Routes = [
   },
   {
     path: 'my-cases',
-    loadComponent: () => import('./my-cases/my-cases.component').then(m => m.MyCasesComponent)
+    redirectTo: '',
+    pathMatch: 'full'
   },
   {
     path: 'new',
-    loadComponent: () => import('./case-form/case-form.component').then(m => m.CaseFormComponent)
+    loadComponent: () => import('./case-detail/case-detail.component').then(m => m.CaseDetailComponent)
   },
   {
     path: ':id',

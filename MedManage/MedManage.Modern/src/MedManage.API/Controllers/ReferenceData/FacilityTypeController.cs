@@ -4,7 +4,7 @@ using MedManage.Core.Interfaces.Services;
 
 namespace MedManage.API.Controllers.ReferenceData;
 
-[Route("api/[controller]")]
+[Route("api/facility-type")]
 public class FacilityTypeController : ReferenceDataController<FacilityTypeDto, CreateFacilityTypeDto, UpdateFacilityTypeDto>
 {
     public FacilityTypeController(IReferenceDataService<FacilityTypeDto, CreateFacilityTypeDto, UpdateFacilityTypeDto> service)

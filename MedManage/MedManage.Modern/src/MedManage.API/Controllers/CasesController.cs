@@ -60,7 +60,8 @@ public class CasesController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<IEnumerable<CaseDto>>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetMyCases(CancellationToken cancellationToken)
     {
-        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+            ?? User.FindFirst("sub")?.Value;
         if (string.IsNullOrEmpty(userId))
         {
             return Unauthorized();

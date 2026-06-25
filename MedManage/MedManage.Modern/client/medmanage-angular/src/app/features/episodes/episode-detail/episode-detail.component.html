@@ -56,17 +56,39 @@
 
       <mat-divider></mat-divider>
 
-      <!-- Cases Grid -->
-      <ag-grid-angular
-        class="ag-theme-material cases-grid"
-        [rowData]="linkedCases"
-        [columnDefs]="caseColumnDefs"
-        [defaultColDef]="defaultColDef"
-        [animateRows]="true"
-        [pagination]="true"
-        [paginationPageSize]="10"
-        (gridReady)="onGridReady($event)">
-      </ag-grid-angular>
+      <!-- Cases Table -->
+      @if (linkedCases.length === 0) {
+        <p class="no-data">No cases linked to this episode.</p>
+      }
+      @if (linkedCases.length > 0) {
+        <div class="table-scroll">
+          <table mat-table [dataSource]="linkedCases" class="full-width-table">
+            <ng-container matColumnDef="caseId">
+              <th mat-header-cell *matHeaderCellDef>Case ID</th>
+              <td mat-cell *matCellDef="let row">{{ row.caseId }}</td>
+            </ng-container>
+            <ng-container matColumnDef="dateCreated">
+              <th mat-header-cell *matHeaderCellDef>Linked Date</th>
+              <td mat-cell *matCellDef="let row">{{ row.dateCreated | date:'dd/MM/yyyy' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="dateInserted">
+              <th mat-header-cell *matHeaderCellDef>Added</th>
+              <td mat-cell *matCellDef="let row">{{ row.dateInserted | date:'dd/MM/yyyy' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Actions</th>
+              <td mat-cell *matCellDef="let row">
+                <button mat-icon-button color="warn" matTooltip="Unlink Case" (click)="onUnlinkCase(row)">
+                  <mat-icon>link_off</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="caseColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: caseColumns;"></tr>
+          </table>
+        </div>
+      }
     </mat-card-content>
   </mat-card>
 </div>

@@ -33,9 +33,15 @@ public class CaseService : ICaseService
     {
         var caseEntity = await _context.Cases
             .Include(c => c.Member)
+                .ThenInclude(m => m!.MedicalAid)
+            .Include(c => c.Member)
+                .ThenInclude(m => m!.MemberStatus)
             .Include(c => c.Status)
+            .Include(c => c.AuthType)
             .Include(c => c.ReferTo)
+                .ThenInclude(p => p!.Speciality)
             .Include(c => c.ReferFrom)
+                .ThenInclude(p => p!.Speciality)
             .FirstOrDefaultAsync(c => c.CaseId == caseId && c.DateDeleted == null, cancellationToken);
 
         return caseEntity == null ? null : _mapper.Map<CaseDto>(caseEntity);
@@ -46,6 +52,9 @@ public class CaseService : ICaseService
         var query = _context.Cases
             .Include(c => c.Member)
             .Include(c => c.Status)
+            .Include(c => c.AuthType)
+            .Include(c => c.ReferTo)
+            .Include(c => c.ReferFrom)
             .Where(c => c.DateDeleted == null)
             .AsQueryable();
 
@@ -72,6 +81,12 @@ public class CaseService : ICaseService
                 && c.Member.Surname.Contains(request.MemberSurname));
         }
 
+        if (!string.IsNullOrWhiteSpace(request.MemberName))
+        {
+            query = query.Where(c => c.Member != null && c.Member.Name != null
+                && c.Member.Name.Contains(request.MemberName));
+        }
+
         if (request.StatusId.HasValue)
         {
             query = query.Where(c => c.StatusId == request.StatusId.Value);
@@ -96,6 +111,14 @@ public class CaseService : ICaseService
         if (request.ReferFromId.HasValue)
         {
             query = query.Where(c => c.ReferFromId == request.ReferFromId.Value);
+        }
+
+        // Practice name filter (matches both ReferTo and ReferFrom practice names)
+        if (!string.IsNullOrWhiteSpace(request.PracticeName))
+        {
+            query = query.Where(c =>
+                (c.ReferTo != null && c.ReferTo.PracticeName != null && c.ReferTo.PracticeName.Contains(request.PracticeName)) ||
+                (c.ReferFrom != null && c.ReferFrom.PracticeName != null && c.ReferFrom.PracticeName.Contains(request.PracticeName)));
         }
 
         // Date filters
@@ -230,6 +253,7 @@ public class CaseService : ICaseService
         var query = _context.Cases
             .Include(c => c.Member)
             .Include(c => c.ReferTo)
+            .Include(c => c.AuthType)
             .Where(c => c.DateDeleted == null
                 && c.MemberId == request.MemberId
                 && c.AdmissionDate == admissionDate);
@@ -296,6 +320,8 @@ public class CaseService : ICaseService
         var cases = await _context.Cases
             .Include(c => c.Member)
             .Include(c => c.Status)
+            .Include(c => c.AuthType)
+            .Include(c => c.ReferTo)
             .Where(c => c.DateDeleted == null &&
                 (c.UserID == userId || lockedCaseIds.Contains(c.CaseId)))
             .OrderByDescending(c => c.DateCreated)

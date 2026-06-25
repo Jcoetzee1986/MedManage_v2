@@ -11,6 +11,9 @@ import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatSortModule, Sort } from '@angular/material/sort';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatToolbarModule } from '@angular/material/toolbar';
 import { MemberService } from '../services/member.service';
 import { MemberDto, MemberSearchRequest } from '../models/member.models';
 
@@ -28,7 +31,10 @@ import { MemberDto, MemberSearchRequest } from '../models/member.models';
     MatTableModule,
     MatPaginatorModule,
     MatSortModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatToolbarModule
   ],
   templateUrl: './member-list.component.html',
   styleUrls: ['./member-list.component.scss']
@@ -38,7 +44,7 @@ export class MemberListComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
 
-  displayedColumns = ['memberNumber', 'firstName', 'lastName', 'idNumber', 'medicalAidName', 'memberStatusName'];
+  displayedColumns = ['memberNumber', 'lastName', 'firstName', 'idNumber', 'medicalAidName', 'memberStatusName'];
   dataSource: MemberDto[] = [];
   totalCount = 0;
   pageSize = 25;
@@ -48,10 +54,12 @@ export class MemberListComponent implements OnInit {
   sortDirection: 'asc' | 'desc' = 'asc';
 
   searchForm = this.fb.group({
-    memberNumber: [''],
-    firstName: [''],
     lastName: [''],
-    idNumber: ['']
+    firstName: [''],
+    memberNumber: [''],
+    passportNumber: [''],
+    idNumber: [''],
+    dateOfBirth: [null as Date | null]
   });
 
   ngOnInit(): void {
@@ -63,10 +71,12 @@ export class MemberListComponent implements OnInit {
     const formValue = this.searchForm.value;
 
     const request: MemberSearchRequest = {
-      memberNumber: formValue.memberNumber || undefined,
-      firstName: formValue.firstName || undefined,
       lastName: formValue.lastName || undefined,
+      firstName: formValue.firstName || undefined,
+      memberNumber: formValue.memberNumber || undefined,
+      passportNumber: formValue.passportNumber || undefined,
       idNumber: formValue.idNumber || undefined,
+      dateOfBirth: formValue.dateOfBirth ? formValue.dateOfBirth.toISOString() : undefined,
       pageNumber: this.pageIndex + 1,
       pageSize: this.pageSize,
       sortField: this.sortField,
@@ -112,7 +122,25 @@ export class MemberListComponent implements OnInit {
     this.router.navigate(['/members', member.id]);
   }
 
+  onRowDoubleClick(member: MemberDto): void {
+    this.router.navigate(['/members', member.id]);
+  }
+
+  onOpenSelected(): void {
+    // If there's a selected row, navigate to it
+    if (this.dataSource.length > 0) {
+      this.router.navigate(['/members', this.dataSource[0].id]);
+    }
+  }
+
   onNewMember(): void {
     this.router.navigate(['/members', 'new']);
+  }
+
+  onSearchKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      this.onSearch();
+    }
   }
 }

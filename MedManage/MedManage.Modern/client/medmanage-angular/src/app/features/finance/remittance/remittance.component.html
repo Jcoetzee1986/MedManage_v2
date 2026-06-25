@@ -56,19 +56,15 @@
 
         <mat-divider></mat-divider>
 
-        <div class="grid-container">
-          <ag-grid-angular
-            class="ag-theme-material"
-            [columnDefs]="columnDefs"
-            [defaultColDef]="defaultColDef"
-            [rowData]="billings"
-            [rowSelection]="'single'"
-            [pagination]="true"
-            [paginationPageSize]="25"
-            (gridReady)="onGridReady($event)"
-            (rowDoubleClicked)="onRowDoubleClicked($event)">
-          </ag-grid-angular>
-        </div>
+        <app-data-table
+          [columns]="tableColumnDefs"
+          [data]="billings"
+          [totalCount]="billings.length"
+          [pageSize]="30"
+          [showPaginator]="billings.length > 30"
+          emptyMessage="No billings found for this remittance."
+          (rowDblClick)="onRowDoubleClicked($event)">
+        </app-data-table>
       </mat-card-content>
     </mat-card>
   }

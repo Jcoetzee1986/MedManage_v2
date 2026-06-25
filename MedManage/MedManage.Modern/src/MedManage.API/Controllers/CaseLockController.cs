@@ -50,17 +50,23 @@ public class CaseLockController : ControllerBase
         {
             var lockState = await _caseLockService.AcquireLockAsync(caseId, cancellationToken);
 
-            var currentUserId = User.FindFirst("sub")?.Value
-                ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+            var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                ?? User.FindFirst("sub")?.Value
                 ?? "unknown";
 
-            if (lockState.LockedByUserId != currentUserId && lockState.LockedByUserId != "unknown")
+            // Lock is considered acquired if:
+            // - We are the lock owner
+            // - The lock owner is "unknown" (dev/unauthenticated)
+            // - The current user is "unknown" (dev/unauthenticated) 
+            if (lockState.LockedByUserId == currentUserId 
+                || lockState.LockedByUserId == "unknown" 
+                || currentUserId == "unknown")
             {
-                return Conflict(ApiResponse<CaseLockDto>.ErrorResponse(
-                    $"Case is locked by user '{lockState.LockedByUserName}' (active since {lockState.LastActivity:g}, expires {lockState.ExpiresAt:g})"));
+                return Ok(ApiResponse<CaseLockDto>.SuccessResponse(lockState, "Lock acquired successfully"));
             }
 
-            return Ok(ApiResponse<CaseLockDto>.SuccessResponse(lockState, "Lock acquired successfully"));
+            return Conflict(ApiResponse<CaseLockDto>.ErrorResponse(
+                $"Case is locked by user '{lockState.LockedByUserName}' (active since {lockState.LastActivity:g}, expires {lockState.ExpiresAt:g})"));
         }
         catch (KeyNotFoundException ex)
         {
@@ -115,8 +121,8 @@ public class CaseLockController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<int>), StatusCodes.Status200OK)]
     public async Task<IActionResult> ReleaseMyLocks(CancellationToken cancellationToken)
     {
-        var userId = User.FindFirst("sub")?.Value
-            ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+            ?? User.FindFirst("sub")?.Value;
 
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();

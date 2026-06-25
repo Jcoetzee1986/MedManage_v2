@@ -57,7 +57,11 @@ export class ClientSwitcherComponent implements OnInit {
   selectedClientId: number | null = null;
   loading = false;
 
+  private readonly STORAGE_KEY = 'medmanage_active_client_id';
+
   ngOnInit(): void {
+    // Restore from auth service
+    this.selectedClientId = this.authService.activeClientId;
     this.loadClients();
   }
 
@@ -67,7 +71,14 @@ export class ClientSwitcherComponent implements OnInit {
       next: (clients) => {
         this.clients = clients;
         if (clients.length > 0) {
-          this.selectedClientId = clients[0].mainClientId;
+          // Use stored value if it matches an available client, otherwise default to first
+          const storedId = this.selectedClientId;
+          if (storedId && clients.some(c => c.mainClientId === storedId)) {
+            this.selectedClientId = storedId;
+          } else {
+            this.selectedClientId = clients[0].mainClientId;
+            this.authService.setActiveClient(this.selectedClientId);
+          }
         }
         this.loading = false;
       },
@@ -83,6 +94,7 @@ export class ClientSwitcherComponent implements OnInit {
         if (response.success) {
           this.snackBar.open(response.message || 'Client switched successfully', 'Close', { duration: 3000 });
           this.selectedClientId = mainClientId;
+          this.authService.setActiveClient(mainClientId);
         } else {
           this.snackBar.open(response.message || 'Failed to switch client', 'Close', { duration: 3000 });
         }

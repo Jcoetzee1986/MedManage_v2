@@ -11,8 +11,8 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatListModule } from '@angular/material/list';
 import { MatChipsModule } from '@angular/material/chips';
-import { AgGridModule } from 'ag-grid-angular';
-import { ColDef, GridReadyEvent, GridApi } from 'ag-grid-community';
+import { MatTableModule } from '@angular/material/table';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { EpisodeService } from '../services/episode.service';
 import {
   EpisodeDto,
@@ -37,7 +37,8 @@ import {
     MatDividerModule,
     MatListModule,
     MatChipsModule,
-    AgGridModule
+    MatTableModule,
+    MatTooltipModule
   ],
   templateUrl: './episode-detail.component.html',
   styleUrls: ['./episode-detail.component.scss']
@@ -49,11 +50,13 @@ export class EpisodeDetailComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly snackBar = inject(MatSnackBar);
 
-  private gridApi!: GridApi;
   episodeId: number | null = null;
   isNew = false;
   loading = false;
   linkedCases: EpisodeCaseDto[] = [];
+
+  /** Table columns for linked cases */
+  caseColumns = ['caseId', 'dateCreated', 'dateInserted', 'actions'];
 
   episodeForm = this.fb.group({
     episodeDescription: ['', Validators.required],
@@ -65,39 +68,6 @@ export class EpisodeDetailComponent implements OnInit {
     caseId: [null as number | null, Validators.required]
   });
 
-  caseColumnDefs: ColDef[] = [
-    { field: 'caseId', headerName: 'Case ID', width: 100, sortable: true },
-    {
-      field: 'dateCreated',
-      headerName: 'Linked Date',
-      width: 140,
-      sortable: true,
-      valueFormatter: p => p.value ? new Date(p.value).toLocaleDateString() : ''
-    },
-    {
-      field: 'dateInserted',
-      headerName: 'Added',
-      width: 140,
-      sortable: true,
-      valueFormatter: p => p.value ? new Date(p.value).toLocaleDateString() : ''
-    },
-    {
-      headerName: 'Actions',
-      width: 100,
-      cellRenderer: () => `<button class="unlink-btn" title="Unlink Case">✕</button>`,
-      onCellClicked: (params: any) => {
-        if (params.event?.target?.classList.contains('unlink-btn')) {
-          this.onUnlinkCase(params.data);
-        }
-      }
-    }
-  ];
-
-  defaultColDef: ColDef = {
-    resizable: true,
-    filter: false
-  };
-
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
     if (idParam === 'new') {
@@ -107,10 +77,6 @@ export class EpisodeDetailComponent implements OnInit {
       this.loadEpisode();
       this.loadLinkedCases();
     }
-  }
-
-  onGridReady(params: GridReadyEvent): void {
-    this.gridApi = params.api;
   }
 
   loadEpisode(): void {

@@ -4,7 +4,7 @@ using MedManage.Core.Interfaces.Services;
 
 namespace MedManage.API.Controllers.ReferenceData;
 
-[Route("api/[controller]")]
+[Route("api/member-status")]
 public class MemberStatusController : ReferenceDataController<MemberStatusDto, CreateMemberStatusDto, UpdateMemberStatusDto>
 {
     public MemberStatusController(IReferenceDataService<MemberStatusDto, CreateMemberStatusDto, UpdateMemberStatusDto> service)

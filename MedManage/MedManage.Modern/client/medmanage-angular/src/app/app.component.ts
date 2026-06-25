@@ -1,19 +1,38 @@
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
+import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Subject, takeUntil, filter } from 'rxjs';
 import { ActivityTrackingService } from './core/services/activity-tracking.service';
 import { AuthService } from './core/services/auth.service';
 import { SessionTimeoutWarningComponent } from './shared/components/session-timeout-warning.component';
+import { ClientSwitcherComponent } from './shared/components/client-switcher/client-switcher.component';
 
 @Component({
     selector: 'app-root',
-    imports: [RouterOutlet, MatDialogModule],
+    imports: [CommonModule, RouterOutlet, MatToolbarModule, MatDialogModule, ClientSwitcherComponent],
     templateUrl: './app.component.html',
     styles: [`
     .app-container {
       height: 100vh;
       width: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    .app-header {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      padding: 8px 16px;
+      min-height: 60px;
+      background: #f5f5f5;
+      border-bottom: 1px solid #e0e0e0;
+      overflow: visible;
+    }
+    .app-content {
+      flex: 1;
+      overflow: auto;
     }
   `]
 })
@@ -26,6 +45,11 @@ export class AppComponent implements OnInit, OnDestroy {
   private warningDialogRef: any = null;
 
   title = 'MedManage';
+
+  /** Whether the user is currently authenticated (for showing app-level UI) */
+  get isAuthenticated(): boolean {
+    return this.authService.isAuthenticated();
+  }
 
   ngOnInit(): void {
     // Start activity tracking if user is authenticated

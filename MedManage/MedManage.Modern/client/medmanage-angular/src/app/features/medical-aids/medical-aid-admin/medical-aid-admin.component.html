@@ -34,6 +34,10 @@
                     <input matInput formControlName="reportTemplate" />
                   </mat-form-field>
                   <mat-form-field>
+                    <mat-label>Main Client ID</mat-label>
+                    <input matInput type="number" formControlName="mainClientId" />
+                  </mat-form-field>
+                  <mat-form-field>
                     <mat-label>Initiation Date</mat-label>
                     <input matInput [matDatepicker]="initPicker" formControlName="medicalAidInitiationDate" />
                     <mat-datepicker-toggle matIconSuffix [for]="initPicker"></mat-datepicker-toggle>

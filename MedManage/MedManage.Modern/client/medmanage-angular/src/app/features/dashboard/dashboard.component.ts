@@ -1,10 +1,11 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
-import { ClientSwitcherComponent } from '../../shared/components/client-switcher/client-switcher.component';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { DashboardService, DashboardStats } from '../../core/services/dashboard.service';
 
 @Component({
     selector: 'app-dashboard',
@@ -14,31 +15,15 @@ import { ClientSwitcherComponent } from '../../shared/components/client-switcher
       MatButtonModule,
       MatIconModule,
       MatCardModule,
-      ClientSwitcherComponent
+      MatProgressSpinnerModule
     ],
     templateUrl: './dashboard.component.html',
     styles: [`
-      .dashboard {
-        padding: 24px;
-      }
       .dashboard-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
         margin-bottom: 24px;
-      }
-      .stats {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 16px;
-        margin-bottom: 24px;
-      }
-      .stat-card {
-        padding: 16px;
-      }
-      .stat-value {
-        font-size: 1.5rem;
-        font-weight: bold;
       }
       .actions {
         display: flex;
@@ -47,10 +32,36 @@ import { ClientSwitcherComponent } from '../../shared/components/client-switcher
       }
     `]
 })
-export class DashboardComponent {
+export class DashboardComponent implements OnInit {
   private readonly router = inject(Router);
+  private readonly dashboardService = inject(DashboardService);
+
+  stats: DashboardStats | null = null;
+  loading = true;
+  error: string | null = null;
+
+  ngOnInit(): void {
+    this.loadStats();
+  }
 
   goToMyCases(): void {
     this.router.navigate(['/cases/my-cases']);
+  }
+
+  private loadStats(): void {
+    this.loading = true;
+    this.error = null;
+
+    this.dashboardService.getStats().subscribe({
+      next: (stats) => {
+        this.stats = stats;
+        this.loading = false;
+      },
+      error: (err) => {
+        this.error = 'Failed to load dashboard statistics. Please try again later.';
+        this.loading = false;
+        console.error('Dashboard stats error:', err);
+      }
+    });
   }
 }

@@ -4,7 +4,7 @@ using MedManage.Core.Interfaces.Services;
 
 namespace MedManage.API.Controllers.ReferenceData;
 
-[Route("api/[controller]")]
+[Route("api/checklist-template")]
 public class ChecklistTemplateController : ReferenceDataController<ChecklistTemplateDto, CreateChecklistTemplateDto, UpdateChecklistTemplateDto>
 {
     public ChecklistTemplateController(IReferenceDataService<ChecklistTemplateDto, CreateChecklistTemplateDto, UpdateChecklistTemplateDto> service)

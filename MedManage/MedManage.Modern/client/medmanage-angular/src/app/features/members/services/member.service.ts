@@ -42,6 +42,10 @@ export class MemberService {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 
+  checkDuplicateMemberNumber(memberNumber: string): Observable<boolean> {
+    return this.http.get<boolean>(`${this.baseUrl}/check-duplicate?memberNumber=${encodeURIComponent(memberNumber)}`);
+  }
+
   // ─── Chronic Illness ─────────────────────────────────────────
 
   getChronicIllnesses(memberId: number): Observable<MemberChronicIllnessDto[]> {

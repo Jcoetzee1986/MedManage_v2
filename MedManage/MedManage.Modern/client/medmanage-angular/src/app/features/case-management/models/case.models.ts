@@ -5,42 +5,91 @@
 
 export interface CaseDto {
   id: number;
+  caseId?: number;
   caseNumber?: string;
   authNumber?: string;
+  accountNr?: string;
   caseStatusId?: number;
   caseStatusName?: string;
+  caseStatus?: string;
+  statusId?: number;
   caseTypeId?: number;
   caseTypeName?: string;
+  authTypeId?: number;
   caseCategoryId?: number;
   caseCategoryName?: string;
   memberId?: number;
   memberName?: string;
   memberNumber?: string;
+  memberSurname?: string;
+  memberIdNumber?: string;
+  memberDateOfBirth?: string;
+  memberMedicalAidName?: string;
+  memberProductName?: string;
+  memberStatusName?: string;
+  surname?: string;
+  name?: string;
+  initials?: string;
+  idNumber?: string;
+  dateOfBirth?: string;
   referToId?: number;
   referToName?: string;
+  referTo?: string;
+  referToPracticeName?: string;
+  referToPersonSurname?: string;
+  referToPersonName?: string;
+  referToSpeciality?: string;
+  referToContact?: string;
   referFromId?: number;
   referFromName?: string;
+  referFrom?: string;
+  referFromPracticeName?: string;
+  referFromPersonSurname?: string;
+  referFromPersonName?: string;
+  referFromSpeciality?: string;
+  referFromContact?: string;
   practiceId?: number;
   practiceName?: string;
   mainClientId?: number;
   mainClientName?: string;
   medicalAidId?: number;
   medicalAidName?: string;
+  medAidProductName?: string;
   productId?: number;
   productName?: string;
   dateOfService?: string;
   dateAdmitted?: string;
+  admissionDate?: string;
+  admissionTime?: string;
   dateDischarged?: string;
+  dischargeDate?: string;
+  dischargeTime?: string;
   dateCreated?: string;
   dateUpdated?: string;
   createdBy?: string;
+  userID?: string;
   diagnosis?: string;
   comments?: string;
+  caseDescription?: string;
+  description?: string;
   isBooking?: boolean;
+  hasBooking?: boolean;
+  wasBooking?: boolean;
+  wcaIod?: boolean;
+  primaryICD?: string;
+  primaryCPT?: string;
+  changeToCaseDate?: string;
+  interimAmount?: number;
+  finalInvoiceAmount?: number;
+  penaltyPercentage?: number;
+  finalInvoiceWithPenalty?: number;
+  totalLos?: number;
+  totalLengthOfStay?: number;
 }
 
 export interface CreateCaseRequest {
   authNumber?: string;
+  accountNr?: string;
   caseStatusId?: number;
   caseTypeId?: number;
   caseCategoryId?: number;
@@ -53,10 +102,25 @@ export interface CreateCaseRequest {
   productId?: number;
   dateOfService?: string;
   dateAdmitted?: string;
+  admissionTime?: string;
   dateDischarged?: string;
+  dischargeTime?: string;
   diagnosis?: string;
+  description?: string;
   comments?: string;
   isBooking?: boolean;
+  wasBooking?: boolean;
+  wcaIod?: boolean;
+  interimAmount?: number;
+  finalInvoiceAmount?: number;
+  penaltyPercentage?: number;
+}
+
+export interface DuplicateCheckResult {
+  isDuplicate: boolean;
+  existingCaseId?: number;
+  existingCaseNumber?: string;
+  message?: string;
 }
 
 export interface UpdateCaseRequest extends CreateCaseRequest {
@@ -65,19 +129,35 @@ export interface UpdateCaseRequest extends CreateCaseRequest {
 
 export interface CaseSearchRequest {
   authNumber?: string;
-  memberName?: string;
   memberNumber?: string;
-  caseStatusId?: number;
-  caseTypeId?: number;
-  practiceId?: number;
-  dateFrom?: string;
-  dateTo?: string;
+  memberSurname?: string;
+  memberName?: string;
+  statusId?: number;
+  caseCategoryId?: number;
+  authTypeId?: number;
+  referToId?: number;
+  referFromId?: number;
+  practiceName?: string;
+  admissionDateFrom?: string;
+  admissionDateTo?: string;
+  dischargeDateFrom?: string;
+  dischargeDateTo?: string;
+  dateCreatedFrom?: string;
+  dateCreatedTo?: string;
   icdCode?: string;
   cptCode?: string;
+  medicalAidId?: number;
   pageNumber?: number;
   pageSize?: number;
-  sortField?: string;
-  sortDirection?: 'asc' | 'desc';
+  sortBy?: string;
+  sortDescending?: boolean;
+}
+
+/** Wrapper for API responses that use the ApiResponse<T> envelope */
+export interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  message?: string;
 }
 
 export interface PagedResult<T> {

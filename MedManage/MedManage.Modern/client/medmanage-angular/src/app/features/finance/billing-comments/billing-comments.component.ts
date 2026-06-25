@@ -106,11 +106,6 @@ import { BillingCommentDto } from '../models/billing.models';
       color: #888;
       font-style: italic;
     }
-    .loading-spinner {
-      display: flex;
-      justify-content: center;
-      padding: 16px;
-    }
     ::ng-deep .comment-input .mat-mdc-form-field-subscript-wrapper {
       display: none;
     }

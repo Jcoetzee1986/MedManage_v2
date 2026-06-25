@@ -3,6 +3,7 @@ export interface BaseTariffDto {
   code: string;
   description: string;
   category: string | null;
+  speciality: string | null;
   isActive: boolean;
   dateCreated: string | null;
 }
@@ -11,6 +12,7 @@ export interface CreateBaseTariffRequest {
   code: string;
   description: string;
   category?: string | null;
+  speciality?: string | null;
   isActive?: boolean;
 }
 

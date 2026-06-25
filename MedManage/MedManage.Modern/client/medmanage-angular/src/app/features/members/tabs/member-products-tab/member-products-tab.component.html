@@ -1,8 +1,8 @@
 <div class="tab-content">
   <div class="tab-header">
-    <h3>Medical Aid Product History</h3>
+    <h3>Medical Aid Product</h3>
     <button mat-raised-button color="primary" (click)="onAdd()" *ngIf="!showForm">
-      <mat-icon>add</mat-icon> Add
+      <mat-icon>add</mat-icon> Assign Product
     </button>
   </div>
 
@@ -11,19 +11,25 @@
     <form [formGroup]="form" (ngSubmit)="onSave()">
       <div class="form-row">
         <mat-form-field appearance="outline">
-          <mat-label>Medical Aid Product ID</mat-label>
-          <input matInput formControlName="medicalAidProductId" type="number" required>
+          <mat-label>Select Product</mat-label>
+          <mat-select formControlName="medicalAidProductId" required>
+            <mat-option *ngFor="let product of availableProducts" [value]="product.medAidProductId">
+              {{ product.medAidProductName }}
+            </mat-option>
+          </mat-select>
+          <mat-error>Product is required</mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline">
-          <mat-label>Date From</mat-label>
-          <input matInput [matDatepicker]="fromPicker" formControlName="dateFrom">
+          <mat-label>Start Date</mat-label>
+          <input matInput [matDatepicker]="fromPicker" formControlName="dateFrom" required>
           <mat-datepicker-toggle matIconSuffix [for]="fromPicker"></mat-datepicker-toggle>
           <mat-datepicker #fromPicker></mat-datepicker>
+          <mat-error>Start date is required</mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline">
-          <mat-label>Date To</mat-label>
+          <mat-label>End Date</mat-label>
           <input matInput [matDatepicker]="toPicker" formControlName="dateTo">
           <mat-datepicker-toggle matIconSuffix [for]="toPicker"></mat-datepicker-toggle>
           <mat-datepicker #toPicker></mat-datepicker>
@@ -37,25 +43,21 @@
     </form>
   </div>
 
-  <!-- Table -->
+  <!-- Product History Grid -->
+  <h4 *ngIf="items.length > 0">Product History</h4>
   <table mat-table [dataSource]="items" class="full-width-table" *ngIf="items.length > 0">
-    <ng-container matColumnDef="medicalAidName">
-      <th mat-header-cell *matHeaderCellDef>Medical Aid</th>
-      <td mat-cell *matCellDef="let row">{{ row.medicalAidName }}</td>
-    </ng-container>
-
     <ng-container matColumnDef="medicalAidProductName">
       <th mat-header-cell *matHeaderCellDef>Product</th>
       <td mat-cell *matCellDef="let row">{{ row.medicalAidProductName }}</td>
     </ng-container>
 
     <ng-container matColumnDef="dateFrom">
-      <th mat-header-cell *matHeaderCellDef>Date From</th>
+      <th mat-header-cell *matHeaderCellDef>Start Date</th>
       <td mat-cell *matCellDef="let row">{{ row.dateFrom | date:'shortDate' }}</td>
     </ng-container>
 
     <ng-container matColumnDef="dateTo">
-      <th mat-header-cell *matHeaderCellDef>Date To</th>
+      <th mat-header-cell *matHeaderCellDef>End Date</th>
       <td mat-cell *matCellDef="let row">{{ row.dateTo | date:'shortDate' }}</td>
     </ng-container>
 

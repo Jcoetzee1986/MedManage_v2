@@ -1,84 +1,151 @@
 <div class="case-list-container">
-  <!-- Search Filters -->
+  <!-- Toolbar -->
+  <mat-toolbar class="case-toolbar" color="primary">
+    <span class="toolbar-title">
+      <mat-icon>folder_open</mat-icon>
+      {{ isMyView ? 'My Cases' : 'Case Search Results' }}
+    </span>
+    <span class="toolbar-spacer"></span>
+
+    <button mat-button matTooltip="Open/Edit Selected Case" (click)="onOpenCase()">
+      <mat-icon>edit</mat-icon> Open
+    </button>
+
+    <button mat-button matTooltip="Create New Case" (click)="onNewCase()" *hasRole="['CaseManager', 'Admin']">
+      <mat-icon>add_circle</mat-icon> New Case
+    </button>
+
+    <button mat-button matTooltip="Copy Selected Case" (click)="onCopyCase()" *hasRole="['CaseManager', 'Admin']">
+      <mat-icon>content_copy</mat-icon> Copy
+    </button>
+
+    <button mat-button matTooltip="Export to Excel (CSV)" (click)="onExportExcel()">
+      <mat-icon>download</mat-icon> Export
+    </button>
+
+    <button mat-button matTooltip="Print Report (PDF)" (click)="onPrintReport()" [disabled]="exporting">
+      <mat-icon>print</mat-icon> Report
+    </button>
+  </mat-toolbar>
+
+  <!-- Search Panel -->
   <mat-card class="search-card">
-    <mat-card-header>
-      <mat-card-title>Case Search</mat-card-title>
-    </mat-card-header>
     <mat-card-content>
       <form [formGroup]="searchForm" (ngSubmit)="onSearch()" class="search-form">
+        <!-- Row 1: Text filters -->
         <div class="search-row">
           <mat-form-field appearance="outline">
-            <mat-label>Auth Number</mat-label>
-            <input matInput formControlName="authNumber" placeholder="Search by auth number">
+            <mat-label>Case Number (Auth #)</mat-label>
+            <input matInput formControlName="authNumber" placeholder="Auth number...">
           </mat-form-field>
 
           <mat-form-field appearance="outline">
-            <mat-label>Member Name</mat-label>
-            <input matInput formControlName="memberName" placeholder="Search by member name">
+            <mat-label>Member No</mat-label>
+            <input matInput formControlName="memberNumber" placeholder="Member number...">
           </mat-form-field>
 
           <mat-form-field appearance="outline">
-            <mat-label>Member Number</mat-label>
-            <input matInput formControlName="memberNumber" placeholder="Search by member number">
+            <mat-label>Surname</mat-label>
+            <input matInput formControlName="surname" placeholder="Surname...">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Name</mat-label>
+            <input matInput formControlName="name" placeholder="Name...">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Practice</mat-label>
+            <input matInput formControlName="practiceName" placeholder="Practice name...">
           </mat-form-field>
         </div>
 
+        <!-- Row 2: Date range, Medical Funder, Status, Case Type -->
         <div class="search-row">
-          <app-reference-data-dropdown
-            resource="case-status"
-            label="Case Status"
-            formControlName="caseStatusId">
-          </app-reference-data-dropdown>
-
-          <app-reference-data-dropdown
-            resource="case-type"
-            label="Case Type"
-            formControlName="caseTypeId">
-          </app-reference-data-dropdown>
-
+          <!-- Date Created range with enable checkbox -->
+          <mat-checkbox formControlName="dateCreatedEnabled">
+            Date Created
+          </mat-checkbox>
           <mat-form-field appearance="outline">
-            <mat-label>Date From</mat-label>
-            <input matInput [matDatepicker]="dateFromPicker" formControlName="dateFrom">
+            <mat-label>From</mat-label>
+            <input matInput [matDatepicker]="dateFromPicker" formControlName="dateCreatedFrom"
+              [disabled]="!searchForm.get('dateCreatedEnabled')?.value">
             <mat-datepicker-toggle matIconSuffix [for]="dateFromPicker"></mat-datepicker-toggle>
             <mat-datepicker #dateFromPicker></mat-datepicker>
           </mat-form-field>
-
           <mat-form-field appearance="outline">
-            <mat-label>Date To</mat-label>
-            <input matInput [matDatepicker]="dateToPicker" formControlName="dateTo">
+            <mat-label>To</mat-label>
+            <input matInput [matDatepicker]="dateToPicker" formControlName="dateCreatedTo"
+              [disabled]="!searchForm.get('dateCreatedEnabled')?.value">
             <mat-datepicker-toggle matIconSuffix [for]="dateToPicker"></mat-datepicker-toggle>
             <mat-datepicker #dateToPicker></mat-datepicker>
           </mat-form-field>
+
+          <!-- Medical Funder with enable checkbox -->
+          <mat-checkbox formControlName="medicalAidEnabled">
+            Medical Funder
+          </mat-checkbox>
+          <mat-form-field appearance="outline">
+            <mat-label>Medical Funder</mat-label>
+            <mat-select formControlName="medicalAidId"
+              [disabled]="!searchForm.get('medicalAidEnabled')?.value">
+              <mat-option [value]="null">-- All --</mat-option>
+              @for (aid of medicalAids; track aid.id) {
+                <mat-option [value]="aid.id">{{ aid.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Status dropdown -->
+          <app-reference-data-dropdown
+            resource="case-status"
+            label="Status"
+            [mode]="'select'"
+            formControlName="statusId">
+          </app-reference-data-dropdown>
+
+          <!-- Case/Auth Type dropdown -->
+          <app-reference-data-dropdown
+            resource="case-type"
+            label="Case/Auth Type"
+            [mode]="'select'"
+            formControlName="authTypeId">
+          </app-reference-data-dropdown>
         </div>
 
+        <!-- Search Actions -->
         <div class="search-actions">
           <button mat-raised-button color="primary" type="submit">
             <mat-icon>search</mat-icon> Search
           </button>
           <button mat-stroked-button type="button" (click)="onReset()">
-            <mat-icon>clear</mat-icon> Reset
-          </button>
-          <button mat-raised-button color="accent" type="button" (click)="onNewCase()">
-            <mat-icon>add</mat-icon> New Case
+            <mat-icon>refresh</mat-icon> My Cases
           </button>
         </div>
       </form>
     </mat-card-content>
   </mat-card>
 
-  <!-- ag-Grid -->
-  <div class="grid-container">
-    <ag-grid-angular
-      class="ag-theme-material"
-      [columnDefs]="columnDefs"
-      [defaultColDef]="defaultColDef"
-      [rowModelType]="rowModelType"
-      [pagination]="true"
-      [paginationPageSize]="50"
-      [cacheBlockSize]="50"
-      [rowSelection]="'single'"
-      (gridReady)="onGridReady($event)"
-      (rowDoubleClicked)="onRowDoubleClicked($event)">
-    </ag-grid-angular>
-  </div>
+  <!-- Loading overlay for report export -->
+  @if (exporting) {
+    <div class="export-overlay">
+      <mat-spinner diameter="40"></mat-spinner>
+      <span>Generating report...</span>
+    </div>
+  }
+
+  <!-- Results Table -->
+  <app-data-table
+    [columns]="tableColumnDefs"
+    [data]="rowData"
+    [totalCount]="totalCount"
+    [pageSize]="pageSize"
+    [pageIndex]="pageIndex"
+    [emptyMessage]="isMyView ? 'No cases assigned to you.' : 'No cases found. Try adjusting your search criteria.'"
+    [selectable]="true"
+    [selectedRow]="selectedCase"
+    (rowClick)="selectedCase = $event"
+    (rowDblClick)="onRowDoubleClicked2($event)"
+    (pageChange)="onPageChange($event)">
+  </app-data-table>
 </div>

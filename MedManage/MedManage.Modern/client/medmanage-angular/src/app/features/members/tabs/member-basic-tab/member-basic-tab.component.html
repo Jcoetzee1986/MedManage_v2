@@ -1,20 +1,23 @@
 <div class="tab-content">
   <form [formGroup]="form" (ngSubmit)="onSave()" class="member-form">
+
+    <!-- ═══ Section 1: Personal ═══ -->
+    <h3 class="section-title">Personal</h3>
     <div class="form-row">
-      <mat-form-field appearance="outline">
-        <mat-label>Member Number</mat-label>
-        <input matInput formControlName="memberNumber" required>
-        <mat-error *ngIf="form.controls.memberNumber.hasError('required')">Required</mat-error>
-      </mat-form-field>
+      <app-reference-data-dropdown
+        resource="gender"
+        label="Gender"
+        formControlName="genderId">
+      </app-reference-data-dropdown>
+
+      <app-reference-data-dropdown
+        resource="title"
+        label="Title"
+        formControlName="titleId">
+      </app-reference-data-dropdown>
 
       <mat-form-field appearance="outline">
-        <mat-label>First Name</mat-label>
-        <input matInput formControlName="firstName" required>
-        <mat-error *ngIf="form.controls.firstName.hasError('required')">Required</mat-error>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>Last Name</mat-label>
+        <mat-label>Surname</mat-label>
         <input matInput formControlName="lastName" required>
         <mat-error *ngIf="form.controls.lastName.hasError('required')">Required</mat-error>
       </mat-form-field>
@@ -22,9 +25,34 @@
 
     <div class="form-row">
       <mat-form-field appearance="outline">
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="firstName" required>
+        <mat-error *ngIf="form.controls.firstName.hasError('required')">Required</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Initials</mat-label>
+        <input matInput formControlName="initials">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
         <mat-label>ID Number</mat-label>
         <input matInput formControlName="idNumber">
       </mat-form-field>
+    </div>
+
+    <div class="form-row">
+      <app-reference-data-dropdown
+        resource="marrital-status"
+        label="Marital Status"
+        formControlName="marritalStatusId">
+      </app-reference-data-dropdown>
+
+      <app-reference-data-dropdown
+        resource="language"
+        label="Language"
+        formControlName="languageId">
+      </app-reference-data-dropdown>
 
       <mat-form-field appearance="outline">
         <mat-label>Date of Birth</mat-label>
@@ -32,7 +60,180 @@
         <mat-datepicker-toggle matIconSuffix [for]="dobPicker"></mat-datepicker-toggle>
         <mat-datepicker #dobPicker></mat-datepicker>
       </mat-form-field>
+    </div>
 
+    <div class="form-row">
+      <mat-checkbox formControlName="isPensioner">Pensioner</mat-checkbox>
+      <mat-checkbox formControlName="isMbodRma">MBOD/RMA</mat-checkbox>
+      <app-reference-data-dropdown
+        resource="race"
+        label="Race"
+        formControlName="raceId">
+      </app-reference-data-dropdown>
+    </div>
+
+    <mat-divider class="section-divider"></mat-divider>
+
+    <!-- ═══ Section 2: Medical Aid ═══ -->
+    <h3 class="section-title">Medical Aid</h3>
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Medical Funder</mat-label>
+        <mat-select formControlName="medicalAidId">
+          <mat-option [value]="null">-- None --</mat-option>
+          <mat-option *ngFor="let aid of medicalAids" [value]="aid.id">{{ aid.name }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <app-reference-data-dropdown
+        resource="member-status"
+        label="Member Status"
+        formControlName="memberStatusId">
+      </app-reference-data-dropdown>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Member Number</mat-label>
+        <input matInput formControlName="memberNumber" required>
+        <mat-error *ngIf="form.controls.memberNumber.hasError('required')">Required</mat-error>
+      </mat-form-field>
+    </div>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Date Of Benefit</mat-label>
+        <input matInput [matDatepicker]="benefitPicker" formControlName="dateOfBenefit">
+        <mat-datepicker-toggle matIconSuffix [for]="benefitPicker"></mat-datepicker-toggle>
+        <mat-datepicker #benefitPicker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Date Joined</mat-label>
+        <input matInput [matDatepicker]="joinedPicker" formControlName="dateJoined">
+        <mat-datepicker-toggle matIconSuffix [for]="joinedPicker"></mat-datepicker-toggle>
+        <mat-datepicker #joinedPicker></mat-datepicker>
+      </mat-form-field>
+    </div>
+
+    <div class="form-row">
+      <mat-checkbox formControlName="isMedAidExhausted">Med Aid Exhausted?</mat-checkbox>
+      <mat-form-field appearance="outline">
+        <mat-label>Date Exhausted</mat-label>
+        <input matInput [matDatepicker]="exhaustedPicker" formControlName="dateExhausted">
+        <mat-datepicker-toggle matIconSuffix [for]="exhaustedPicker"></mat-datepicker-toggle>
+        <mat-datepicker #exhaustedPicker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-checkbox formControlName="isWaitingPeriod">Waiting Period?</mat-checkbox>
+    </div>
+
+    <div class="form-row">
+      <mat-checkbox formControlName="isReinstated">Re-Instated?</mat-checkbox>
+      <mat-form-field appearance="outline">
+        <mat-label>Date Re-Instated</mat-label>
+        <input matInput [matDatepicker]="reinstatedPicker" formControlName="dateReinstated">
+        <mat-datepicker-toggle matIconSuffix [for]="reinstatedPicker"></mat-datepicker-toggle>
+        <mat-datepicker #reinstatedPicker></mat-datepicker>
+      </mat-form-field>
+    </div>
+
+    <div class="form-row">
+      <mat-checkbox formControlName="isDeceased">Deceased?</mat-checkbox>
+      <mat-form-field appearance="outline">
+        <mat-label>Date Deceased</mat-label>
+        <input matInput [matDatepicker]="deceasedPicker" formControlName="dateDeceased">
+        <mat-datepicker-toggle matIconSuffix [for]="deceasedPicker"></mat-datepicker-toggle>
+        <mat-datepicker #deceasedPicker></mat-datepicker>
+      </mat-form-field>
+    </div>
+
+    <mat-divider class="section-divider"></mat-divider>
+
+    <!-- ═══ Section 3: Logistics (Address/Contact) ═══ -->
+    <h3 class="section-title">Logistics</h3>
+    <div class="form-row">
+      <app-reference-data-dropdown
+        resource="country"
+        label="Country"
+        formControlName="countryId">
+      </app-reference-data-dropdown>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Passport Number</mat-label>
+        <input matInput formControlName="passportNumber">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Passport Expiry Date</mat-label>
+        <input matInput [matDatepicker]="passportExpiryPicker" formControlName="passportExpiryDate">
+        <mat-datepicker-toggle matIconSuffix [for]="passportExpiryPicker"></mat-datepicker-toggle>
+        <mat-datepicker #passportExpiryPicker></mat-datepicker>
+      </mat-form-field>
+    </div>
+
+    <div class="form-row">
+      <app-reference-data-dropdown
+        resource="period-in-country"
+        label="Period In Country"
+        formControlName="periodInCountryId">
+      </app-reference-data-dropdown>
+    </div>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Address Line 1</mat-label>
+        <input matInput formControlName="addressLine1">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Address Line 2</mat-label>
+        <input matInput formControlName="addressLine2">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Address Line 3</mat-label>
+        <input matInput formControlName="addressLine3">
+      </mat-form-field>
+    </div>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Address Code</mat-label>
+        <input matInput formControlName="addressCode">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Phone Number</mat-label>
+        <input matInput formControlName="phoneNumber">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Cell Number</mat-label>
+        <input matInput formControlName="cellNumber">
+      </mat-form-field>
+    </div>
+
+    <mat-divider class="section-divider"></mat-divider>
+
+    <!-- ═══ Section 4: Other (Next of Kin & Employer) ═══ -->
+    <h3 class="section-title">Other (Next of Kin &amp; Employer)</h3>
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Dependents</mat-label>
+        <input matInput formControlName="dependents">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Next Of Kin</mat-label>
+        <input matInput formControlName="nextOfKin">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Relationship</mat-label>
+        <input matInput formControlName="relationship">
+      </mat-form-field>
+    </div>
+
+    <div class="form-row">
       <mat-form-field appearance="outline">
         <mat-label>Contact Number</mat-label>
         <input matInput formControlName="contactNumber">
@@ -40,25 +241,60 @@
     </div>
 
     <div class="form-row">
-      <mat-form-field appearance="outline">
-        <mat-label>Email</mat-label>
-        <input matInput formControlName="email" type="email">
-        <mat-error *ngIf="form.controls.email.hasError('email')">Invalid email</mat-error>
-      </mat-form-field>
+      <app-reference-data-dropdown
+        resource="country"
+        label="Employer Country"
+        formControlName="employerCountryId">
+      </app-reference-data-dropdown>
 
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Address</mat-label>
-        <input matInput formControlName="address">
+      <mat-form-field appearance="outline" class="wide-field">
+        <mat-label>Employer Address</mat-label>
+        <textarea matInput formControlName="employerAddress" rows="3"></textarea>
       </mat-form-field>
     </div>
 
     <div class="form-row">
-      <mat-checkbox formControlName="allowServices">Allow Services</mat-checkbox>
+      <mat-form-field appearance="outline">
+        <mat-label>Employer Address Code</mat-label>
+        <input matInput formControlName="employerAddressCode">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Employer Phone Number</mat-label>
+        <input matInput formControlName="employerPhoneNumber">
+      </mat-form-field>
     </div>
 
+    <mat-divider class="section-divider"></mat-divider>
+
+    <!-- ═══ Section 5: Suspension ═══ -->
+    <h3 class="section-title">Suspension</h3>
+    <div class="form-row">
+      <mat-checkbox formControlName="isSuspended">Suspended?</mat-checkbox>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Date Suspended</mat-label>
+        <input matInput [matDatepicker]="suspendedPicker" formControlName="dateSuspended">
+        <mat-datepicker-toggle matIconSuffix [for]="suspendedPicker"></mat-datepicker-toggle>
+        <mat-datepicker #suspendedPicker></mat-datepicker>
+      </mat-form-field>
+
+      <app-reference-data-dropdown
+        resource="suspended-reason"
+        label="Suspend Reason"
+        formControlName="suspendReasonId">
+      </app-reference-data-dropdown>
+    </div>
+
+    <mat-divider class="section-divider"></mat-divider>
+
+    <!-- ═══ Form Actions ═══ -->
     <div class="form-actions">
-      <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || saving">
-        {{ isNew ? 'Create' : 'Save' }}
+      <button mat-raised-button color="primary" type="submit" [disabled]="saving">
+        {{ saving ? 'Saving...' : (isNew ? 'Create' : 'Save') }}
+      </button>
+      <button mat-stroked-button type="button" (click)="onCancel()">
+        Cancel
       </button>
     </div>
   </form>

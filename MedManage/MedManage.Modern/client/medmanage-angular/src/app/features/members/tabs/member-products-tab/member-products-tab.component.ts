@@ -6,11 +6,14 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MemberService } from '../../services/member.service';
 import { MemberMedicalAidProductDto, CreateMemberMedicalAidProductRequest } from '../../models/member.models';
+import { MedicalAidService } from '../../../medical-aids/services/medical-aid.service';
+import { MedicalAidProductDto } from '../../../medical-aids/models/medical-aid.models';
 
 @Component({
   selector: 'app-member-products-tab',
@@ -23,6 +26,7 @@ import { MemberMedicalAidProductDto, CreateMemberMedicalAidProductRequest } from
     MatIconModule,
     MatFormFieldModule,
     MatInputModule,
+    MatSelectModule,
     MatDatepickerModule,
     MatNativeDateModule,
     MatSnackBarModule
@@ -32,24 +36,28 @@ import { MemberMedicalAidProductDto, CreateMemberMedicalAidProductRequest } from
 })
 export class MemberProductsTabComponent implements OnInit {
   @Input() memberId!: number;
+  @Input() medicalAidId: number | null = null;
 
   private readonly memberService = inject(MemberService);
+  private readonly medicalAidService = inject(MedicalAidService);
   private readonly fb = inject(FormBuilder);
   private readonly snackBar = inject(MatSnackBar);
 
   items: MemberMedicalAidProductDto[] = [];
-  displayedColumns = ['medicalAidName', 'medicalAidProductName', 'dateFrom', 'dateTo', 'actions'];
+  availableProducts: MedicalAidProductDto[] = [];
+  displayedColumns = ['medicalAidProductName', 'dateFrom', 'dateTo', 'actions'];
   showForm = false;
   editingId: number | null = null;
 
   form = this.fb.group({
     medicalAidProductId: [null as number | null, Validators.required],
-    dateFrom: [null as Date | null],
+    dateFrom: [null as Date | null, Validators.required],
     dateTo: [null as Date | null]
   });
 
   ngOnInit(): void {
     this.loadItems();
+    this.loadAvailableProducts();
   }
 
   loadItems(): void {
@@ -57,6 +65,15 @@ export class MemberProductsTabComponent implements OnInit {
       next: (data) => this.items = data,
       error: () => this.snackBar.open('Failed to load medical aid products', 'Close', { duration: 3000 })
     });
+  }
+
+  private loadAvailableProducts(): void {
+    if (this.medicalAidId) {
+      this.medicalAidService.getProducts(this.medicalAidId).subscribe({
+        next: (products) => this.availableProducts = products,
+        error: () => {}
+      });
+    }
   }
 
   onAdd(): void {
@@ -101,9 +118,9 @@ export class MemberProductsTabComponent implements OnInit {
         this.editingId = null;
         this.form.reset();
         this.loadItems();
-        this.snackBar.open('Saved successfully', 'Close', { duration: 3000 });
+        this.snackBar.open('Product saved', 'Close', { duration: 3000 });
       },
-      error: () => this.snackBar.open('Failed to save', 'Close', { duration: 3000 })
+      error: () => this.snackBar.open('Failed to save product', 'Close', { duration: 3000 })
     });
   }
 
@@ -112,9 +129,9 @@ export class MemberProductsTabComponent implements OnInit {
       this.memberService.deleteMedicalAidProduct(this.memberId, item.id).subscribe({
         next: () => {
           this.loadItems();
-          this.snackBar.open('Deleted successfully', 'Close', { duration: 3000 });
+          this.snackBar.open('Product removed', 'Close', { duration: 3000 });
         },
-        error: () => this.snackBar.open('Failed to delete', 'Close', { duration: 3000 })
+        error: () => this.snackBar.open('Failed to delete product', 'Close', { duration: 3000 })
       });
     }
   }

@@ -78,25 +78,6 @@ import { CaseDto } from '../models/case.models';
     .my-cases-container {
       padding: 24px;
     }
-    .loading-spinner {
-      display: flex;
-      justify-content: center;
-      padding: 32px;
-    }
-    .no-data {
-      text-align: center;
-      color: #666;
-      padding: 32px;
-    }
-    .full-width {
-      width: 100%;
-    }
-    .clickable-row {
-      cursor: pointer;
-    }
-    .clickable-row:hover {
-      background-color: rgba(0, 0, 0, 0.04);
-    }
     mat-card-title {
       display: flex;
       align-items: center;

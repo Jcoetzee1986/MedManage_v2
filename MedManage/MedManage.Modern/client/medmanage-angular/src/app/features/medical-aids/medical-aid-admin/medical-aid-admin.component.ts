@@ -12,6 +12,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MedicalAidService } from '../services/medical-aid.service';
 import {
   MedicalAidDto,
@@ -36,7 +37,8 @@ import {
     MatNativeDateModule,
     MatCardModule,
     MatSnackBarModule,
-    MatSlideToggleModule
+    MatSlideToggleModule,
+    MatTooltipModule
   ],
   templateUrl: './medical-aid-admin.component.html',
   styleUrls: ['./medical-aid-admin.component.scss']
@@ -56,6 +58,7 @@ export class MedicalAidAdminComponent implements OnInit {
     medicalAidName: ['', Validators.required],
     casePrefix: [''],
     reportTemplate: [''],
+    mainClientId: [null as number | null],
     medicalAidInitiationDate: [''],
     medicalAidReinstatedDate: [''],
     medicalAidTerminatedDate: ['']
@@ -118,6 +121,7 @@ export class MedicalAidAdminComponent implements OnInit {
       medicalAidName: item.medicalAidName || '',
       casePrefix: item.casePrefix || '',
       reportTemplate: item.reportTemplate || '',
+      mainClientId: item.mainClientId || null,
       medicalAidInitiationDate: item.medicalAidInitiationDate || '',
       medicalAidReinstatedDate: item.medicalAidReinstatedDate || '',
       medicalAidTerminatedDate: item.medicalAidTerminatedDate || ''
@@ -138,7 +142,7 @@ export class MedicalAidAdminComponent implements OnInit {
     if (this.editingMedicalAidId) {
       const request = {
         medicalAidId: this.editingMedicalAidId,
-        mainClientId: null,
+        mainClientId: formValue.mainClientId || null,
         medicalAidName: formValue.medicalAidName || null,
         casePrefix: formValue.casePrefix || null,
         reportTemplate: formValue.reportTemplate || null,
@@ -156,7 +160,7 @@ export class MedicalAidAdminComponent implements OnInit {
       });
     } else {
       const request = {
-        mainClientId: null,
+        mainClientId: formValue.mainClientId || null,
         medicalAidName: formValue.medicalAidName || null,
         casePrefix: formValue.casePrefix || null,
         reportTemplate: formValue.reportTemplate || null,

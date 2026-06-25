@@ -11,6 +11,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { ReferenceDataDropdownComponent } from '../../../shared/components/reference-data-dropdown/reference-data-dropdown.component';
 import { BillingCommentsComponent } from '../billing-comments/billing-comments.component';
 import { BillingService } from '../services/billing.service';
@@ -31,6 +32,7 @@ import { CaseBillingDto, CreateBillingRequest, UpdateBillingRequest } from '../m
     MatCardModule,
     MatSnackBarModule,
     MatProgressSpinnerModule,
+    MatCheckboxModule,
     ReferenceDataDropdownComponent,
     BillingCommentsComponent
   ],
@@ -55,8 +57,21 @@ export class BillingFormComponent implements OnInit {
     billingStatusId: [null as number | null],
     dateReceived: [null as Date | null],
     dateSubmitted: [null as Date | null],
+    datePaid: [null as Date | null],
+    accountDateFrom: [null as Date | null],
+    accountDateTo: [null as Date | null],
     amount: [null as number | null],
     finalInvoiceAmount: [null as number | null],
+    discount: [null as number | null],
+    penalty: [null as number | null],
+    rejectedAmount: [null as number | null],
+    patientName: [''],
+    patientSurname: [''],
+    patientInitials: [''],
+    remittanceNumber: [''],
+    submitted: [false],
+    reported: [false],
+    reportedDate: [null as Date | null],
     comments: ['']
   });
 
@@ -80,8 +95,21 @@ export class BillingFormComponent implements OnInit {
           billingStatusId: billing.billingStatusId || null,
           dateReceived: billing.dateReceived ? new Date(billing.dateReceived) : null,
           dateSubmitted: billing.dateSubmitted ? new Date(billing.dateSubmitted) : null,
+          datePaid: billing.datePaid ? new Date(billing.datePaid) : null,
+          accountDateFrom: (billing as any).accountDateFrom ? new Date((billing as any).accountDateFrom) : null,
+          accountDateTo: (billing as any).accountDateTo ? new Date((billing as any).accountDateTo) : null,
           amount: billing.amount || null,
           finalInvoiceAmount: billing.finalInvoiceAmount || null,
+          discount: (billing as any).discount || null,
+          penalty: (billing as any).penalty || null,
+          rejectedAmount: (billing as any).rejectedAmount || null,
+          patientName: (billing as any).patientName || '',
+          patientSurname: (billing as any).patientSurname || '',
+          patientInitials: (billing as any).patientInitials || '',
+          remittanceNumber: billing.remittanceNumber || '',
+          submitted: (billing as any).submitted || false,
+          reported: (billing as any).reported || false,
+          reportedDate: (billing as any).reportedDate ? new Date((billing as any).reportedDate) : null,
           comments: billing.comments || ''
         });
         this.loading = false;
@@ -108,8 +136,17 @@ export class BillingFormComponent implements OnInit {
         billingStatusId: formVal.billingStatusId || undefined,
         dateReceived: formVal.dateReceived?.toISOString(),
         dateSubmitted: formVal.dateSubmitted?.toISOString(),
+        datePaid: formVal.datePaid?.toISOString(),
+        accountDateFrom: formVal.accountDateFrom?.toISOString(),
+        accountDateTo: formVal.accountDateTo?.toISOString(),
         amount: formVal.amount || undefined,
         finalInvoiceAmount: formVal.finalInvoiceAmount || undefined,
+        discount: formVal.discount || undefined,
+        penalty: formVal.penalty || undefined,
+        rejectedAmount: formVal.rejectedAmount || undefined,
+        patientName: formVal.patientName || undefined,
+        patientSurname: formVal.patientSurname || undefined,
+        patientInitials: formVal.patientInitials || undefined,
         comments: formVal.comments || undefined
       };
 
@@ -130,8 +167,17 @@ export class BillingFormComponent implements OnInit {
         billingStatusId: formVal.billingStatusId || undefined,
         dateReceived: formVal.dateReceived?.toISOString(),
         dateSubmitted: formVal.dateSubmitted?.toISOString(),
+        datePaid: formVal.datePaid?.toISOString(),
+        accountDateFrom: formVal.accountDateFrom?.toISOString(),
+        accountDateTo: formVal.accountDateTo?.toISOString(),
         amount: formVal.amount || undefined,
         finalInvoiceAmount: formVal.finalInvoiceAmount || undefined,
+        discount: formVal.discount || undefined,
+        penalty: formVal.penalty || undefined,
+        rejectedAmount: formVal.rejectedAmount || undefined,
+        patientName: formVal.patientName || undefined,
+        patientSurname: formVal.patientSurname || undefined,
+        patientInitials: formVal.patientInitials || undefined,
         comments: formVal.comments || undefined
       };
 

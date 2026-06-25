@@ -30,8 +30,9 @@ export class MedicalAidService {
       .pipe(map(r => r.data));
   }
 
-  getActive(): Observable<MedicalAidDto[]> {
-    return this.http.get<ApiResponse<MedicalAidDto[]>>(`${this.baseUrl}/active`)
+  getActive(mainClientId?: number): Observable<MedicalAidDto[]> {
+    const params = mainClientId ? `?mainClientId=${mainClientId}` : '';
+    return this.http.get<ApiResponse<MedicalAidDto[]>>(`${this.baseUrl}/active${params}`)
       .pipe(map(r => r.data));
   }
 

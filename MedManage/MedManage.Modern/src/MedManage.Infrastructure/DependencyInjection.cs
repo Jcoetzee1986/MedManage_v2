@@ -168,6 +168,9 @@ public static class DependencyInjection
         // Session Admin Service
         services.AddScoped<ISessionAdminService, SessionAdminService>();
         
+        // Dashboard Service
+        services.AddScoped<IDashboardService, DashboardService>();
+        
         // Reporting Services (jsreport)
         services.AddHttpClient<IReportService, ReportService>((sp, client) =>
         {

@@ -61,6 +61,7 @@ export class BookingFormComponent implements OnInit {
     hospital: [''],
     arrived: [false],
     tisch: [''],
+    authNumber: [''],
     comments: ['']
   });
 
@@ -92,6 +93,7 @@ export class BookingFormComponent implements OnInit {
           hospital: booking.hospital || '',
           arrived: booking.arrived || false,
           tisch: booking.tisch || '',
+          authNumber: booking.authNumber || '',
           comments: booking.comments || ''
         });
         this.loading = false;
@@ -125,6 +127,7 @@ export class BookingFormComponent implements OnInit {
         hospital: val.hospital || null,
         arrived: val.arrived || false,
         tisch: val.tisch || null,
+        authNumber: val.authNumber || null,
         comments: val.comments || null
       };
 
@@ -152,6 +155,7 @@ export class BookingFormComponent implements OnInit {
         hospital: val.hospital || null,
         arrived: val.arrived || false,
         tisch: val.tisch || null,
+        authNumber: val.authNumber || null,
         comments: val.comments || null
       };
 

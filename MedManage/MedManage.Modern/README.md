@@ -10,8 +10,8 @@ copy .env.example .env        # edit with your DB password
 .\scripts\podman-up.ps1 -Build -Detach
 
 # Option 2: Local development
-cd src/MedManage.API && dotnet run          # Terminal 1
-cd client/medmanage-angular && npm start    # Terminal 2
+dotnet watch run --project src\MedManage.API  # Terminal 1
+cd client\medmanage-angular & npm start       # Terminal 2
 ```
 
 See [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md) for full setup instructions.

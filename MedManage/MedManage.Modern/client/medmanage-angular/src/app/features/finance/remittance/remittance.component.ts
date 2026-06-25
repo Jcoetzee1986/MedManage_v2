@@ -10,10 +10,9 @@ import { MatCardModule } from '@angular/material/card';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
-import { AgGridModule } from 'ag-grid-angular';
-import { ColDef, GridReadyEvent, GridApi } from 'ag-grid-community';
 import { BillingService } from '../services/billing.service';
 import { CaseBillingDto } from '../models/billing.models';
+import { DataTableComponent, DataTableColumn } from '../../../shared/components/data-table/data-table.component';
 
 @Component({
   selector: 'app-remittance',
@@ -29,7 +28,7 @@ import { CaseBillingDto } from '../models/billing.models';
     MatSnackBarModule,
     MatProgressSpinnerModule,
     MatDividerModule,
-    AgGridModule
+    DataTableComponent
   ],
   templateUrl: './remittance.component.html',
   styleUrls: ['./remittance.component.scss']
@@ -40,7 +39,6 @@ export class RemittanceComponent {
   private readonly fb = inject(FormBuilder);
   private readonly snackBar = inject(MatSnackBar);
 
-  private gridApi!: GridApi;
   loading = false;
   billings: CaseBillingDto[] = [];
   searchedRemittance = '';
@@ -50,47 +48,19 @@ export class RemittanceComponent {
     remittanceNumber: ['', Validators.required]
   });
 
-  /** ag-Grid column definitions */
-  columnDefs: ColDef[] = [
-    { field: 'accountNumber', headerName: 'Account #', width: 130 },
-    { field: 'invoiceNumber', headerName: 'Invoice #', width: 130 },
-    { field: 'caseNumber', headerName: 'Case #', width: 120 },
-    { field: 'memberName', headerName: 'Member', flex: 1 },
-    { field: 'providerName', headerName: 'Provider', flex: 1 },
-    { field: 'billingStatusName', headerName: 'Status', width: 120 },
-    {
-      field: 'amount',
-      headerName: 'Amount',
-      width: 120,
-      type: 'numericColumn',
-      valueFormatter: p => p.value != null ? `R ${p.value.toFixed(2)}` : ''
-    },
-    {
-      field: 'amountPaid',
-      headerName: 'Paid',
-      width: 120,
-      type: 'numericColumn',
-      valueFormatter: p => p.value != null ? `R ${p.value.toFixed(2)}` : ''
-    },
-    {
-      field: 'datePaid',
-      headerName: 'Date Paid',
-      width: 120,
-      valueFormatter: p => p.value ? new Date(p.value).toLocaleDateString() : ''
-    },
-    {
-      field: 'dateReceived',
-      headerName: 'Received',
-      width: 120,
-      valueFormatter: p => p.value ? new Date(p.value).toLocaleDateString() : ''
-    }
+  /** Column definitions for DataTableComponent */
+  tableColumnDefs: DataTableColumn[] = [
+    { field: 'accountNumber', header: 'Account #', width: '130px' },
+    { field: 'invoiceNumber', header: 'Invoice #', width: '130px' },
+    { field: 'caseNumber', header: 'Case #', width: '120px' },
+    { field: 'memberName', header: 'Member' },
+    { field: 'providerName', header: 'Provider' },
+    { field: 'billingStatusName', header: 'Status', width: '120px' },
+    { field: 'amount', header: 'Amount', width: '120px', pipe: 'currency', align: 'right' },
+    { field: 'amountPaid', header: 'Paid', width: '120px', pipe: 'currency', align: 'right' },
+    { field: 'datePaid', header: 'Date Paid', width: '110px', pipe: 'date' },
+    { field: 'dateReceived', header: 'Received', width: '110px', pipe: 'date' }
   ];
-
-  defaultColDef: ColDef = {
-    resizable: true,
-    filter: false,
-    sortable: true
-  };
 
   get totalAmount(): number {
     return this.billings.reduce((sum, b) => sum + (b.amount || 0), 0);
@@ -98,10 +68,6 @@ export class RemittanceComponent {
 
   get totalPaid(): number {
     return this.billings.reduce((sum, b) => sum + (b.amountPaid || 0), 0);
-  }
-
-  onGridReady(params: GridReadyEvent): void {
-    this.gridApi = params.api;
   }
 
   /** Search for billings by remittance number */
@@ -128,9 +94,9 @@ export class RemittanceComponent {
   }
 
   /** Navigate to specific billing record */
-  onRowDoubleClicked(event: any): void {
-    if (event.data) {
-      this.router.navigate(['/finance/billing', event.data.id]);
+  onRowDoubleClicked(row: any): void {
+    if (row) {
+      this.router.navigate(['/finance/billing', row.id]);
     }
   }
 

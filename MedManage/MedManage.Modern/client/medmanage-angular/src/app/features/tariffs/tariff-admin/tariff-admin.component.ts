@@ -49,7 +49,7 @@ export class TariffAdminComponent implements OnInit {
 
   // ─── Base Tariffs ────────────────────────────────────────────
   baseTariffs: BaseTariffDto[] = [];
-  baseTariffColumns = ['code', 'description', 'category', 'isActive', 'actions'];
+  baseTariffColumns = ['code', 'description', 'speciality', 'category', 'isActive', 'actions'];
   showBaseForm = false;
   editingBaseId: number | null = null;
 
@@ -57,6 +57,7 @@ export class TariffAdminComponent implements OnInit {
     code: ['', Validators.required],
     description: ['', Validators.required],
     category: [''],
+    speciality: [''],
     isActive: [true]
   });
 
@@ -104,7 +105,7 @@ export class TariffAdminComponent implements OnInit {
   onAddBase(): void {
     this.showBaseForm = true;
     this.editingBaseId = null;
-    this.baseForm.reset({ isActive: true });
+    this.baseForm.reset({ isActive: true, speciality: '' });
   }
 
   onEditBase(item: BaseTariffDto): void {
@@ -114,6 +115,7 @@ export class TariffAdminComponent implements OnInit {
       code: item.code,
       description: item.description,
       category: item.category || '',
+      speciality: (item as any).speciality || '',
       isActive: item.isActive
     });
   }
@@ -121,7 +123,7 @@ export class TariffAdminComponent implements OnInit {
   onCancelBase(): void {
     this.showBaseForm = false;
     this.editingBaseId = null;
-    this.baseForm.reset({ isActive: true });
+    this.baseForm.reset({ isActive: true, speciality: '' });
   }
 
   onSaveBase(): void {
@@ -132,6 +134,7 @@ export class TariffAdminComponent implements OnInit {
       code: formValue.code!,
       description: formValue.description!,
       category: formValue.category || null,
+      speciality: formValue.speciality || null,
       isActive: formValue.isActive ?? true
     };
 

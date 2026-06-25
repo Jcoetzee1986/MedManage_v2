@@ -10,6 +10,7 @@
       [disabled]="disabled"
       [required]="required"
       [placeholder]="placeholder"
+      disableOptionCentering
       (selectionChange)="onSelectChange($event.value)">
       <mat-option [value]="null">-- None --</mat-option>
       @for (item of items; track item.id) {

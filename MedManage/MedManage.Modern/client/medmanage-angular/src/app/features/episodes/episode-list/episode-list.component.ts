@@ -11,12 +11,11 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatDialogModule, MatDialog } from '@angular/material/dialog';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { AgGridModule } from 'ag-grid-angular';
-import { ColDef, GridReadyEvent, GridApi } from 'ag-grid-community';
+import { MatDialogModule } from '@angular/material/dialog';
+import { PageEvent } from '@angular/material/paginator';
 import { EpisodeService } from '../services/episode.service';
 import { EpisodeDto, EpisodeSearchFilters } from '../models/episode.models';
+import { DataTableComponent, DataTableColumn } from '../../../shared/components/data-table/data-table.component';
 
 @Component({
   selector: 'app-episode-list',
@@ -34,8 +33,7 @@ import { EpisodeDto, EpisodeSearchFilters } from '../models/episode.models';
     MatSnackBarModule,
     MatTooltipModule,
     MatDialogModule,
-    MatPaginatorModule,
-    AgGridModule
+    DataTableComponent
   ],
   templateUrl: './episode-list.component.html',
   styleUrls: ['./episode-list.component.scss']
@@ -46,10 +44,9 @@ export class EpisodeListComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly snackBar = inject(MatSnackBar);
 
-  private gridApi!: GridApi;
   rowData: EpisodeDto[] = [];
   totalCount = 0;
-  pageSize = 25;
+  pageSize = 30;
   pageIndex = 0;
   loading = false;
 
@@ -60,37 +57,17 @@ export class EpisodeListComponent implements OnInit {
     dateTo: [null as Date | null]
   });
 
-  columnDefs: ColDef[] = [
-    { field: 'episodeId', headerName: 'ID', width: 80, sortable: true },
-    { field: 'episodeDescription', headerName: 'Description', flex: 2, sortable: true },
-    { field: 'memberId', headerName: 'Member ID', width: 120, sortable: true },
-    {
-      field: 'dateCreated',
-      headerName: 'Date Created',
-      width: 140,
-      sortable: true,
-      valueFormatter: p => p.value ? new Date(p.value).toLocaleDateString() : ''
-    },
-    {
-      field: 'dateInserted',
-      headerName: 'Added',
-      width: 140,
-      sortable: true,
-      valueFormatter: p => p.value ? new Date(p.value).toLocaleDateString() : ''
-    }
+  /** Column definitions for DataTableComponent */
+  tableColumnDefs: DataTableColumn[] = [
+    { field: 'episodeId', header: 'ID', width: '80px' },
+    { field: 'episodeDescription', header: 'Description' },
+    { field: 'memberId', header: 'Member ID', width: '120px' },
+    { field: 'dateCreated', header: 'Date Created', width: '120px', pipe: 'date' },
+    { field: 'dateInserted', header: 'Added', width: '120px', pipe: 'date' }
   ];
-
-  defaultColDef: ColDef = {
-    resizable: true,
-    filter: false
-  };
 
   ngOnInit(): void {
     this.loadEpisodes();
-  }
-
-  onGridReady(params: GridReadyEvent): void {
-    this.gridApi = params.api;
   }
 
   loadEpisodes(): void {
@@ -136,9 +113,9 @@ export class EpisodeListComponent implements OnInit {
     this.loadEpisodes();
   }
 
-  onRowDoubleClicked(event: any): void {
-    if (event.data) {
-      this.router.navigate(['/episodes', event.data.episodeId]);
+  onRowDoubleClicked(row: any): void {
+    if (row) {
+      this.router.navigate(['/episodes', row.episodeId]);
     }
   }
 

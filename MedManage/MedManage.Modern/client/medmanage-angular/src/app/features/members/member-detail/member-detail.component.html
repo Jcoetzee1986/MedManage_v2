@@ -26,14 +26,17 @@
       </app-member-basic-tab>
     </mat-tab>
 
+    <!-- Medical Aid Products (only for existing members) -->
+    <mat-tab label="Medical Aid Products" *ngIf="!isNew">
+      <app-member-products-tab
+        [memberId]="memberId"
+        [medicalAidId]="memberData?.medicalAidId ?? null">
+      </app-member-products-tab>
+    </mat-tab>
+
     <!-- Chronic Illness (only for existing members) -->
     <mat-tab label="Chronic Illness" *ngIf="!isNew">
       <app-member-chronic-illness-tab [memberId]="memberId"></app-member-chronic-illness-tab>
-    </mat-tab>
-
-    <!-- Medical Aid Products (only for existing members) -->
-    <mat-tab label="Medical Aid Products" *ngIf="!isNew">
-      <app-member-products-tab [memberId]="memberId"></app-member-products-tab>
     </mat-tab>
 
     <!-- Notes (only for existing members) -->

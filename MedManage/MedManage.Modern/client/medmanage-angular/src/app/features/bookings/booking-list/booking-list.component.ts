@@ -11,11 +11,10 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { AgGridModule } from 'ag-grid-angular';
-import { ColDef, GridReadyEvent, GridApi } from 'ag-grid-community';
+import { PageEvent } from '@angular/material/paginator';
 import { BookingService } from '../services/booking.service';
 import { BookingDto, BookingSearchFilters } from '../models/booking.models';
+import { DataTableComponent, DataTableColumn } from '../../../shared/components/data-table/data-table.component';
 
 @Component({
   selector: 'app-booking-list',
@@ -32,8 +31,7 @@ import { BookingDto, BookingSearchFilters } from '../models/booking.models';
     MatCardModule,
     MatSnackBarModule,
     MatTooltipModule,
-    MatPaginatorModule,
-    AgGridModule
+    DataTableComponent
   ],
   templateUrl: './booking-list.component.html',
   styleUrls: ['./booking-list.component.scss']
@@ -44,84 +42,36 @@ export class BookingListComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly snackBar = inject(MatSnackBar);
 
-  private gridApi!: GridApi;
   rowData: BookingDto[] = [];
   totalCount = 0;
-  pageSize = 25;
+  pageSize = 30;
   pageIndex = 0;
   loading = false;
 
   searchForm = this.fb.group({
+    surname: [''],
+    name: [''],
     memberNumber: [''],
     dateFrom: [null as Date | null],
     dateTo: [null as Date | null]
   });
 
-  columnDefs: ColDef[] = [
-    { field: 'bookingId', headerName: 'ID', width: 80, sortable: true },
-    {
-      field: 'travelDate',
-      headerName: 'Travel Date',
-      width: 130,
-      sortable: true,
-      valueFormatter: p => p.value ? new Date(p.value).toLocaleDateString() : ''
-    },
-    {
-      field: 'travelTime',
-      headerName: 'Time',
-      width: 100
-    },
-    {
-      field: 'appointmentDate',
-      headerName: 'Appointment',
-      width: 130,
-      sortable: true,
-      valueFormatter: p => p.value ? new Date(p.value).toLocaleDateString() : ''
-    },
-    { field: 'discipline', headerName: 'Discipline', flex: 1, sortable: true },
-    { field: 'hospital', headerName: 'Hospital', flex: 1, sortable: true },
-    {
-      field: 'consultation',
-      headerName: 'Consult',
-      width: 90,
-      valueFormatter: p => p.value ? 'Yes' : 'No'
-    },
-    {
-      field: 'admission',
-      headerName: 'Admission',
-      width: 100,
-      valueFormatter: p => p.value ? 'Yes' : 'No'
-    },
-    {
-      field: 'arrived',
-      headerName: 'Arrived',
-      width: 90,
-      valueFormatter: p => p.value ? 'Yes' : 'No'
-    },
-    { field: 'caseId', headerName: 'Case ID', width: 100 },
-    {
-      headerName: 'Actions',
-      width: 120,
-      cellRenderer: () => `<button class="convert-btn" title="Convert to Case">→ Case</button>`,
-      onCellClicked: (params: any) => {
-        if (params.event?.target?.classList.contains('convert-btn')) {
-          this.onConvertToCase(params.data);
-        }
-      }
-    }
+  /** Column definitions for DataTableComponent */
+  tableColumnDefs: DataTableColumn[] = [
+    { field: 'bookingId', header: 'ID', width: '70px' },
+    { field: 'travelDate', header: 'Travel Date', width: '110px', pipe: 'date' },
+    { field: 'travelTime', header: 'Time', width: '80px' },
+    { field: 'appointmentDate', header: 'Appointment', width: '110px', pipe: 'date' },
+    { field: 'discipline', header: 'Discipline' },
+    { field: 'hospital', header: 'Hospital' },
+    { field: 'consultation', header: 'Consult', width: '80px', format: (v) => v ? 'Yes' : 'No' },
+    { field: 'admission', header: 'Admission', width: '90px', format: (v) => v ? 'Yes' : 'No' },
+    { field: 'arrived', header: 'Arrived', width: '80px', format: (v) => v ? 'Yes' : 'No' },
+    { field: 'caseId', header: 'Case ID', width: '90px' }
   ];
-
-  defaultColDef: ColDef = {
-    resizable: true,
-    filter: false
-  };
 
   ngOnInit(): void {
     this.loadBookings();
-  }
-
-  onGridReady(params: GridReadyEvent): void {
-    this.gridApi = params.api;
   }
 
   loadBookings(): void {
@@ -129,6 +79,8 @@ export class BookingListComponent implements OnInit {
     const formValue = this.searchForm.value;
 
     const filters: BookingSearchFilters = {
+      surname: formValue.surname || undefined,
+      name: formValue.name || undefined,
       memberNumber: formValue.memberNumber || undefined,
       dateFrom: formValue.dateFrom ? formValue.dateFrom.toISOString() : undefined,
       dateTo: formValue.dateTo ? formValue.dateTo.toISOString() : undefined,
@@ -166,9 +118,9 @@ export class BookingListComponent implements OnInit {
     this.loadBookings();
   }
 
-  onRowDoubleClicked(event: any): void {
-    if (event.data) {
-      this.router.navigate(['/bookings', event.data.bookingId]);
+  onRowDoubleClicked(row: any): void {
+    if (row) {
+      this.router.navigate(['/bookings', row.bookingId]);
     }
   }
 

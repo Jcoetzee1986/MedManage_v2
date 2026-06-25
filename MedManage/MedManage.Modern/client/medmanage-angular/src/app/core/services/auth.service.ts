@@ -30,9 +30,30 @@ export class AuthService {
   private readonly TOKEN_KEY = 'medmanage_token';
   private readonly REFRESH_TOKEN_KEY = 'medmanage_refresh_token';
   private readonly USER_KEY = 'medmanage_user';
+  private readonly ACTIVE_CLIENT_KEY = 'medmanage_active_client_id';
   private readonly API_URL = `${environment.apiUrl}/auth`;
 
   private currentUserSubject = new BehaviorSubject<UserInfo | null>(this.getUserFromStorage());
+  private activeClientSubject = new BehaviorSubject<number | null>(this.getStoredClientId());
+
+  /** Observable that emits whenever the active client changes */
+  activeClient$ = this.activeClientSubject.asObservable();
+
+  /** Get the current active client ID */
+  get activeClientId(): number | null {
+    return this.activeClientSubject.value;
+  }
+
+  /** Set the active client ID (persists to localStorage and notifies subscribers) */
+  setActiveClient(mainClientId: number): void {
+    localStorage.setItem(this.ACTIVE_CLIENT_KEY, String(mainClientId));
+    this.activeClientSubject.next(mainClientId);
+  }
+
+  private getStoredClientId(): number | null {
+    const stored = localStorage.getItem('medmanage_active_client_id');
+    return stored ? parseInt(stored, 10) : null;
+  }
   public currentUser$ = this.currentUserSubject.asObservable();
 
   constructor() { }

@@ -13,18 +13,11 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { AgGridModule } from 'ag-grid-angular';
-import {
-  ColDef,
-  GridReadyEvent,
-  GridApi,
-  IServerSideDatasource,
-  IServerSideGetRowsParams,
-  SelectionChangedEvent
-} from 'ag-grid-community';
+import { MatTableModule } from '@angular/material/table';
 
 import { BillingService } from '../services/billing.service';
-import { CaseBillingDto, BillingSearchRequest, BulkPaymentRequest } from '../models/billing.models';
+import { CaseBillingDto, BillingSearchRequest, BulkPaymentRequest, RemittanceUpdateRequest } from '../models/billing.models';
+import { ReferenceDataDropdownComponent } from '../../../shared/components/reference-data-dropdown/reference-data-dropdown.component';
 
 @Component({
   selector: 'app-bulk-payment',
@@ -43,7 +36,8 @@ import { CaseBillingDto, BillingSearchRequest, BulkPaymentRequest } from '../mod
     MatSnackBarModule,
     MatStepperModule,
     MatProgressSpinnerModule,
-    AgGridModule
+    MatTableModule,
+    ReferenceDataDropdownComponent
   ],
   templateUrl: './bulk-payment.component.html',
   styleUrls: ['./bulk-payment.component.scss']
@@ -54,14 +48,18 @@ export class BulkPaymentComponent {
   private readonly fb = inject(FormBuilder);
   private readonly snackBar = inject(MatSnackBar);
 
-  private gridApi!: GridApi;
   selectedBillings: CaseBillingDto[] = [];
   processing = false;
+
+  /** Columns for the mat-table */
+  displayedColumns = ['select', 'accountNumber', 'invoiceNumber', 'caseNumber', 'memberName', 'providerName', 'amount', 'dateReceived'];
 
   /** Search form for finding billings to pay */
   searchForm = this.fb.group({
     providerName: [''],
     accountNumber: [''],
+    billingStatusId: [null as number | null],
+    caseStatusId: [null as number | null],
     dateFrom: [null as Date | null],
     dateTo: [null as Date | null]
   });
@@ -73,82 +71,64 @@ export class BulkPaymentComponent {
     comments: ['']
   });
 
-  /** ag-Grid columns for selection */
-  columnDefs: ColDef[] = [
-    { headerCheckboxSelection: true, checkboxSelection: true, width: 50 },
-    { field: 'accountNumber', headerName: 'Account #', width: 130 },
-    { field: 'invoiceNumber', headerName: 'Invoice #', width: 130 },
-    { field: 'caseNumber', headerName: 'Case #', width: 120 },
-    { field: 'memberName', headerName: 'Member', flex: 1 },
-    { field: 'providerName', headerName: 'Provider', flex: 1 },
-    {
-      field: 'amount',
-      headerName: 'Amount',
-      width: 120,
-      type: 'numericColumn',
-      valueFormatter: p => p.value != null ? `R ${p.value.toFixed(2)}` : ''
-    },
-    {
-      field: 'dateReceived',
-      headerName: 'Received',
-      width: 120,
-      valueFormatter: p => p.value ? new Date(p.value).toLocaleDateString() : ''
-    }
-  ];
+  /** Row data for the table */
+  rowData: any[] = [];
 
-  defaultColDef: ColDef = {
-    resizable: true,
-    filter: false,
-    sortable: true
-  };
-
-  rowModelType: 'serverSide' = 'serverSide';
-
-  onGridReady(params: GridReadyEvent): void {
-    this.gridApi = params.api;
-    this.gridApi.setGridOption('serverSideDatasource', this.createDatasource());
+  ngOnInit(): void {
+    this.loadBillings();
   }
 
-  private createDatasource(): IServerSideDatasource {
-    return {
-      getRows: (params: IServerSideGetRowsParams) => {
-        const startRow = params.request.startRow ?? 0;
-        const endRow = params.request.endRow ?? 50;
-        const pageSize = endRow - startRow;
-        const pageNumber = Math.floor(startRow / pageSize) + 1;
-
-        const formValue = this.searchForm.value;
-        const searchRequest: BillingSearchRequest = {
-          providerName: formValue.providerName || undefined,
-          accountNumber: formValue.accountNumber || undefined,
-          dateFrom: formValue.dateFrom ? formValue.dateFrom.toISOString() : undefined,
-          dateTo: formValue.dateTo ? formValue.dateTo.toISOString() : undefined,
-          isPaid: false, // Only show unpaid billings
-          pageNumber,
-          pageSize
-        };
-
-        this.billingService.search(searchRequest).subscribe({
-          next: (result) => {
-            params.success({
-              rowData: result.items,
-              rowCount: result.totalCount
-            });
-          },
-          error: () => {
-            params.fail();
-          }
-        });
-      }
+  /** Load unpaid billings from the API */
+  private loadBillings(): void {
+    const formValue = this.searchForm.value;
+    const searchRequest: BillingSearchRequest = {
+      providerName: formValue.providerName || undefined,
+      accountNumber: formValue.accountNumber || undefined,
+      billingStatusId: formValue.billingStatusId || undefined,
+      dateFrom: formValue.dateFrom ? formValue.dateFrom.toISOString() : undefined,
+      dateTo: formValue.dateTo ? formValue.dateTo.toISOString() : undefined,
+      isPaid: false,
+      pageNumber: 1,
+      pageSize: 30
     };
+
+    this.billingService.search(searchRequest).subscribe({
+      next: (result) => {
+        this.rowData = result.items;
+      },
+      error: () => {
+        this.rowData = [];
+      }
+    });
   }
 
   onSearch(): void {
-    this.gridApi?.refreshServerSide({ purge: true });
+    this.loadBillings();
   }
 
-  onSelectionChanged(event: SelectionChangedEvent): void {
-    this.selectedBillings = this.gridApi.getSelectedRows();
+  /** Multi-select: toggle all rows */
+  get allSelected(): boolean {
+    return this.rowData.length > 0 && this.selectedBillings.length === this.rowData.length;
+  }
+
+  get someSelected(): boolean {
+    return this.selectedBillings.length > 0;
+  }
+
+  onToggleAll(checked: boolean): void {
+    this.selectedBillings = checked ? [...this.rowData] : [];
+  }
+
+  onToggleRow(row: any, checked: boolean): void {
+    if (checked) {
+      this.selectedBillings = [...this.selectedBillings, row];
+    } else {
+      this.selectedBillings = this.selectedBillings.filter(b => b !== row);
+    }
+  }
+
+  isRowSelected(row: any): boolean {
+    return this.selectedBillings.includes(row);
   }
 
   get totalSelectedAmount(): number {
@@ -177,7 +157,7 @@ export class BulkPaymentComponent {
           { duration: 5000 }
         );
         this.selectedBillings = [];
-        this.gridApi?.refreshServerSide({ purge: true });
+        this.loadBillings();
         this.paymentForm.reset({ datePaid: new Date() });
       },
       error: () => {
@@ -189,5 +169,38 @@ export class BulkPaymentComponent {
 
   onBack(): void {
     this.router.navigate(['/finance']);
+  }
+
+  /** Create a remittance batch from the selected billings */
+  onCreateRemittance(): void {
+    if (this.selectedBillings.length === 0) return;
+
+    const remittanceNumber = prompt('Enter remittance number:');
+    if (!remittanceNumber) return;
+
+    const request: RemittanceUpdateRequest = {
+      billingIds: this.selectedBillings.map(b => b.id),
+      remittanceNumber
+    };
+
+    this.billingService.updateRemittance(request).subscribe({
+      next: () => {
+        this.snackBar.open(
+          `Remittance "${remittanceNumber}" assigned to ${this.selectedBillings.length} billing(s)`,
+          'Close',
+          { duration: 5000 }
+        );
+        this.selectedBillings = [];
+        this.loadBillings();
+      },
+      error: () => {
+        this.snackBar.open('Failed to create remittance', 'Close', { duration: 3000 });
+      }
+    });
+  }
+
+  /** Navigate to import status functionality */
+  onImportStatus(): void {
+    this.router.navigate(['/admin/imports']);
   }
 }

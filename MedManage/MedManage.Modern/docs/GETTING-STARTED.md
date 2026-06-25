@@ -160,13 +160,13 @@ Edit `src/MedManage.API/appsettings.json`:
 ### 2. Start the API
 
 ```powershell
-cd src/MedManage.API
+cd src\MedManage.API
 dotnet run
 ```
 
-Or with hot-reload:
+Or with hot-reload (from the solution root):
 ```powershell
-dotnet watch run
+dotnet watch run --project src\MedManage.API
 ```
 
 The API starts at `https://localhost:5001` (HTTPS) and `http://localhost:5000` (HTTP).
@@ -263,7 +263,7 @@ MedManage.Modern/
 dotnet build MedManage.Modern.sln
 
 # Run API with hot-reload
-cd src/MedManage.API && dotnet watch run
+dotnet watch run --project src\MedManage.API
 
 # Build Angular for production
 cd client/medmanage-angular && npx ng build --configuration production

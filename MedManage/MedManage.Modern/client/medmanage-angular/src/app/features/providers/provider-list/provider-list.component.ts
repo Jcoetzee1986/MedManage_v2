@@ -11,6 +11,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatSortModule, Sort } from '@angular/material/sort';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatToolbarModule } from '@angular/material/toolbar';
 import { ProviderService } from '../services/provider.service';
 import { ProviderDto, ProviderSearchRequest } from '../models/provider.models';
 
@@ -28,7 +29,8 @@ import { ProviderDto, ProviderSearchRequest } from '../models/provider.models';
     MatTableModule,
     MatPaginatorModule,
     MatSortModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatToolbarModule
   ],
   templateUrl: './provider-list.component.html',
   styleUrls: ['./provider-list.component.scss']
@@ -46,12 +48,14 @@ export class ProviderListComponent implements OnInit {
   loading = false;
   sortField = 'practiceName';
   sortDirection: 'asc' | 'desc' = 'asc';
+  selectedProvider: ProviderDto | null = null;
 
   searchForm = this.fb.group({
     providerNumber: [''],
     practiceName: [''],
     firstName: [''],
-    lastName: ['']
+    lastName: [''],
+    speciality: ['']
   });
 
   ngOnInit(): void {
@@ -67,6 +71,7 @@ export class ProviderListComponent implements OnInit {
       practiceName: formValue.practiceName || undefined,
       firstName: formValue.firstName || undefined,
       lastName: formValue.lastName || undefined,
+      specialityName: formValue.speciality || undefined,
       pageNumber: this.pageIndex + 1,
       pageSize: this.pageSize,
       sortField: this.sortField,
@@ -90,6 +95,13 @@ export class ProviderListComponent implements OnInit {
     this.loadProviders();
   }
 
+  onSearchKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      this.onSearch();
+    }
+  }
+
   onReset(): void {
     this.searchForm.reset();
     this.pageIndex = 0;
@@ -109,7 +121,17 @@ export class ProviderListComponent implements OnInit {
   }
 
   onRowClick(provider: ProviderDto): void {
+    this.selectedProvider = provider;
+  }
+
+  onRowDoubleClick(provider: ProviderDto): void {
     this.router.navigate(['/providers', provider.id]);
+  }
+
+  onOpenSelected(): void {
+    if (this.selectedProvider) {
+      this.router.navigate(['/providers', this.selectedProvider.id]);
+    }
   }
 
   onNewProvider(): void {

@@ -1,23 +1,46 @@
 <div class="dashboard">
   <div class="dashboard-header">
     <h1>MedManage Dashboard</h1>
-    <app-client-switcher></app-client-switcher>
   </div>
   <p>Welcome to the modernized MedManage application!</p>
-  <div class="stats">
-    <mat-card class="stat-card">
-      <h3>Cases</h3>
-      <p class="stat-value">Loading...</p>
-    </mat-card>
-    <mat-card class="stat-card">
-      <h3>Members</h3>
-      <p class="stat-value">Loading...</p>
-    </mat-card>
-    <mat-card class="stat-card">
-      <h3>Pending Billing</h3>
-      <p class="stat-value">Loading...</p>
-    </mat-card>
-  </div>
+
+  @if (error) {
+    <div class="error-message">
+      <mat-icon>error_outline</mat-icon> {{ error }}
+    </div>
+  }
+
+  @if (loading) {
+    <div class="loading-spinner">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+  }
+
+  @if (stats && !loading) {
+    <div class="stats">
+      <mat-card class="stat-card">
+        <h3>Cases</h3>
+        <p class="stat-value">{{ stats.totalCases | number }}</p>
+      </mat-card>
+      <mat-card class="stat-card">
+        <h3>Members</h3>
+        <p class="stat-value">{{ stats.totalMembers | number }}</p>
+      </mat-card>
+      <mat-card class="stat-card">
+        <h3>Pending Billing</h3>
+        <p class="stat-value">{{ stats.pendingBillingCount | number }}</p>
+      </mat-card>
+      <mat-card class="stat-card">
+        <h3>Active Cases</h3>
+        <p class="stat-value">{{ stats.activeCases | number }}</p>
+      </mat-card>
+      <mat-card class="stat-card">
+        <h3>Recent Cases (30 days)</h3>
+        <p class="stat-value">{{ stats.recentCases | number }}</p>
+      </mat-card>
+    </div>
+  }
+
   <div class="actions">
     <button mat-raised-button color="primary" (click)="goToMyCases()">
       <mat-icon>assignment_ind</mat-icon> My Cases

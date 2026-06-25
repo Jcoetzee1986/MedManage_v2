@@ -1,5 +1,9 @@
 <div class="tab-content">
   <form [formGroup]="form" (ngSubmit)="onSave()" class="provider-form">
+
+    <!-- General Section -->
+    <h3 class="section-title">General</h3>
+
     <div class="form-row">
       <mat-form-field appearance="outline">
         <mat-label>Provider Number</mat-label>
@@ -8,65 +12,196 @@
       </mat-form-field>
 
       <mat-form-field appearance="outline">
+        <mat-label>Surname</mat-label>
+        <input matInput formControlName="lastName" required>
+        <mat-error *ngIf="form.controls.lastName.hasError('required')">Required</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="firstName" required>
+        <mat-error *ngIf="form.controls.firstName.hasError('required')">Required</mat-error>
+      </mat-form-field>
+    </div>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline">
         <mat-label>Practice Name</mat-label>
         <input matInput formControlName="practiceName" required>
         <mat-error *ngIf="form.controls.practiceName.hasError('required')">Required</mat-error>
       </mat-form-field>
-    </div>
 
-    <div class="form-row">
       <mat-form-field appearance="outline">
-        <mat-label>First Name</mat-label>
-        <input matInput formControlName="firstName" required>
-        <mat-error *ngIf="form.controls.firstName.hasError('required')">Required</mat-error>
+        <mat-label>Speciality</mat-label>
+        <input matInput formControlName="specialityName">
       </mat-form-field>
 
       <mat-form-field appearance="outline">
-        <mat-label>Last Name</mat-label>
-        <input matInput formControlName="lastName" required>
-        <mat-error *ngIf="form.controls.lastName.hasError('required')">Required</mat-error>
+        <mat-label>Service Area</mat-label>
+        <input matInput formControlName="serviceArea">
       </mat-form-field>
     </div>
 
     <div class="form-row">
       <mat-form-field appearance="outline">
-        <mat-label>Contact Number</mat-label>
+        <mat-label>Practice Group Number</mat-label>
+        <input matInput formControlName="practiceGroupNumber">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Number of Partners</mat-label>
+        <input matInput type="number" formControlName="numberOfPartners">
+      </mat-form-field>
+
+      <div class="checkbox-field">
+        <mat-checkbox formControlName="isHospital">Is a Hospital</mat-checkbox>
+      </div>
+    </div>
+
+    <!-- Contact Section -->
+    <h3 class="section-title">Contact</h3>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Phone Number</mat-label>
         <input matInput formControlName="contactNumber">
       </mat-form-field>
 
+      <mat-form-field appearance="outline">
+        <mat-label>Cell Number</mat-label>
+        <input matInput formControlName="cellNumber">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Fax</mat-label>
+        <input matInput formControlName="fax">
+      </mat-form-field>
+    </div>
+
+    <div class="form-row">
       <mat-form-field appearance="outline">
         <mat-label>Email</mat-label>
         <input matInput formControlName="email" type="email">
         <mat-error *ngIf="form.controls.email.hasError('email')">Invalid email</mat-error>
       </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Country</mat-label>
+        <input matInput formControlName="countryName">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Language</mat-label>
+        <input matInput formControlName="languageName">
+      </mat-form-field>
     </div>
 
+    <!-- Physical Address Section -->
+    <h3 class="section-title">Physical Address</h3>
+
     <div class="form-row">
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Address</mat-label>
-        <input matInput formControlName="address">
+      <mat-form-field appearance="outline">
+        <mat-label>Address 1</mat-label>
+        <input matInput formControlName="address1">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Address 2</mat-label>
+        <input matInput formControlName="address2">
       </mat-form-field>
     </div>
 
     <div class="form-row">
       <mat-form-field appearance="outline">
-        <mat-label>BHF Number</mat-label>
-        <input matInput formControlName="bHFNumber">
+        <mat-label>Address 3</mat-label>
+        <input matInput formControlName="address3">
       </mat-form-field>
 
       <mat-form-field appearance="outline">
-        <mat-label>HPCSA Number</mat-label>
-        <input matInput formControlName="hpcsaNumber">
+        <mat-label>Address 4</mat-label>
+        <input matInput formControlName="address4">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Code</mat-label>
+        <input matInput formControlName="addressCode">
+      </mat-form-field>
+    </div>
+
+    <!-- Postal Address Section -->
+    <h3 class="section-title">Postal Address</h3>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Postal Address 1</mat-label>
+        <input matInput formControlName="postalAddress1">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Postal Address 2</mat-label>
+        <input matInput formControlName="postalAddress2">
       </mat-form-field>
     </div>
 
     <div class="form-row">
-      <mat-checkbox formControlName="isActive">Active</mat-checkbox>
+      <mat-form-field appearance="outline">
+        <mat-label>Postal Address 3</mat-label>
+        <input matInput formControlName="postalAddress3">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Postal Address 4</mat-label>
+        <input matInput formControlName="postalAddress4">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Postal Code</mat-label>
+        <input matInput formControlName="postalAddressCode">
+      </mat-form-field>
+    </div>
+
+    <!-- Banking Section -->
+    <h3 class="section-title">Bank Details</h3>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Bank Name</mat-label>
+        <input matInput formControlName="bankName">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Branch Name</mat-label>
+        <input matInput formControlName="branchName">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Branch Code</mat-label>
+        <input matInput formControlName="branchCode">
+      </mat-form-field>
+    </div>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Account Type</mat-label>
+        <input matInput formControlName="accountType">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Account Number</mat-label>
+        <input matInput formControlName="accountNumber">
+      </mat-form-field>
+    </div>
+
+    <!-- Status & Actions -->
+    <div class="form-row">
+      <div class="checkbox-field">
+        <mat-checkbox formControlName="isActive">Visible to Users</mat-checkbox>
+      </div>
     </div>
 
     <div class="form-actions">
       <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || saving">
-        {{ isNew ? 'Create' : 'Save' }}
+        <mat-icon>save</mat-icon> {{ isNew ? 'Create' : 'Save' }}
       </button>
     </div>
   </form>

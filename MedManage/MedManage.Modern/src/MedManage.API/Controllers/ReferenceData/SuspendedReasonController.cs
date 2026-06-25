@@ -4,7 +4,7 @@ using MedManage.Core.Interfaces.Services;
 
 namespace MedManage.API.Controllers.ReferenceData;
 
-[Route("api/[controller]")]
+[Route("api/suspended-reason")]
 public class SuspendedReasonController : ReferenceDataController<SuspendedReasonDto, CreateSuspendedReasonDto, UpdateSuspendedReasonDto>
 {
     public SuspendedReasonController(IReferenceDataService<SuspendedReasonDto, CreateSuspendedReasonDto, UpdateSuspendedReasonDto> service)

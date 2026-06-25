@@ -4,7 +4,7 @@ using MedManage.Core.Interfaces.Services;
 
 namespace MedManage.API.Controllers.ReferenceData;
 
-[Route("api/[controller]")]
+[Route("api/case-type")]
 public class CaseTypeController : ReferenceDataController<CaseTypeDto, CreateCaseTypeDto, UpdateCaseTypeDto>
 {
     public CaseTypeController(IReferenceDataService<CaseTypeDto, CreateCaseTypeDto, UpdateCaseTypeDto> service)

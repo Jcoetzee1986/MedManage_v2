@@ -4,7 +4,7 @@ using MedManage.Core.Interfaces.Services;
 
 namespace MedManage.API.Controllers.ReferenceData;
 
-[Route("api/[controller]")]
+[Route("api/period-in-country")]
 public class PeriodInCountryController : ReferenceDataController<PeriodInCountryDto, CreatePeriodInCountryDto, UpdatePeriodInCountryDto>
 {
     public PeriodInCountryController(IReferenceDataService<PeriodInCountryDto, CreatePeriodInCountryDto, UpdatePeriodInCountryDto> service)

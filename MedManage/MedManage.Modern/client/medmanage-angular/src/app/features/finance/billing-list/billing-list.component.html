@@ -81,19 +81,16 @@
     </mat-card-content>
   </mat-card>
 
-  <!-- ag-Grid -->
-  <div class="grid-container">
-    <ag-grid-angular
-      class="ag-theme-material"
-      [columnDefs]="columnDefs"
-      [defaultColDef]="defaultColDef"
-      [rowModelType]="rowModelType"
-      [pagination]="true"
-      [paginationPageSize]="50"
-      [cacheBlockSize]="50"
-      [rowSelection]="'single'"
-      (gridReady)="onGridReady($event)"
-      (rowDoubleClicked)="onRowDoubleClicked($event)">
-    </ag-grid-angular>
-  </div>
+  <!-- Data Table -->
+  <app-data-table
+    [columns]="tableColumnDefs"
+    [data]="rowData"
+    [totalCount]="totalCount"
+    [pageSize]="pageSize"
+    [pageIndex]="pageIndex"
+    emptyMessage="No billing records found."
+    (rowDblClick)="onRowDoubleClicked($event)"
+    (rowClick)="selectedRow = $event"
+    (pageChange)="onPageChange($event)">
+  </app-data-table>
 </div>

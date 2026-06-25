@@ -10,15 +10,9 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { AgGridModule } from 'ag-grid-angular';
-import {
-  ColDef,
-  GridReadyEvent,
-  GridApi,
-  IServerSideDatasource,
-  IServerSideGetRowsParams
-} from 'ag-grid-community';
+import { PageEvent } from '@angular/material/paginator';
 import { ReferenceDataDropdownComponent } from '../../../shared/components/reference-data-dropdown/reference-data-dropdown.component';
+import { DataTableComponent, DataTableColumn } from '../../../shared/components/data-table/data-table.component';
 import { BillingService } from '../services/billing.service';
 import { BillingSearchRequest } from '../models/billing.models';
 
@@ -36,7 +30,7 @@ import { BillingSearchRequest } from '../models/billing.models';
     MatNativeDateModule,
     MatCardModule,
     MatCheckboxModule,
-    AgGridModule,
+    DataTableComponent,
     ReferenceDataDropdownComponent
   ],
   templateUrl: './billing-list.component.html',
@@ -47,7 +41,12 @@ export class BillingListComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
 
-  private gridApi!: GridApi;
+  selectedRow: any = null;
+
+  /** Pagination */
+  totalCount = 0;
+  pageSize = 30;
+  pageIndex = 0;
 
   /** Search filter form */
   searchForm = this.fb.group({
@@ -62,119 +61,81 @@ export class BillingListComponent implements OnInit {
     dateTo: [null as Date | null]
   });
 
-  /** ag-Grid column definitions */
-  columnDefs: ColDef[] = [
-    { field: 'accountNumber', headerName: 'Account #', width: 130, sortable: true },
-    { field: 'invoiceNumber', headerName: 'Invoice #', width: 130, sortable: true },
-    { field: 'caseNumber', headerName: 'Case #', width: 120, sortable: true },
-    { field: 'memberName', headerName: 'Member', flex: 1, sortable: true },
-    { field: 'providerName', headerName: 'Provider', flex: 1, sortable: true },
-    { field: 'billingStatusName', headerName: 'Status', width: 120 },
-    {
-      field: 'amount',
-      headerName: 'Amount',
-      width: 120,
-      type: 'numericColumn',
-      valueFormatter: p => p.value != null ? `R ${p.value.toFixed(2)}` : ''
-    },
-    {
-      field: 'amountPaid',
-      headerName: 'Paid',
-      width: 120,
-      type: 'numericColumn',
-      valueFormatter: p => p.value != null ? `R ${p.value.toFixed(2)}` : ''
-    },
-    { field: 'remittanceNumber', headerName: 'Remittance #', width: 140 },
-    {
-      field: 'dateReceived',
-      headerName: 'Received',
-      width: 120,
-      valueFormatter: p => p.value ? new Date(p.value).toLocaleDateString() : ''
-    },
-    {
-      field: 'datePaid',
-      headerName: 'Date Paid',
-      width: 120,
-      valueFormatter: p => p.value ? new Date(p.value).toLocaleDateString() : ''
-    }
+  /** Column definitions for DataTableComponent */
+  tableColumnDefs: DataTableColumn[] = [
+    { field: 'accountNumber', header: 'Account #', width: '130px' },
+    { field: 'invoiceNumber', header: 'Invoice #', width: '130px' },
+    { field: 'caseNumber', header: 'Case #', width: '120px' },
+    { field: 'memberName', header: 'Member' },
+    { field: 'providerName', header: 'Provider' },
+    { field: 'billingStatusName', header: 'Status', width: '120px' },
+    { field: 'amount', header: 'Amount', width: '120px', pipe: 'currency', align: 'right' },
+    { field: 'amountPaid', header: 'Paid', width: '120px', pipe: 'currency', align: 'right' },
+    { field: 'remittanceNumber', header: 'Remittance #', width: '140px' },
+    { field: 'dateReceived', header: 'Received', width: '110px', pipe: 'date' },
+    { field: 'datePaid', header: 'Date Paid', width: '110px', pipe: 'date' }
   ];
 
-  /** ag-Grid default column settings */
-  defaultColDef: ColDef = {
-    resizable: true,
-    filter: false
-  };
+  /** Row data */
+  rowData: any[] = [];
 
-  /** Server-side row model type */
-  rowModelType: 'serverSide' = 'serverSide';
-
-  ngOnInit(): void {}
-
-  onGridReady(params: GridReadyEvent): void {
-    this.gridApi = params.api;
-    this.gridApi.setGridOption('serverSideDatasource', this.createDatasource());
+  ngOnInit(): void {
+    this.loadBillings();
   }
 
-  /** Create server-side datasource for ag-Grid */
-  private createDatasource(): IServerSideDatasource {
-    return {
-      getRows: (params: IServerSideGetRowsParams) => {
-        const startRow = params.request.startRow ?? 0;
-        const endRow = params.request.endRow ?? 50;
-        const pageSize = endRow - startRow;
-        const pageNumber = Math.floor(startRow / pageSize) + 1;
-
-        const sortModel = params.request.sortModel;
-        const sortField = sortModel?.length ? sortModel[0].colId : undefined;
-        const sortDirection = sortModel?.length ? sortModel[0].sort as 'asc' | 'desc' : undefined;
-
-        const formValue = this.searchForm.value;
-        const searchRequest: BillingSearchRequest = {
-          providerName: formValue.providerName || undefined,
-          accountNumber: formValue.accountNumber || undefined,
-          memberName: formValue.memberName || undefined,
-          memberNumber: formValue.memberNumber || undefined,
-          billingStatusId: formValue.billingStatusId || undefined,
-          isPaid: formValue.isPaid ?? undefined,
-          remittanceNumber: formValue.remittanceNumber || undefined,
-          dateFrom: formValue.dateFrom ? formValue.dateFrom.toISOString() : undefined,
-          dateTo: formValue.dateTo ? formValue.dateTo.toISOString() : undefined,
-          pageNumber,
-          pageSize,
-          sortField,
-          sortDirection
-        };
-
-        this.billingService.search(searchRequest).subscribe({
-          next: (result) => {
-            params.success({
-              rowData: result.items,
-              rowCount: result.totalCount
-            });
-          },
-          error: () => {
-            params.fail();
-          }
-        });
-      }
+  /** Load billings from the API */
+  private loadBillings(): void {
+    const formValue = this.searchForm.value;
+    const searchRequest: BillingSearchRequest = {
+      providerName: formValue.providerName || undefined,
+      accountNumber: formValue.accountNumber || undefined,
+      memberName: formValue.memberName || undefined,
+      memberNumber: formValue.memberNumber || undefined,
+      billingStatusId: formValue.billingStatusId || undefined,
+      isPaid: formValue.isPaid ?? undefined,
+      remittanceNumber: formValue.remittanceNumber || undefined,
+      dateFrom: formValue.dateFrom ? formValue.dateFrom.toISOString() : undefined,
+      dateTo: formValue.dateTo ? formValue.dateTo.toISOString() : undefined,
+      pageNumber: this.pageIndex + 1,
+      pageSize: this.pageSize
     };
+
+    this.billingService.search(searchRequest).subscribe({
+      next: (result) => {
+        this.rowData = result.items;
+        this.totalCount = result.totalCount;
+      },
+      error: () => {
+        this.rowData = [];
+        this.totalCount = 0;
+      }
+    });
   }
 
   /** Execute search with current filters */
   onSearch(): void {
-    this.gridApi?.refreshServerSide({ purge: true });
+    this.pageIndex = 0;
+    this.loadBillings();
+  }
+
+  /** Handle page changes */
+  onPageChange(event: PageEvent): void {
+    this.pageIndex = event.pageIndex;
+    this.pageSize = event.pageSize;
+    this.loadBillings();
   }
 
   /** Reset search form */
   onReset(): void {
     this.searchForm.reset();
-    this.gridApi?.refreshServerSide({ purge: true });
+    this.pageIndex = 0;
+    this.loadBillings();
   }
 
   /** Navigate to billing detail */
-  onRowDoubleClicked(event: any): void {
-    if (event.data) {
-      this.router.navigate(['/finance/billing', event.data.id]);
+  onRowDoubleClicked(row: any): void {
+    if (row) {
+      this.router.navigate(['/finance/billing', row.id]);
     }
   }
 

@@ -8,19 +8,29 @@
       <!-- Search Filters -->
       <form [formGroup]="searchForm" class="search-form" (ngSubmit)="onSearch()">
         <mat-form-field appearance="outline">
+          <mat-label>Surname</mat-label>
+          <input matInput formControlName="surname" placeholder="Search by surname">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Name</mat-label>
+          <input matInput formControlName="name" placeholder="Search by name">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
           <mat-label>Member Number</mat-label>
           <input matInput formControlName="memberNumber" placeholder="Search by member #">
         </mat-form-field>
 
         <mat-form-field appearance="outline">
-          <mat-label>Date From</mat-label>
+          <mat-label>Travel Date From</mat-label>
           <input matInput [matDatepicker]="dateFromPicker" formControlName="dateFrom">
           <mat-datepicker-toggle matIconSuffix [for]="dateFromPicker"></mat-datepicker-toggle>
           <mat-datepicker #dateFromPicker></mat-datepicker>
         </mat-form-field>
 
         <mat-form-field appearance="outline">
-          <mat-label>Date To</mat-label>
+          <mat-label>Travel Date To</mat-label>
           <input matInput [matDatepicker]="dateToPicker" formControlName="dateTo">
           <mat-datepicker-toggle matIconSuffix [for]="dateToPicker"></mat-datepicker-toggle>
           <mat-datepicker #dateToPicker></mat-datepicker>
@@ -44,25 +54,17 @@
       </div>
 
       <!-- Grid -->
-      <ag-grid-angular
-        class="ag-theme-material booking-grid"
-        [rowData]="rowData"
-        [columnDefs]="columnDefs"
-        [defaultColDef]="defaultColDef"
-        [animateRows]="true"
-        (gridReady)="onGridReady($event)"
-        (rowDoubleClicked)="onRowDoubleClicked($event)">
-      </ag-grid-angular>
-
-      <!-- Server-side Pagination -->
-      <mat-paginator
-        [length]="totalCount"
+      <app-data-table
+        [columns]="tableColumnDefs"
+        [data]="rowData"
+        [totalCount]="totalCount"
         [pageSize]="pageSize"
         [pageIndex]="pageIndex"
-        [pageSizeOptions]="[10, 25, 50, 100]"
-        (page)="onPageChange($event)"
-        showFirstLastButtons>
-      </mat-paginator>
+        [loading]="loading"
+        emptyMessage="No bookings found."
+        (rowDblClick)="onRowDoubleClicked($event)"
+        (pageChange)="onPageChange($event)">
+      </app-data-table>
     </mat-card-content>
   </mat-card>
 </div>

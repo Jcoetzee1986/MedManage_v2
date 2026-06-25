@@ -6,8 +6,37 @@ export interface ProviderDto {
   lastName: string;
   specialityId: number | null;
   specialityName: string | null;
+  practiceGroupNumber: string | null;
+  numberOfPartners: number | null;
+  serviceArea: string | null;
+  isHospital: boolean;
   contactNumber: string | null;
+  cellNumber: string | null;
+  fax: string | null;
   email: string | null;
+  countryId: number | null;
+  countryName: string | null;
+  languageId: number | null;
+  languageName: string | null;
+  // Physical address
+  address1: string | null;
+  address2: string | null;
+  address3: string | null;
+  address4: string | null;
+  addressCode: string | null;
+  // Postal address
+  postalAddress1: string | null;
+  postalAddress2: string | null;
+  postalAddress3: string | null;
+  postalAddress4: string | null;
+  postalAddressCode: string | null;
+  // Banking
+  bankName: string | null;
+  branchName: string | null;
+  branchCode: string | null;
+  accountType: string | null;
+  accountNumber: string | null;
+  // Legacy compat
   address: string | null;
   bHFNumber: string | null;
   hpcsaNumber: string | null;
@@ -21,8 +50,31 @@ export interface CreateProviderRequest {
   firstName: string;
   lastName: string;
   specialityId?: number | null;
+  practiceGroupNumber?: string | null;
+  numberOfPartners?: number | null;
+  serviceArea?: string | null;
+  isHospital?: boolean;
   contactNumber?: string | null;
+  cellNumber?: string | null;
+  fax?: string | null;
   email?: string | null;
+  countryId?: number | null;
+  languageId?: number | null;
+  address1?: string | null;
+  address2?: string | null;
+  address3?: string | null;
+  address4?: string | null;
+  addressCode?: string | null;
+  postalAddress1?: string | null;
+  postalAddress2?: string | null;
+  postalAddress3?: string | null;
+  postalAddress4?: string | null;
+  postalAddressCode?: string | null;
+  bankName?: string | null;
+  branchName?: string | null;
+  branchCode?: string | null;
+  accountType?: string | null;
+  accountNumber?: string | null;
   address?: string | null;
   bHFNumber?: string | null;
   hpcsaNumber?: string | null;
@@ -37,6 +89,7 @@ export interface ProviderSearchRequest {
   firstName?: string;
   lastName?: string;
   specialityId?: number;
+  specialityName?: string;
   pageNumber?: number;
   pageSize?: number;
   sortField?: string;

@@ -24,6 +24,9 @@ export interface CaseBillingDto {
   amountPaid?: number;
   finalInvoiceAmount?: number;
   remittanceNumber?: string;
+  submitted?: boolean;
+  reported?: boolean;
+  reportedDate?: string;
   comments?: string;
   dateCreated?: string;
   dateUpdated?: string;
@@ -37,8 +40,21 @@ export interface CreateBillingRequest {
   billingStatusId?: number;
   dateReceived?: string;
   dateSubmitted?: string;
+  datePaid?: string;
+  accountDateFrom?: string;
+  accountDateTo?: string;
   amount?: number;
   finalInvoiceAmount?: number;
+  discount?: number;
+  penalty?: number;
+  rejectedAmount?: number;
+  remittanceNumber?: string;
+  submitted?: boolean;
+  reported?: boolean;
+  reportedDate?: string;
+  patientName?: string;
+  patientSurname?: string;
+  patientInitials?: string;
   comments?: string;
 }
 

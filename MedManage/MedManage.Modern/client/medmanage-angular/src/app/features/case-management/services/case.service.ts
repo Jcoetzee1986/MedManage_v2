@@ -1,9 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import {
-  CaseDto, CreateCaseRequest, UpdateCaseRequest, CaseSearchRequest, PagedResult,
+  CaseDto, CreateCaseRequest, UpdateCaseRequest, CaseSearchRequest, PagedResult, ApiResponse,
   CaseCptDto, CreateCaseCptRequest,
   CaseIcdDto, CreateCaseIcdRequest,
   CaseTariffDto, CreateCaseTariffRequest,
@@ -15,7 +15,8 @@ import {
   CaseNappiDto, CreateCaseNappiRequest,
   CaseFileDto,
   CaseLinkDto, CreateCaseLinkRequest,
-  CaseCopyRequest
+  CaseCopyRequest,
+  DuplicateCheckResult
 } from '../models/case.models';
 
 @Injectable({
@@ -28,27 +29,39 @@ export class CaseService {
   // ─── Case CRUD ───────────────────────────────────────────────
 
   search(request: CaseSearchRequest): Observable<PagedResult<CaseDto>> {
-    return this.http.post<PagedResult<CaseDto>>(`${this.baseUrl}/search`, request);
+    return this.http.post<ApiResponse<PagedResult<CaseDto>>>(`${this.baseUrl}/search`, request)
+      .pipe(map(r => r.data));
   }
 
   getMyCases(): Observable<CaseDto[]> {
-    return this.http.get<CaseDto[]>(`${this.baseUrl}/my-cases`);
+    return this.http.get<ApiResponse<CaseDto[]>>(`${this.baseUrl}/my-cases`)
+      .pipe(map(r => r.data));
   }
 
   getById(id: number): Observable<CaseDto> {
-    return this.http.get<CaseDto>(`${this.baseUrl}/${id}`);
+    return this.http.get<ApiResponse<CaseDto>>(`${this.baseUrl}/${id}`)
+      .pipe(map(r => r.data));
   }
 
   create(request: CreateCaseRequest): Observable<CaseDto> {
-    return this.http.post<CaseDto>(this.baseUrl, request);
+    return this.http.post<ApiResponse<CaseDto>>(this.baseUrl, request)
+      .pipe(map(r => r.data));
   }
 
   update(id: number, request: UpdateCaseRequest): Observable<CaseDto> {
-    return this.http.put<CaseDto>(`${this.baseUrl}/${id}`, request);
+    return this.http.put<ApiResponse<CaseDto>>(`${this.baseUrl}/${id}`, request)
+      .pipe(map(r => r.data));
   }
 
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  }
+
+  /** Generate a report for cases between dates */
+  exportReport(request: CaseSearchRequest): Observable<Blob> {
+    return this.http.post(`${environment.apiUrl}/reports/cases-between-dates`, request, {
+      responseType: 'blob'
+    });
   }
 
   // ─── CPT Codes ──────────────────────────────────────────────
@@ -273,6 +286,12 @@ export class CaseService {
   /** Release ALL locks held by the current user (call on logout) */
   releaseAllMyLocks(): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/locks/mine`);
+  }
+
+  // ─── Case Duplicate Check ────────────────────────────────────
+
+  checkDuplicate(request: CreateCaseRequest): Observable<DuplicateCheckResult> {
+    return this.http.post<DuplicateCheckResult>(`${this.baseUrl}/check-duplicate`, request);
   }
 
   // ─── Case Status Transition ─────────────────────────────────

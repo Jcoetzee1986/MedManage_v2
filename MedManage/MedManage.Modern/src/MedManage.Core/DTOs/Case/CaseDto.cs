@@ -32,6 +32,32 @@ public class CaseDto
     public decimal? PenaltyPercentage { get; set; }
     public int? CaseCategoryId { get; set; }
 
+    // Flattened member properties
+    public string? MemberNumber { get; set; }
+    public string? MemberSurname { get; set; }
+    public string? MemberName { get; set; }
+    public string? MemberIdNumber { get; set; }
+    public DateOnly? MemberDateOfBirth { get; set; }
+    public string? MemberMedicalAidName { get; set; }
+    public string? MemberProductName { get; set; }
+    public string? MemberStatusName { get; set; }
+
+    // Flattened status/type properties
+    public string? CaseStatusName { get; set; }
+    public string? CaseTypeName { get; set; }
+
+    // Flattened Refer To provider properties
+    public string? ReferToPracticeName { get; set; }
+    public string? ReferToPersonSurname { get; set; }
+    public string? ReferToPersonName { get; set; }
+    public string? ReferToSpeciality { get; set; }
+
+    // Flattened Refer From provider properties
+    public string? ReferFromPracticeName { get; set; }
+    public string? ReferFromPersonSurname { get; set; }
+    public string? ReferFromPersonName { get; set; }
+    public string? ReferFromSpeciality { get; set; }
+
     // Audit fields
     public DateTime DateInserted { get; set; }
     public string UserID { get; set; } = string.Empty;
