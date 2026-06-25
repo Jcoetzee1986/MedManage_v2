@@ -212,17 +212,35 @@ export class AuthService {
    * Logout current user. Releases all case locks and revokes tokens.
    */
   logout(): void {
-    // Release all case locks held by this user (fire-and-forget)
-    this.http.delete(`${environment.apiUrl}/cases/locks/mine`).subscribe({
-      error: () => {} // best-effort
-    });
+    // Guard against re-entrant logout (prevents infinite loop)
+    const token = this.getToken();
+    if (!token) {
+      // Already logged out — just clean up and navigate
+      this.removeToken();
+      this.removeRefreshToken();
+      this.removeUser();
+      this.currentUserSubject.next(null);
+      this.router.navigate(['/login']);
+      return;
+    }
 
-    // Try to revoke refresh token if it exists
-    const refreshToken = this.getRefreshToken();
-    if (refreshToken) {
-      this.revokeToken(refreshToken).subscribe({
-        error: (err) => console.error('Failed to revoke token:', err)
+    // Only attempt lock release and token revocation if token is still valid
+    const expiry = this.getTokenExpiration();
+    const tokenStillValid = !expiry || expiry > new Date();
+
+    if (tokenStillValid) {
+      // Release all case locks held by this user (fire-and-forget)
+      this.http.delete(`${environment.apiUrl}/cases/locks/mine`).subscribe({
+        error: () => {} // best-effort
       });
+
+      // Try to revoke refresh token
+      const refreshToken = this.getRefreshToken();
+      if (refreshToken) {
+        this.revokeToken(refreshToken).subscribe({
+          error: () => {} // best-effort
+        });
+      }
     }
 
     this.removeToken();
@@ -242,7 +260,11 @@ export class AuthService {
     // Check if token is expired
     const expiry = this.getTokenExpiration();
     if (expiry && expiry < new Date()) {
-      this.logout();
+      // Token expired — clean up silently without triggering HTTP calls
+      this.removeToken();
+      this.removeRefreshToken();
+      this.removeUser();
+      this.currentUserSubject.next(null);
       return false;
     }
 

@@ -1,4 +1,4 @@
-<div class="case-detail-container" *ngIf="!loading; else loadingTpl" cdkScrollable>
+<div class="case-detail-container" *ngIf="!loading; else loadingTpl">
   <!-- Toolbar -->
   <mat-toolbar class="case-toolbar">
     <button mat-icon-button (click)="onClose()" aria-label="Back to list" matTooltip="Close">
@@ -13,28 +13,23 @@
 
     <span class="status-badge" *ngIf="caseData?.caseStatusName">{{ caseData?.caseStatusName }}</span>
 
-    <!-- Save -->
     <button mat-raised-button color="primary" (click)="onSave()" [disabled]="saving" matTooltip="Save case">
       <mat-icon>save</mat-icon> Save
     </button>
 
-    <!-- Close -->
     <button mat-stroked-button (click)="onClose()" matTooltip="Close and return to list">
       <mat-icon>close</mat-icon> Close
     </button>
 
-    <!-- Print Letter (requires saved case) -->
     <button mat-stroked-button (click)="onPrintLetter()" *ngIf="!isNewCase"
             matTooltip="Generate case letter PDF (requires ICD codes)">
       <mat-icon>print</mat-icon> Print Letter
     </button>
 
-    <!-- Create Booking -->
     <button mat-stroked-button (click)="onCreateBooking()" *ngIf="!isNewCase" matTooltip="Create a new booking for this case">
       <mat-icon>event</mat-icon> Create Booking
     </button>
 
-    <!-- Copy (Role restricted: CaseManager / Admin) -->
     <ng-container *hasRole="['CaseManager', 'Admin']">
       <button mat-stroked-button (click)="onCopyCase()" *ngIf="!isNewCase" matTooltip="Copy this case">
         <mat-icon>content_copy</mat-icon> Copy
@@ -42,421 +37,300 @@
     </ng-container>
   </mat-toolbar>
 
-  <!-- Tabbed Content -->
-  <mat-tab-group class="case-tabs" [animationDuration]="'0ms'">
-    <!-- Primary Details Tab -->
-    <mat-tab label="Case Detail">
-      <div class="tab-content">
-        <form [formGroup]="form">
-          <!-- Case Info Section -->
-          <h3 class="section-header">Case Information</h3>
-          <div class="form-grid">
-            <!-- Case ID (read-only) -->
-            <mat-form-field appearance="outline" *ngIf="!isNewCase">
-              <mat-label>Case ID</mat-label>
-              <input matInput [value]="caseData?.caseId || caseId" readonly>
-            </mat-form-field>
+  <!-- Tab Navigation -->
+  <nav mat-tab-nav-bar [tabPanel]="tabPanel">
+    @for (tab of tabs; track tab.id) {
+      <a mat-tab-link
+         (click)="activeTab = tab.id"
+         [active]="activeTab === tab.id">{{ tab.label }}</a>
+    }
+  </nav>
 
-            <mat-form-field appearance="outline">
-              <mat-label>Auth Number</mat-label>
-              <input matInput formControlName="authNumber">
-            </mat-form-field>
+  <!-- Tab Content -->
+  <mat-tab-nav-panel #tabPanel>
+    @switch (activeTab) {
+      @case ('detail') {
+        <div class="tab-content">
+          <form [formGroup]="form">
+            <h3 class="section-header">Case Information</h3>
+            <div class="form-grid">
+              <mat-form-field appearance="outline" *ngIf="!isNewCase">
+                <mat-label>Case ID</mat-label>
+                <input matInput [value]="caseData?.caseId || caseId" readonly>
+              </mat-form-field>
 
-            <mat-form-field appearance="outline">
-              <mat-label>Account Number</mat-label>
-              <input matInput formControlName="accountNr">
-            </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Auth Number</mat-label>
+                <input matInput formControlName="authNumber">
+              </mat-form-field>
 
-            <app-reference-data-dropdown
-              resource="case-status"
-              label="Case Status"
-              formControlName="caseStatusId">
-            </app-reference-data-dropdown>
+              <mat-form-field appearance="outline">
+                <mat-label>Account Number</mat-label>
+                <input matInput formControlName="accountNr">
+              </mat-form-field>
 
-            <app-reference-data-dropdown
-              resource="case-type"
-              label="Case Type *"
-              [required]="true"
-              formControlName="caseTypeId">
-            </app-reference-data-dropdown>
+              <mat-form-field appearance="outline">
+                <mat-label>Case Status</mat-label>
+                <mat-select formControlName="caseStatusId">
+                  <mat-option [value]="null">-- None --</mat-option>
+                  @for (item of caseStatuses; track item.id) {
+                    <mat-option [value]="item.id">{{ item.name }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
 
-            <app-reference-data-dropdown
-              resource="case-category"
-              label="Case Category *"
-              [required]="true"
-              formControlName="caseCategoryId">
-            </app-reference-data-dropdown>
-          </div>
+              <mat-form-field appearance="outline">
+                <mat-label>Case Type **</mat-label>
+                <mat-select formControlName="caseTypeId" required>
+                  <mat-option [value]="null">-- None --</mat-option>
+                  @for (item of caseTypes; track item.id) {
+                    <mat-option [value]="item.id">{{ item.name }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
 
-          <!-- Financial Section -->
-          <h3 class="section-header">Financial</h3>
-          <div class="form-grid">
-            <mat-form-field appearance="outline">
-              <mat-label>Interim Amount</mat-label>
-              <input matInput type="number" formControlName="interimAmount" step="0.01">
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Final Invoice Amount</mat-label>
-              <input matInput type="number" formControlName="finalInvoiceAmount" step="0.01">
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Penalty %</mat-label>
-              <input matInput type="number" formControlName="penaltyPercentage" min="0" max="100" step="1">
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Final Invoice With Penalty</mat-label>
-              <input matInput formControlName="finalInvoiceWithPenalty" readonly>
-            </mat-form-field>
-          </div>
-
-          <!-- Flags -->
-          <div class="form-row checkbox-row">
-            <mat-checkbox formControlName="wasBooking">Was Booking</mat-checkbox>
-            <mat-checkbox formControlName="wcaIod">WCA / IOD</mat-checkbox>
-            <span class="readonly-field" *ngIf="caseData?.changeToCaseDate">
-              Change To Case Date: {{ caseData?.changeToCaseDate | date:'dd/MM/yyyy' }}
-            </span>
-          </div>
-
-          <mat-divider></mat-divider>
-
-          <!-- Member Section -->
-          <h3 class="section-header">Member *</h3>
-          <div class="form-grid">
-            <mat-form-field appearance="outline" class="span-2">
-              <mat-label>Search Member (type surname)</mat-label>
-              <input matInput formControlName="memberSearch" [matAutocomplete]="memberAuto">
-              <button mat-icon-button matSuffix *ngIf="form.get('memberId')?.value" (click)="clearMember()">
-                <mat-icon>clear</mat-icon>
-              </button>
-              <mat-autocomplete #memberAuto="matAutocomplete">
-                <mat-option *ngFor="let m of memberSearchResults" [value]="m.lastName + ', ' + m.firstName"
-                            (onSelectionChange)="onMemberSelected(m)">
-                  {{ m.lastName }}, {{ m.firstName }} — {{ m.memberNumber }}
-                </mat-option>
-              </mat-autocomplete>
-              <mat-hint *ngIf="memberSearching">Searching...</mat-hint>
-            </mat-form-field>
-          </div>
-          <!-- Member details display -->
-          <div class="info-grid" *ngIf="selectedMember || caseData?.memberId">
-            <div class="info-item">
-              <span class="info-label">Surname</span>
-              <span class="info-value">{{ selectedMember?.lastName || caseData?.memberSurname || '—' }}</span>
+              <mat-form-field appearance="outline">
+                <mat-label>Case Category **</mat-label>
+                <mat-select formControlName="caseCategoryId" required>
+                  <mat-option [value]="null">-- None --</mat-option>
+                  @for (item of caseCategories; track item.id) {
+                    <mat-option [value]="item.id">{{ item.name }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
             </div>
-            <div class="info-item">
-              <span class="info-label">Name</span>
-              <span class="info-value">{{ selectedMember?.firstName || caseData?.memberName || '—' }}</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">ID Number</span>
-              <span class="info-value">{{ selectedMember?.idNumber || caseData?.memberIdNumber || '—' }}</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">Date of Birth</span>
-              <span class="info-value">{{ (selectedMember?.dateOfBirth || caseData?.memberDateOfBirth) | date:'dd/MM/yyyy' }}</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">Medical Aid</span>
-              <span class="info-value">{{ selectedMember?.medicalAidName || caseData?.memberMedicalAidName || '—' }}</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">Product</span>
-              <span class="info-value">{{ selectedMember?.medicalAidProductName || caseData?.memberProductName || '—' }}</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">Status</span>
-              <span class="info-value">{{ selectedMember?.memberStatusName || caseData?.memberStatusName || '—' }}</span>
-            </div>
-          </div>
 
-          <mat-divider></mat-divider>
+            <h3 class="section-header">Financial</h3>
+            <div class="form-grid">
+              <mat-form-field appearance="outline">
+                <mat-label>Interim Amount</mat-label>
+                <input matInput type="number" formControlName="interimAmount" step="0.01">
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Final Invoice Amount</mat-label>
+                <input matInput type="number" formControlName="finalInvoiceAmount" step="0.01">
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Penalty %</mat-label>
+                <input matInput type="number" formControlName="penaltyPercentage" min="0" max="100" step="1">
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Final Invoice With Penalty</mat-label>
+                <input matInput formControlName="finalInvoiceWithPenalty" readonly>
+              </mat-form-field>
+            </div>
 
-          <!-- Refer To Practice -->
-          <h3 class="section-header">Refer To Practice *</h3>
-          <div class="form-grid">
-            <mat-form-field appearance="outline" class="span-2">
-              <mat-label>Search Provider (type name)</mat-label>
-              <input matInput formControlName="referToSearch" [matAutocomplete]="referToAuto">
-              <button mat-icon-button matSuffix *ngIf="form.get('referToId')?.value" (click)="clearReferTo()">
-                <mat-icon>clear</mat-icon>
-              </button>
-              <mat-autocomplete #referToAuto="matAutocomplete">
-                <mat-option *ngFor="let p of referToResults"
-                            [value]="p.practiceName + ' - ' + p.lastName + ', ' + p.firstName"
-                            (onSelectionChange)="onReferToSelected(p)">
-                  {{ p.practiceName }} — {{ p.lastName }}, {{ p.firstName }} ({{ p.specialityName || 'N/A' }})
-                </mat-option>
-              </mat-autocomplete>
+            <div class="form-row checkbox-row">
+              <mat-checkbox formControlName="wasBooking">Was Booking</mat-checkbox>
+              <mat-checkbox formControlName="wcaIod">WCA / IOD</mat-checkbox>
+              <span class="readonly-field" *ngIf="caseData?.changeToCaseDate">
+                Change To Case Date: {{ caseData?.changeToCaseDate | date:'dd/MM/yyyy' }}
+              </span>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <h3 class="section-header">Member *</h3>
+            <div class="form-grid">
+              <mat-form-field appearance="outline" class="span-2">
+                <mat-label>Search Member (type surname)</mat-label>
+                <input matInput formControlName="memberSearch" [matAutocomplete]="memberAuto">
+                <button mat-icon-button matSuffix *ngIf="form.get('memberId')?.value" (click)="clearMember()">
+                  <mat-icon>clear</mat-icon>
+                </button>
+                <mat-autocomplete #memberAuto="matAutocomplete">
+                  <mat-option *ngFor="let m of memberSearchResults" [value]="m.lastName + ', ' + m.firstName"
+                              (onSelectionChange)="onMemberSelected(m)">
+                    {{ m.lastName }}, {{ m.firstName }} — {{ m.memberNumber }}
+                  </mat-option>
+                </mat-autocomplete>
+                <mat-hint *ngIf="memberSearching">Searching...</mat-hint>
+              </mat-form-field>
+            </div>
+            <div class="info-grid" *ngIf="selectedMember || caseData?.memberId">
+              <div class="info-item">
+                <span class="info-label">Surname</span>
+                <span class="info-value">{{ selectedMember?.lastName || caseData?.memberSurname || '—' }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Name</span>
+                <span class="info-value">{{ selectedMember?.firstName || caseData?.memberName || '—' }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">ID Number</span>
+                <span class="info-value">{{ selectedMember?.idNumber || caseData?.memberIdNumber || '—' }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Date of Birth</span>
+                <span class="info-value">{{ (selectedMember?.dateOfBirth || caseData?.memberDateOfBirth) | date:'dd/MM/yyyy' }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Medical Aid</span>
+                <span class="info-value">{{ selectedMember?.medicalAidName || caseData?.memberMedicalAidName || '—' }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Product</span>
+                <span class="info-value">{{ selectedMember?.medicalAidProductName || caseData?.memberProductName || '—' }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Status</span>
+                <span class="info-value">{{ selectedMember?.memberStatusName || caseData?.memberStatusName || '—' }}</span>
+              </div>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <h3 class="section-header">Refer To Practice *</h3>
+            <div class="form-grid">
+              <mat-form-field appearance="outline" class="span-2">
+                <mat-label>Search Provider (type name)</mat-label>
+                <input matInput formControlName="referToSearch" [matAutocomplete]="referToAuto">
+                <button mat-icon-button matSuffix *ngIf="form.get('referToId')?.value" (click)="clearReferTo()">
+                  <mat-icon>clear</mat-icon>
+                </button>
+                <mat-autocomplete #referToAuto="matAutocomplete">
+                  <mat-option *ngFor="let p of referToResults"
+                              [value]="p.practiceName + ' - ' + p.lastName + ', ' + p.firstName"
+                              (onSelectionChange)="onReferToSelected(p)">
+                    {{ p.practiceName }} — {{ p.lastName }}, {{ p.firstName }} ({{ p.specialityName || 'N/A' }})
+                  </mat-option>
+                </mat-autocomplete>
+              </mat-form-field>
+            </div>
+            <div class="info-grid" *ngIf="selectedReferTo || caseData?.referToId">
+              <div class="info-item">
+                <span class="info-label">Practice Name</span>
+                <span class="info-value">{{ selectedReferTo?.practiceName || caseData?.referToPracticeName || '—' }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Person</span>
+                <span class="info-value">{{ selectedReferTo ? (selectedReferTo.lastName + ', ' + selectedReferTo.firstName) : ((caseData?.referToPersonSurname || '') + ', ' + (caseData?.referToPersonName || '')) }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Speciality</span>
+                <span class="info-value">{{ selectedReferTo?.specialityName || caseData?.referToSpeciality || '—' }}</span>
+              </div>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <h3 class="section-header">Refer From Practice</h3>
+            <div class="form-grid">
+              <mat-form-field appearance="outline" class="span-2">
+                <mat-label>Search Provider (type name)</mat-label>
+                <input matInput formControlName="referFromSearch" [matAutocomplete]="referFromAuto">
+                <button mat-icon-button matSuffix *ngIf="form.get('referFromId')?.value" (click)="clearReferFrom()">
+                  <mat-icon>clear</mat-icon>
+                </button>
+                <mat-autocomplete #referFromAuto="matAutocomplete">
+                  <mat-option *ngFor="let p of referFromResults"
+                              [value]="p.practiceName + ' - ' + p.lastName + ', ' + p.firstName"
+                              (onSelectionChange)="onReferFromSelected(p)">
+                    {{ p.practiceName }} — {{ p.lastName }}, {{ p.firstName }} ({{ p.specialityName || 'N/A' }})
+                  </mat-option>
+                </mat-autocomplete>
+              </mat-form-field>
+            </div>
+            <div class="info-grid" *ngIf="selectedReferFrom || caseData?.referFromId">
+              <div class="info-item">
+                <span class="info-label">Practice Name</span>
+                <span class="info-value">{{ selectedReferFrom?.practiceName || caseData?.referFromPracticeName || '—' }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Person</span>
+                <span class="info-value">{{ selectedReferFrom ? (selectedReferFrom.lastName + ', ' + selectedReferFrom.firstName) : ((caseData?.referFromPersonSurname || '') + ', ' + (caseData?.referFromPersonName || '')) }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Speciality</span>
+                <span class="info-value">{{ selectedReferFrom?.specialityName || caseData?.referFromSpeciality || '—' }}</span>
+              </div>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <h3 class="section-header">Dates</h3>
+            <div class="form-grid">
+              <mat-form-field appearance="outline">
+                <mat-label>Admission Date</mat-label>
+                <input matInput [matDatepicker]="admPicker" formControlName="admissionDate">
+                <mat-datepicker-toggle matSuffix [for]="admPicker"></mat-datepicker-toggle>
+                <mat-datepicker #admPicker></mat-datepicker>
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Admission Time</mat-label>
+                <input matInput type="time" formControlName="admissionTime">
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Discharge Date</mat-label>
+                <input matInput [matDatepicker]="disPicker" formControlName="dischargeDate">
+                <mat-datepicker-toggle matSuffix [for]="disPicker"></mat-datepicker-toggle>
+                <mat-datepicker #disPicker></mat-datepicker>
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Discharge Time</mat-label>
+                <input matInput type="time" formControlName="dischargeTime">
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Total LOS (days)</mat-label>
+                <input matInput [value]="totalLos ?? '—'" readonly>
+              </mat-form-field>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <h3 class="section-header">Case Description</h3>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Description</mat-label>
+              <textarea matInput formControlName="description" rows="4"></textarea>
             </mat-form-field>
-          </div>
-          <div class="info-grid" *ngIf="selectedReferTo || caseData?.referToId">
-            <div class="info-item">
-              <span class="info-label">Practice Name</span>
-              <span class="info-value">{{ selectedReferTo?.practiceName || caseData?.referToPracticeName || '—' }}</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">Person</span>
-              <span class="info-value">{{ selectedReferTo ? (selectedReferTo.lastName + ', ' + selectedReferTo.firstName) : ((caseData?.referToPersonSurname || '') + ', ' + (caseData?.referToPersonName || '')) }}</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">Speciality</span>
-              <span class="info-value">{{ selectedReferTo?.specialityName || caseData?.referToSpeciality || '—' }}</span>
-            </div>
-          </div>
-
-          <mat-divider></mat-divider>
-
-          <!-- Refer From Practice -->
-          <h3 class="section-header">Refer From Practice</h3>
-          <div class="form-grid">
-            <mat-form-field appearance="outline" class="span-2">
-              <mat-label>Search Provider (type name)</mat-label>
-              <input matInput formControlName="referFromSearch" [matAutocomplete]="referFromAuto">
-              <button mat-icon-button matSuffix *ngIf="form.get('referFromId')?.value" (click)="clearReferFrom()">
-                <mat-icon>clear</mat-icon>
-              </button>
-              <mat-autocomplete #referFromAuto="matAutocomplete">
-                <mat-option *ngFor="let p of referFromResults"
-                            [value]="p.practiceName + ' - ' + p.lastName + ', ' + p.firstName"
-                            (onSelectionChange)="onReferFromSelected(p)">
-                  {{ p.practiceName }} — {{ p.lastName }}, {{ p.firstName }} ({{ p.specialityName || 'N/A' }})
-                </mat-option>
-              </mat-autocomplete>
-            </mat-form-field>
-          </div>
-          <div class="info-grid" *ngIf="selectedReferFrom || caseData?.referFromId">
-            <div class="info-item">
-              <span class="info-label">Practice Name</span>
-              <span class="info-value">{{ selectedReferFrom?.practiceName || caseData?.referFromPracticeName || caseData?.referFromName || '—' }}</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">Person</span>
-              <span class="info-value">{{ selectedReferFrom ? (selectedReferFrom.lastName + ', ' + selectedReferFrom.firstName) : ((caseData?.referFromPersonSurname || '') + ', ' + (caseData?.referFromPersonName || '')) }}</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">Speciality</span>
-              <span class="info-value">{{ selectedReferFrom?.specialityName || caseData?.referFromSpeciality || '—' }}</span>
-            </div>
-            <div class="info-item" *ngIf="caseData?.referFromContact">
-              <span class="info-label">Contact</span>
-              <span class="info-value">{{ caseData?.referFromContact }}</span>
-            </div>
-          </div>
-
-          <mat-divider></mat-divider>
-
-          <!-- Dates Section -->
-          <h3 class="section-header">Dates</h3>
-          <div class="form-grid">
-            <mat-form-field appearance="outline">
-              <mat-label>Admission Date</mat-label>
-              <input matInput [matDatepicker]="admPicker" formControlName="admissionDate">
-              <mat-datepicker-toggle matSuffix [for]="admPicker"></mat-datepicker-toggle>
-              <mat-datepicker #admPicker></mat-datepicker>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Admission Time</mat-label>
-              <input matInput type="time" formControlName="admissionTime">
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Discharge Date</mat-label>
-              <input matInput [matDatepicker]="disPicker" formControlName="dischargeDate">
-              <mat-datepicker-toggle matSuffix [for]="disPicker"></mat-datepicker-toggle>
-              <mat-datepicker #disPicker></mat-datepicker>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Discharge Time</mat-label>
-              <input matInput type="time" formControlName="dischargeTime">
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Total LOS (days)</mat-label>
-              <input matInput [value]="totalLos ?? '—'" readonly>
-            </mat-form-field>
-          </div>
-
-          <mat-divider></mat-divider>
-
-          <!-- Case Description -->
-          <h3 class="section-header">Case Description</h3>
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Description</mat-label>
-            <textarea matInput formControlName="description" rows="4"></textarea>
-          </mat-form-field>
-        </form>
-      </div>
-    </mat-tab>
-
-    <!-- Member -->
-    <mat-tab>
-      <ng-template mat-tab-label>
-        Member
-
-      </ng-template>
-      <ng-container *ngIf="tabsEnabled; else tabDisabledTpl">
+          </form>
+        </div>
+      }
+      @case ('member') {
         <app-case-member-tab [caseData]="caseData!" [caseId]="caseId"></app-case-member-tab>
-      </ng-container>
-    </mat-tab>
-
-    <!-- Provider -->
-    <mat-tab>
-      <ng-template mat-tab-label>
-        Provider
-
-      </ng-template>
-      <ng-container *ngIf="tabsEnabled; else tabDisabledTpl">
+      }
+      @case ('provider') {
         <app-case-provider-tab [caseData]="caseData!" [caseId]="caseId"></app-case-provider-tab>
-      </ng-container>
-    </mat-tab>
-
-    <!-- Dates -->
-    <mat-tab>
-      <ng-template mat-tab-label>
-        Dates
-
-      </ng-template>
-      <ng-container *ngIf="tabsEnabled; else tabDisabledTpl">
+      }
+      @case ('dates') {
         <app-case-dates-tab [caseData]="caseData!" [caseId]="caseId"></app-case-dates-tab>
-      </ng-container>
-    </mat-tab>
-
-    <!-- CPT Codes -->
-    <mat-tab>
-      <ng-template mat-tab-label>
-        CPT Codes
-
-      </ng-template>
-      <ng-container *ngIf="tabsEnabled; else tabDisabledTpl">
+      }
+      @case ('cpt') {
         <app-case-cpt-tab [caseId]="caseId"></app-case-cpt-tab>
-      </ng-container>
-    </mat-tab>
-
-    <!-- ICD Codes -->
-    <mat-tab>
-      <ng-template mat-tab-label>
-        ICD Codes
-
-      </ng-template>
-      <ng-container *ngIf="tabsEnabled; else tabDisabledTpl">
+      }
+      @case ('icd') {
         <app-case-icd-tab [caseId]="caseId"></app-case-icd-tab>
-      </ng-container>
-    </mat-tab>
-
-    <!-- Tariffs -->
-    <mat-tab>
-      <ng-template mat-tab-label>
-        Tariffs
-
-      </ng-template>
-      <ng-container *ngIf="tabsEnabled; else tabDisabledTpl">
+      }
+      @case ('tariffs') {
         <app-case-tariffs-tab [caseId]="caseId"></app-case-tariffs-tab>
-      </ng-container>
-    </mat-tab>
-
-    <!-- Facility Types -->
-    <mat-tab>
-      <ng-template mat-tab-label>
-        Facility Types
-
-      </ng-template>
-      <ng-container *ngIf="tabsEnabled; else tabDisabledTpl">
+      }
+      @case ('facility') {
         <app-case-facility-types-tab [caseId]="caseId"></app-case-facility-types-tab>
-      </ng-container>
-    </mat-tab>
-
-    <!-- Exclusions -->
-    <mat-tab>
-      <ng-template mat-tab-label>
-        Exclusions
-
-      </ng-template>
-      <ng-container *ngIf="tabsEnabled; else tabDisabledTpl">
+      }
+      @case ('exclusions') {
         <app-case-exclusions-tab [caseId]="caseId"></app-case-exclusions-tab>
-      </ng-container>
-    </mat-tab>
-
-    <!-- NAPPI -->
-    <mat-tab>
-      <ng-template mat-tab-label>
-        NAPPI
-
-      </ng-template>
-      <ng-container *ngIf="tabsEnabled; else tabDisabledTpl">
+      }
+      @case ('nappi') {
         <app-case-nappi-tab [caseId]="caseId"></app-case-nappi-tab>
-      </ng-container>
-    </mat-tab>
-
-    <!-- Notes -->
-    <mat-tab>
-      <ng-template mat-tab-label>
-        Notes
-
-      </ng-template>
-      <ng-container *ngIf="tabsEnabled; else tabDisabledTpl">
+      }
+      @case ('notes') {
         <app-case-notes-tab [caseId]="caseId"></app-case-notes-tab>
-      </ng-container>
-    </mat-tab>
-
-    <!-- Comments -->
-    <mat-tab>
-      <ng-template mat-tab-label>
-        Comments
-
-      </ng-template>
-      <ng-container *ngIf="tabsEnabled; else tabDisabledTpl">
+      }
+      @case ('comments') {
         <app-case-comments-tab [caseId]="caseId"></app-case-comments-tab>
-      </ng-container>
-    </mat-tab>
-
-    <!-- Checklist -->
-    <mat-tab>
-      <ng-template mat-tab-label>
-        Checklist
-
-      </ng-template>
-      <ng-container *ngIf="tabsEnabled; else tabDisabledTpl">
+      }
+      @case ('checklist') {
         <app-case-checklist-tab [caseId]="caseId"></app-case-checklist-tab>
-      </ng-container>
-    </mat-tab>
-
-    <!-- Documents -->
-    <mat-tab>
-      <ng-template mat-tab-label>
-        Documents
-
-      </ng-template>
-      <ng-container *ngIf="tabsEnabled; else tabDisabledTpl">
+      }
+      @case ('documents') {
         <app-case-documents-tab [caseId]="caseId"></app-case-documents-tab>
-      </ng-container>
-    </mat-tab>
-
-    <!-- Linked Cases -->
-    <mat-tab>
-      <ng-template mat-tab-label>
-        Linked Cases
-
-      </ng-template>
-      <ng-container *ngIf="tabsEnabled; else tabDisabledTpl">
+      }
+      @case ('linked') {
         <app-case-linked-cases-tab [caseId]="caseId"></app-case-linked-cases-tab>
-      </ng-container>
-    </mat-tab>
-  </mat-tab-group>
+      }
+    }
+  </mat-tab-nav-panel>
 </div>
-
-<!-- Tab disabled message template -->
-<ng-template #tabDisabledTpl>
-  <div class="tab-disabled-message">
-    <mat-icon>info</mat-icon>
-    <p>Save the case before adding codes, notes, or other details.</p>
-  </div>
-</ng-template>
 
 <ng-template #loadingTpl>
   <div class="loading-container">

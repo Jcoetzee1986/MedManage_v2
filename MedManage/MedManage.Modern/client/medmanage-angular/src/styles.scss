@@ -918,11 +918,7 @@ img {
   max-width: 1200px;
 }
 
-// Case Detail Tabs
-.case-detail-container {
-  overflow-y: auto;
-  height: calc(100vh - 64px);
-}
+// Case Detail — no special overrides needed (uses mat-tab-nav-bar, no transforms)
 
 .tab-header {
   display: flex;

@@ -2,7 +2,6 @@ import { Component, inject, OnInit, OnDestroy, HostListener } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ScrollingModule } from '@angular/cdk/scrolling';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -18,6 +17,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
 import { Subject, takeUntil, interval, debounceTime, distinctUntilChanged, switchMap, of } from 'rxjs';
 import { CaseService } from '../services/case.service';
 import { CaseDto, CreateCaseRequest, UpdateCaseRequest } from '../models/case.models';
@@ -26,7 +26,8 @@ import { MemberDto } from '../../members/models/member.models';
 import { ProviderService } from '../../providers/services/provider.service';
 import { ProviderAutocompleteResult } from '../../providers/models/provider.models';
 import { ReportService } from '../../reports/services/report.service';
-import { ReferenceDataDropdownComponent } from '../../../shared/components/reference-data-dropdown/reference-data-dropdown.component';
+import { ReferenceDataService } from '../../../core/services/reference-data.service';
+import { ReferenceDataItem } from '../../../core/models/reference-data.models';
 import { HasRoleDirective } from '../../../shared/directives/has-role.directive';
 import { CaseMemberTabComponent } from '../tabs/case-member-tab/case-member-tab.component';
 import { CaseProviderTabComponent } from '../tabs/case-provider-tab/case-provider-tab.component';
@@ -49,7 +50,6 @@ import { CaseCopyDialogComponent } from '../case-copy-dialog/case-copy-dialog.co
   standalone: true,
   imports: [
     CommonModule,
-    ScrollingModule,
     ReactiveFormsModule,
     MatTabsModule,
     MatButtonModule,
@@ -66,7 +66,7 @@ import { CaseCopyDialogComponent } from '../case-copy-dialog/case-copy-dialog.co
     MatNativeDateModule,
     MatDividerModule,
     MatProgressSpinnerModule,
-    ReferenceDataDropdownComponent,
+    MatSelectModule,
     HasRoleDirective,
     CaseMemberTabComponent,
     CaseProviderTabComponent,
@@ -94,6 +94,7 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
   private readonly memberService = inject(MemberService);
   private readonly providerService = inject(ProviderService);
   private readonly reportService = inject(ReportService);
+  private readonly referenceDataService = inject(ReferenceDataService);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
   private readonly destroy$ = new Subject<void>();
@@ -103,11 +104,35 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
   isNewCase = false;
   loading = true;
   saving = false;
+  activeTab = 'detail';
+
+  tabs = [
+    { id: 'detail', label: 'Case Detail' },
+    { id: 'member', label: 'Member' },
+    { id: 'provider', label: 'Provider' },
+    { id: 'dates', label: 'Dates' },
+    { id: 'cpt', label: 'CPT Codes' },
+    { id: 'icd', label: 'ICD Codes' },
+    { id: 'tariffs', label: 'Tariffs' },
+    { id: 'facility', label: 'Facility Types' },
+    { id: 'exclusions', label: 'Exclusions' },
+    { id: 'nappi', label: 'NAPPI' },
+    { id: 'notes', label: 'Notes' },
+    { id: 'comments', label: 'Comments' },
+    { id: 'checklist', label: 'Checklist' },
+    { id: 'documents', label: 'Documents' },
+    { id: 'linked', label: 'Linked Cases' }
+  ];
 
   // Member lookup
   selectedMember: MemberDto | null = null;
   memberSearchResults: MemberDto[] = [];
   memberSearching = false;
+
+  // Reference data for dropdowns
+  caseStatuses: ReferenceDataItem[] = [];
+  caseTypes: ReferenceDataItem[] = [];
+  caseCategories: ReferenceDataItem[] = [];
 
   // Provider lookup (Refer To)
   referToResults: ProviderAutocompleteResult[] = [];
@@ -198,6 +223,7 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
     this.setupAutoCalculations();
     this.setupMemberSearch();
     this.setupProviderSearch();
+    this.loadReferenceData();
   }
 
   ngOnDestroy(): void {
@@ -357,6 +383,12 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
           });
         }
       });
+  }
+
+  private loadReferenceData(): void {
+    this.referenceDataService.getAll('case-status').subscribe(items => this.caseStatuses = items);
+    this.referenceDataService.getAll('case-type').subscribe(items => this.caseTypes = items);
+    this.referenceDataService.getAll('case-category').subscribe(items => this.caseCategories = items);
   }
 
   private loadCase(): void {

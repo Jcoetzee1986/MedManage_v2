@@ -40,7 +40,7 @@ import { ReferenceDataItem, ReferenceDataResource } from '../../../core/models/r
   ],
   templateUrl: './reference-data-dropdown.component.html',
   styleUrls: ['./reference-data-dropdown.component.scss'],
-  host: { 'style': 'display: contents' },
+  host: { 'style': 'display: block' },
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
