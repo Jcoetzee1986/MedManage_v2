@@ -14,26 +14,49 @@ public class DashboardService : IDashboardService
         _context = context;
     }
 
-    public async Task<DashboardStatsDto> GetStatsAsync(CancellationToken cancellationToken = default)
+    public async Task<DashboardStatsDto> GetStatsAsync(int? mainClientId = null, CancellationToken cancellationToken = default)
     {
-        var totalCases = await _context.Cases
-            .CountAsync(c => c.DateDeleted == null, cancellationToken);
+        // Base queries — filter by mainClientId through Member → MedicalAid → MainClientId
+        var casesQuery = _context.Cases
+            .Where(c => c.DateDeleted == null);
 
-        var totalMembers = await _context.Members
-            .CountAsync(m => m.DateDeleted == null, cancellationToken);
+        var membersQuery = _context.Members
+            .Where(m => m.DateDeleted == null);
 
-        var pendingBillingCount = await _context.CaseBillings
-            .CountAsync(b => b.DateDeleted == null && b.Paid != true, cancellationToken);
+        var billingQuery = _context.CaseBillings
+            .Where(b => b.DateDeleted == null && b.Paid != true);
 
-        // Active cases: cases with a status that indicates active work (StatusId == 1 is typically "Open/Active")
-        // We consider cases created in the last 90 days that are not deleted as "active"
-        var activeCases = await _context.Cases
-            .CountAsync(c => c.DateDeleted == null && c.StatusId == 1, cancellationToken);
+        if (mainClientId.HasValue)
+        {
+            // Cases: filter through Member → MedicalAid → MainClientId
+            casesQuery = casesQuery.Where(c => 
+                c.Member!.MedicalAid!.MainClientId == mainClientId.Value);
 
-        // Recent cases: created in the last 30 days
+            // Members: filter through MedicalAid → MainClientId
+            membersQuery = membersQuery.Where(m => 
+                m.MedicalAid!.MainClientId == mainClientId.Value);
+
+            // Billing: filter through Cases that belong to this client
+            var clientCaseIds = _context.Cases
+                .Where(c => c.DateDeleted == null && 
+                    c.Member!.MedicalAid!.MainClientId == mainClientId.Value)
+                .Select(c => (int?)c.CaseId);
+
+            billingQuery = billingQuery.Where(b => clientCaseIds.Contains(b.CaseId));
+        }
+
+        var totalCases = await casesQuery.CountAsync(cancellationToken);
+        var totalMembers = await membersQuery.CountAsync(cancellationToken);
+        var pendingBillingCount = await billingQuery.CountAsync(cancellationToken);
+
+        // Active cases (StatusId == 1 is "Open")
+        var activeCases = await casesQuery
+            .CountAsync(c => c.StatusId == 1, cancellationToken);
+
+        // Recent cases (last 30 days)
         var thirtyDaysAgo = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-30));
-        var recentCases = await _context.Cases
-            .CountAsync(c => c.DateDeleted == null && c.DateCreated >= thirtyDaysAgo, cancellationToken);
+        var recentCases = await casesQuery
+            .CountAsync(c => c.DateCreated >= thirtyDaysAgo, cancellationToken);
 
         return new DashboardStatsDto
         {

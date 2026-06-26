@@ -23,9 +23,9 @@ public class DashboardController : ControllerBase
     /// </summary>
     [HttpGet("stats")]
     [ProducesResponseType(typeof(ApiResponse<DashboardStatsDto>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetStats(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetStats([FromQuery] int? mainClientId, CancellationToken cancellationToken)
     {
-        var stats = await _dashboardService.GetStatsAsync(cancellationToken);
+        var stats = await _dashboardService.GetStatsAsync(mainClientId, cancellationToken);
         return Ok(ApiResponse<DashboardStatsDto>.SuccessResponse(stats));
     }
 }

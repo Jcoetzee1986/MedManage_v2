@@ -11,11 +11,11 @@ public class MedicalAidProductRepository : Repository<MedicalAidProduct>, IMedic
     {
     }
 
-    public async Task<IEnumerable<MedicalAidProduct>> GetByMedicalAidIdAsync(int medicalAidId)
+    public async Task<IEnumerable<MedicalAidProduct>> GetByMedicalAidIdAsync(int mainClientId)
     {
-        // Note: MedicalAidProduct doesn't have MedicalAidId property - using MainClientId instead
+        // Products with matching MainClientId OR with NULL MainClientId (global/shared products)
         return await _dbSet
-            .Where(p => p.MainClientId == medicalAidId && p.DateDeleted == null)
+            .Where(p => (p.MainClientId == mainClientId || p.MainClientId == null) && p.DateDeleted == null)
             .OrderBy(p => p.MedAidProductName)
             .ToListAsync();
     }

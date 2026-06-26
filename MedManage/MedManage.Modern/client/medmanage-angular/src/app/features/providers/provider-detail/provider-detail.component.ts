@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
+import { NavigationContextService } from '../../../core/services/navigation-context.service';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -35,6 +36,7 @@ import { ProviderDiscountsTabComponent } from '../tabs/provider-discounts-tab/pr
 export class ProviderDetailComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly navContext = inject(NavigationContextService);
   private readonly providerService = inject(ProviderService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly destroy$ = new Subject<void>();
@@ -77,7 +79,8 @@ export class ProviderDetailComponent implements OnInit, OnDestroy {
   }
 
   onBackToList(): void {
-    this.router.navigate(['/providers']);
+    const returnUrl = this.navContext.getReturnUrl();
+    this.router.navigateByUrl(returnUrl || '/providers');
   }
 
   onDeleteProvider(): void {

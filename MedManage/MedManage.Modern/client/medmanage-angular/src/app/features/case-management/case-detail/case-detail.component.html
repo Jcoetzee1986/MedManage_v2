@@ -131,21 +131,13 @@
             <mat-divider></mat-divider>
 
             <h3 class="section-header">Member *</h3>
-            <div class="form-grid">
-              <mat-form-field appearance="outline" class="span-2">
-                <mat-label>Search Member (type surname)</mat-label>
-                <input matInput formControlName="memberSearch" [matAutocomplete]="memberAuto">
-                <button mat-icon-button matSuffix *ngIf="form.get('memberId')?.value" (click)="clearMember()">
-                  <mat-icon>clear</mat-icon>
-                </button>
-                <mat-autocomplete #memberAuto="matAutocomplete">
-                  <mat-option *ngFor="let m of memberSearchResults" [value]="m.lastName + ', ' + m.firstName"
-                              (onSelectionChange)="onMemberSelected(m)">
-                    {{ m.lastName }}, {{ m.firstName }} — {{ m.memberNumber }}
-                  </mat-option>
-                </mat-autocomplete>
-                <mat-hint *ngIf="memberSearching">Searching...</mat-hint>
-              </mat-form-field>
+            <div class="d-flex gap-2 align-center">
+              <button mat-raised-button color="primary" (click)="openMemberLookup()">
+                <mat-icon>search</mat-icon> Search Member
+              </button>
+              <button mat-stroked-button *ngIf="form.get('memberId')?.value" (click)="clearMember()">
+                <mat-icon>clear</mat-icon> Clear
+              </button>
             </div>
             <div class="info-grid" *ngIf="selectedMember || caseData?.memberId">
               <div class="info-item">
@@ -181,21 +173,13 @@
             <mat-divider></mat-divider>
 
             <h3 class="section-header">Refer To Practice *</h3>
-            <div class="form-grid">
-              <mat-form-field appearance="outline" class="span-2">
-                <mat-label>Search Provider (type name)</mat-label>
-                <input matInput formControlName="referToSearch" [matAutocomplete]="referToAuto">
-                <button mat-icon-button matSuffix *ngIf="form.get('referToId')?.value" (click)="clearReferTo()">
-                  <mat-icon>clear</mat-icon>
-                </button>
-                <mat-autocomplete #referToAuto="matAutocomplete">
-                  <mat-option *ngFor="let p of referToResults"
-                              [value]="p.practiceName + ' - ' + p.lastName + ', ' + p.firstName"
-                              (onSelectionChange)="onReferToSelected(p)">
-                    {{ p.practiceName }} — {{ p.lastName }}, {{ p.firstName }} ({{ p.specialityName || 'N/A' }})
-                  </mat-option>
-                </mat-autocomplete>
-              </mat-form-field>
+            <div class="d-flex gap-2 align-center">
+              <button mat-raised-button color="primary" (click)="openReferToLookup()">
+                <mat-icon>search</mat-icon> Search Provider
+              </button>
+              <button mat-stroked-button *ngIf="form.get('referToId')?.value" (click)="clearReferTo()">
+                <mat-icon>clear</mat-icon> Clear
+              </button>
             </div>
             <div class="info-grid" *ngIf="selectedReferTo || caseData?.referToId">
               <div class="info-item">
@@ -215,21 +199,13 @@
             <mat-divider></mat-divider>
 
             <h3 class="section-header">Refer From Practice</h3>
-            <div class="form-grid">
-              <mat-form-field appearance="outline" class="span-2">
-                <mat-label>Search Provider (type name)</mat-label>
-                <input matInput formControlName="referFromSearch" [matAutocomplete]="referFromAuto">
-                <button mat-icon-button matSuffix *ngIf="form.get('referFromId')?.value" (click)="clearReferFrom()">
-                  <mat-icon>clear</mat-icon>
-                </button>
-                <mat-autocomplete #referFromAuto="matAutocomplete">
-                  <mat-option *ngFor="let p of referFromResults"
-                              [value]="p.practiceName + ' - ' + p.lastName + ', ' + p.firstName"
-                              (onSelectionChange)="onReferFromSelected(p)">
-                    {{ p.practiceName }} — {{ p.lastName }}, {{ p.firstName }} ({{ p.specialityName || 'N/A' }})
-                  </mat-option>
-                </mat-autocomplete>
-              </mat-form-field>
+            <div class="d-flex gap-2 align-center">
+              <button mat-raised-button color="primary" (click)="openReferFromLookup()">
+                <mat-icon>search</mat-icon> Search Provider
+              </button>
+              <button mat-stroked-button *ngIf="form.get('referFromId')?.value" (click)="clearReferFrom()">
+                <mat-icon>clear</mat-icon> Clear
+              </button>
             </div>
             <div class="info-grid" *ngIf="selectedReferFrom || caseData?.referFromId">
               <div class="info-item">

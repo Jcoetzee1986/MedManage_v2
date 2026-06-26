@@ -20,7 +20,9 @@ import { MemberDto, CreateMemberRequest, MemberMedicalAidProductDto, CreateMembe
 import { MedicalAidService } from '../../medical-aids/services/medical-aid.service';
 import { MedicalAidProductDto } from '../../medical-aids/models/medical-aid.models';
 import { AuthService } from '../../../core/services/auth.service';
+import { NavigationContextService } from '../../../core/services/navigation-context.service';
 import { ReferenceDataDropdownComponent } from '../../../shared/components/reference-data-dropdown/reference-data-dropdown.component';
+import { HasRoleDirective } from '../../../shared/directives/has-role.directive';
 
 interface SectionLink {
   id: string;
@@ -45,7 +47,8 @@ interface SectionLink {
     MatNativeDateModule,
     MatTableModule,
     MatDividerModule,
-    ReferenceDataDropdownComponent
+    ReferenceDataDropdownComponent,
+    HasRoleDirective
   ],
   templateUrl: './member-detail.component.html',
   styleUrls: ['./member-detail.component.scss']
@@ -57,6 +60,7 @@ export class MemberDetailComponent implements OnInit, OnDestroy, AfterViewInit {
   private readonly memberService = inject(MemberService);
   private readonly medicalAidService = inject(MedicalAidService);
   private readonly authService = inject(AuthService);
+  private readonly navContext = inject(NavigationContextService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly destroy$ = new Subject<void>();
 
@@ -88,9 +92,9 @@ export class MemberDetailComponent implements OnInit, OnDestroy, AfterViewInit {
   sections: SectionLink[] = [
     { id: 'personal', label: 'Personal Information' },
     { id: 'medical-aid', label: 'Medical Aid' },
+    { id: 'products', label: 'Medical Aid Products' },
     { id: 'logistics', label: 'Logistics & Address' },
     { id: 'next-of-kin', label: 'Next of Kin & Employment' },
-    { id: 'products', label: 'Medical Aid Products' },
     { id: 'suspension', label: 'Suspension Details' },
     { id: 'notes', label: 'Member Notes' }
   ];
@@ -386,7 +390,8 @@ export class MemberDetailComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onBackToList(): void {
-    this.router.navigate(['/members']);
+    const returnUrl = this.navContext.getReturnUrl();
+    this.router.navigateByUrl(returnUrl || '/members');
   }
 
   // ─── Save / Delete ──────────────────────────────────────────
@@ -499,6 +504,12 @@ export class MemberDetailComponent implements OnInit, OnDestroy, AfterViewInit {
 
   // ─── Medical Aid Products Sub-Entity ─────────────────────────
 
+  getProductName(medAidProductId: number | null): string {
+    if (!medAidProductId) return '—';
+    const product = this.availableProducts.find(p => p.medAidProductId === medAidProductId);
+    return product?.medAidProductName || `Product #${medAidProductId}`;
+  }
+
   onAddProduct(): void {
     this.showProductForm = true;
     this.editingProductId = null;
@@ -507,11 +518,11 @@ export class MemberDetailComponent implements OnInit, OnDestroy, AfterViewInit {
 
   onEditProduct(item: MemberMedicalAidProductDto): void {
     this.showProductForm = true;
-    this.editingProductId = item.id;
+    this.editingProductId = item.medAidProductIdMemberId || item.id;
     this.productForm.patchValue({
-      medicalAidProductId: item.medicalAidProductId,
-      dateFrom: item.dateFrom ? new Date(item.dateFrom) : null,
-      dateTo: item.dateTo ? new Date(item.dateTo) : null
+      medicalAidProductId: item.medAidProductId || item.medicalAidProductId,
+      dateFrom: item.startDate ? new Date(item.startDate) : (item.dateFrom ? new Date(item.dateFrom) : null),
+      dateTo: item.endDate ? new Date(item.endDate) : (item.dateTo ? new Date(item.dateTo) : null)
     });
   }
 
@@ -526,9 +537,9 @@ export class MemberDetailComponent implements OnInit, OnDestroy, AfterViewInit {
 
     const f = this.productForm.value;
     const request: CreateMemberMedicalAidProductRequest = {
-      medicalAidProductId: f.medicalAidProductId!,
-      dateFrom: f.dateFrom ? f.dateFrom.toISOString() : null,
-      dateTo: f.dateTo ? f.dateTo.toISOString() : null
+      medAidProductId: f.medicalAidProductId!,
+      startDate: f.dateFrom ? f.dateFrom.toISOString().split('T')[0] : '',
+      endDate: f.dateTo ? f.dateTo.toISOString().split('T')[0] : null
     };
 
     const obs = this.editingProductId
@@ -549,7 +560,7 @@ export class MemberDetailComponent implements OnInit, OnDestroy, AfterViewInit {
 
   onDeleteProduct(item: MemberMedicalAidProductDto): void {
     if (confirm('Remove this product history entry?')) {
-      this.memberService.deleteMedicalAidProduct(this.memberId, item.id)
+      this.memberService.deleteMedicalAidProduct(this.memberId, item.medAidProductIdMemberId || item.id)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: () => {

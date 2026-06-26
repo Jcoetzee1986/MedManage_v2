@@ -7,10 +7,10 @@ using MedManage.Core.Entities;
 
 namespace MedManage.Core.Entities;
 
-[Keyless]
 [Table("Member_MedicalAidProduct", Schema = "shared")]
 public partial class MemberMedicalAidProduct : BaseEntity
 {
+    [Key]
     [Column("MedAidProductID_MemberID")]
     public int MedAidProductIdMemberId { get; set; }
 

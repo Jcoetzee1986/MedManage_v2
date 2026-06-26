@@ -15,15 +15,18 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged, switchMap, of } from 'rxjs';
 import { CaseService } from '../services/case.service';
 import { CreateCaseRequest, CreateCaseFacilityTypeRequest } from '../models/case.models';
 import { MemberService } from '../../members/services/member.service';
 import { MemberDto } from '../../members/models/member.models';
 import { ProviderService } from '../../providers/services/provider.service';
-import { ProviderAutocompleteResult } from '../../providers/models/provider.models';
+import { ProviderAutocompleteResult, ProviderDto } from '../../providers/models/provider.models';
 import { ReferenceDataService } from '../../../core/services/reference-data.service';
 import { ReferenceDataItem } from '../../../core/models/reference-data.models';
+import { MemberLookupDialogComponent } from '../../../shared/components/member-lookup-dialog/member-lookup-dialog.component';
+import { ProviderLookupDialogComponent } from '../../../shared/components/provider-lookup-dialog/provider-lookup-dialog.component';
 
 interface IcdEntry {
   code: string;
@@ -60,7 +63,8 @@ interface TreatmentDateEntry {
     MatSnackBarModule,
     MatDividerModule,
     MatProgressSpinnerModule,
-    MatToolbarModule
+    MatToolbarModule,
+    MatDialogModule
   ],
   templateUrl: './case-wizard.component.html',
   styleUrls: ['./case-wizard.component.scss']
@@ -75,6 +79,7 @@ export class CaseWizardComponent implements OnInit, OnDestroy {
   private readonly providerService = inject(ProviderService);
   private readonly referenceDataService = inject(ReferenceDataService);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly dialog = inject(MatDialog);
   private readonly destroy$ = new Subject<void>();
 
   submitting = false;
@@ -102,7 +107,7 @@ export class CaseWizardComponent implements OnInit, OnDestroy {
     referFromSearch: ['']
   });
   referFromResults: ProviderAutocompleteResult[] = [];
-  selectedReferFrom: ProviderAutocompleteResult | null = null;
+  selectedReferFrom: ProviderDto | null = null;
 
   // ─── Step 3: Refer To (required) ────────────────────────────
   referToForm = this.fb.group({
@@ -110,7 +115,7 @@ export class CaseWizardComponent implements OnInit, OnDestroy {
     referToSearch: ['']
   });
   referToResults: ProviderAutocompleteResult[] = [];
-  selectedReferTo: ProviderAutocompleteResult | null = null;
+  selectedReferTo: ProviderDto | null = null;
 
   // ─── Step 4: Case Metadata ──────────────────────────────────
   metadataForm = this.fb.group({
@@ -148,8 +153,6 @@ export class CaseWizardComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadReferenceData();
-    this.setupMemberSearch();
-    this.setupProviderSearches();
   }
 
   ngOnDestroy(): void {
@@ -175,27 +178,15 @@ export class CaseWizardComponent implements OnInit, OnDestroy {
 
   // ─── Member Search ──────────────────────────────────────────
 
-  private setupMemberSearch(): void {
-    this.memberForm.get('memberSearch')!.valueChanges
-      .pipe(
-        debounceTime(300),
-        distinctUntilChanged(),
-        takeUntil(this.destroy$),
-        switchMap(val => {
-          if (!val || val.length < 2) {
-            this.memberSearchResults = [];
-            return of(null);
-          }
-          this.memberSearching = true;
-          return this.memberService.search({ lastName: val, pageSize: 10 });
-        })
-      )
-      .subscribe(result => {
-        this.memberSearching = false;
-        if (result) {
-          this.memberSearchResults = result.items;
-        }
-      });
+  openMemberLookup(): void {
+    const dialogRef = this.dialog.open(MemberLookupDialogComponent, {
+      width: '700px'
+    });
+    dialogRef.afterClosed().subscribe((member: MemberDto | null) => {
+      if (member) {
+        this.onMemberSelected(member);
+      }
+    });
   }
 
   onMemberSelected(member: MemberDto): void {
@@ -244,47 +235,34 @@ export class CaseWizardComponent implements OnInit, OnDestroy {
 
   // ─── Provider Searches ──────────────────────────────────────
 
-  private setupProviderSearches(): void {
-    // Refer From search
-    this.referFromForm.get('referFromSearch')!.valueChanges
-      .pipe(
-        debounceTime(300),
-        distinctUntilChanged(),
-        takeUntil(this.destroy$),
-        switchMap(val => {
-          if (!val || val.length < 2) {
-            this.referFromResults = [];
-            return of([]);
-          }
-          return this.providerService.autocomplete(val);
-        })
-      )
-      .subscribe(results => this.referFromResults = results);
-
-    // Refer To search
-    this.referToForm.get('referToSearch')!.valueChanges
-      .pipe(
-        debounceTime(300),
-        distinctUntilChanged(),
-        takeUntil(this.destroy$),
-        switchMap(val => {
-          if (!val || val.length < 2) {
-            this.referToResults = [];
-            return of([]);
-          }
-          return this.providerService.autocomplete(val);
-        })
-      )
-      .subscribe(results => this.referToResults = results);
+  openReferFromLookup(): void {
+    const dialogRef = this.dialog.open(ProviderLookupDialogComponent, {
+      width: '700px'
+    });
+    dialogRef.afterClosed().subscribe((provider: ProviderDto | null) => {
+      if (provider) {
+        this.onReferFromSelected(provider);
+      }
+    });
   }
 
-  onReferFromSelected(provider: ProviderAutocompleteResult): void {
+  openReferToLookup(): void {
+    const dialogRef = this.dialog.open(ProviderLookupDialogComponent, {
+      width: '700px'
+    });
+    dialogRef.afterClosed().subscribe((provider: ProviderDto | null) => {
+      if (provider) {
+        this.onReferToSelected(provider);
+      }
+    });
+  }
+
+  onReferFromSelected(provider: ProviderDto): void {
     this.selectedReferFrom = provider;
     this.referFromForm.patchValue({
       referFromId: provider.id,
       referFromSearch: `${provider.practiceName} - ${provider.lastName}, ${provider.firstName}`
     });
-    this.referFromResults = [];
   }
 
   clearReferFrom(): void {
@@ -292,13 +270,12 @@ export class CaseWizardComponent implements OnInit, OnDestroy {
     this.referFromForm.patchValue({ referFromId: null, referFromSearch: '' });
   }
 
-  onReferToSelected(provider: ProviderAutocompleteResult): void {
+  onReferToSelected(provider: ProviderDto): void {
     this.selectedReferTo = provider;
     this.referToForm.patchValue({
       referToId: provider.id,
       referToSearch: `${provider.practiceName} - ${provider.lastName}, ${provider.firstName}`
     });
-    this.referToResults = [];
   }
 
   clearReferTo(): void {

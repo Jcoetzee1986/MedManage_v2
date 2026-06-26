@@ -1,30 +1,135 @@
 <div class="tab-content">
-  <form [formGroup]="form" (ngSubmit)="onSave()">
-    <div class="form-row">
-      <mat-form-field appearance="outline">
-        <mat-label>Date of Service</mat-label>
-        <input matInput [matDatepicker]="servicePicker" formControlName="dateOfService">
-        <mat-datepicker-toggle matIconSuffix [for]="servicePicker"></mat-datepicker-toggle>
-        <mat-datepicker #servicePicker></mat-datepicker>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>Date Admitted</mat-label>
-        <input matInput [matDatepicker]="admitPicker" formControlName="dateAdmitted">
-        <mat-datepicker-toggle matIconSuffix [for]="admitPicker"></mat-datepicker-toggle>
-        <mat-datepicker #admitPicker></mat-datepicker>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>Date Discharged</mat-label>
-        <input matInput [matDatepicker]="dischargePicker" formControlName="dateDischarged">
-        <mat-datepicker-toggle matIconSuffix [for]="dischargePicker"></mat-datepicker-toggle>
-        <mat-datepicker #dischargePicker></mat-datepicker>
-      </mat-form-field>
+  <!-- Overall Admission Info (computed, read-only) -->
+  <h3 class="section-header">Overall Admission Info</h3>
+  <div class="info-grid">
+    <div class="info-item">
+      <span class="info-label">Admission Date</span>
+      <span class="info-value">{{ overallAdmissionDate || '—' }}</span>
     </div>
-
-    <div class="form-actions">
-      <button mat-raised-button color="primary" type="submit">Save</button>
+    <div class="info-item">
+      <span class="info-label">Discharge Date</span>
+      <span class="info-value">{{ overallDischargeDate || '—' }}</span>
     </div>
-  </form>
+    <div class="info-item">
+      <span class="info-label">Total LOS</span>
+      <span class="info-value">{{ totalLos }} days</span>
+    </div>
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <!-- Detailed Admission Info -->
+  <div class="tab-header">
+    <h3 class="section-header">Detailed Admission Info</h3>
+    <button mat-raised-button color="primary" (click)="onAdd()">
+      <mat-icon>add</mat-icon> Add
+    </button>
+  </div>
+
+  <!-- Add/Edit Form -->
+  @if (showForm) {
+    <div class="add-form">
+      <form [formGroup]="form">
+        <div class="form-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Facility Type</mat-label>
+            <mat-select formControlName="facilityTypeId" required>
+              @for (ft of facilityTypes; track ft.id) {
+                <mat-option [value]="ft.id">{{ ft.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Admitted</mat-label>
+            <input matInput [matDatepicker]="admPicker" formControlName="dateAdmitted">
+            <mat-datepicker-toggle matIconSuffix [for]="admPicker"></mat-datepicker-toggle>
+            <mat-datepicker #admPicker></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Time Admitted</mat-label>
+            <input matInput type="time" formControlName="timeAdmitted">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Discharged</mat-label>
+            <input matInput [matDatepicker]="disPicker" formControlName="dateDischarged">
+            <mat-datepicker-toggle matIconSuffix [for]="disPicker"></mat-datepicker-toggle>
+            <mat-datepicker #disPicker></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Time Discharged</mat-label>
+            <input matInput type="time" formControlName="timeDischarged">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>LOS (days)</mat-label>
+            <input matInput type="number" formControlName="los" step="0.5">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Minutes on Ventilator</mat-label>
+            <input matInput type="number" formControlName="minutesOnVentilator">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="span-2">
+            <mat-label>Comments</mat-label>
+            <input matInput formControlName="comments">
+          </mat-form-field>
+        </div>
+        <div class="form-actions">
+          <button mat-raised-button color="primary" (click)="onSave()" [disabled]="form.invalid">
+            {{ editingId ? 'Update' : 'Add' }}
+          </button>
+          <button mat-stroked-button (click)="onCancel()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  }
+
+  <!-- Records Table -->
+  @if (facilityTypeRecords.length > 0) {
+    <table mat-table [dataSource]="facilityTypeRecords" class="full-width-table">
+      <ng-container matColumnDef="facilityType">
+        <th mat-header-cell *matHeaderCellDef>Facility Type</th>
+        <td mat-cell *matCellDef="let row">{{ getFacilityTypeName(row.facilityTypeId) }}</td>
+      </ng-container>
+      <ng-container matColumnDef="dateAdmitted">
+        <th mat-header-cell *matHeaderCellDef>Date Admitted</th>
+        <td mat-cell *matCellDef="let row">{{ row.dateAdmitted }}</td>
+      </ng-container>
+      <ng-container matColumnDef="dateDischarged">
+        <th mat-header-cell *matHeaderCellDef>Date Discharged</th>
+        <td mat-cell *matCellDef="let row">{{ row.dateDischarged }}</td>
+      </ng-container>
+      <ng-container matColumnDef="los">
+        <th mat-header-cell *matHeaderCellDef>LOS</th>
+        <td mat-cell *matCellDef="let row">{{ row.los }}</td>
+      </ng-container>
+      <ng-container matColumnDef="minutesOnVentilator">
+        <th mat-header-cell *matHeaderCellDef>Ventilator (min)</th>
+        <td mat-cell *matCellDef="let row">{{ row.minutesOnVentilator || '—' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="comments">
+        <th mat-header-cell *matHeaderCellDef>Comments</th>
+        <td mat-cell *matCellDef="let row">{{ row.comments || '' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let row">
+          <button mat-icon-button (click)="onEdit(row)"><mat-icon>edit</mat-icon></button>
+          <button mat-icon-button color="warn" (click)="onDelete(row)"><mat-icon>delete</mat-icon></button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  }
+
+  @if (facilityTypeRecords.length === 0 && !showForm) {
+    <p class="empty-message">No treatment date records. Click "Add" to create one.</p>
+  }
 </div>

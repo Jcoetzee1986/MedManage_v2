@@ -1,95 +1,163 @@
 <div class="tab-content">
   <div class="tab-header">
     <h3>Tariffs</h3>
-    <button mat-raised-button color="primary" (click)="showAddForm = !showAddForm">
+    <button mat-raised-button color="primary" (click)="onShowAddForm()">
       <mat-icon>add</mat-icon> Add Tariff
     </button>
   </div>
 
-  <div class="add-form" *ngIf="showAddForm">
-    <form [formGroup]="addForm" (ngSubmit)="onAdd()">
-      <div class="form-row">
-        <mat-form-field appearance="outline">
-          <mat-label>Tariff ID</mat-label>
-          <input matInput type="number" formControlName="tariffId">
-        </mat-form-field>
+  <!-- Add Form -->
+  @if (showAddForm) {
+    <div class="add-form">
+      <form [formGroup]="addForm" (ngSubmit)="onAdd()">
+        <div class="form-grid">
+          <!-- Tariff Code Autocomplete -->
+          <mat-form-field appearance="outline" class="span-2">
+            <mat-label>Tariff Code</mat-label>
+            <input matInput [formControl]="codeSearchControl" [matAutocomplete]="tariffAuto"
+                   placeholder="Type at least 3 characters to search...">
+            <button mat-icon-button matSuffix type="button" (click)="onOpenFullLookup()" matTooltip="Advanced Search">
+              <mat-icon>search</mat-icon>
+            </button>
+            <mat-autocomplete #tariffAuto="matAutocomplete"
+                              [displayWith]="displayTariff"
+                              (optionSelected)="onTariffSelected($event.option.value)">
+              @for (t of tariffSuggestions; track t.id) {
+                <mat-option [value]="t">
+                  <strong>{{ t.code }}</strong> — {{ t.description }}
+                  @if (t.currentRate) {
+                    <span class="tariff-rate">(R {{ t.currentRate.toFixed(2) }})</span>
+                  }
+                </mat-option>
+              }
+            </mat-autocomplete>
+          </mat-form-field>
 
-        <mat-form-field appearance="outline">
-          <mat-label>Value</mat-label>
-          <input matInput type="number" formControlName="value">
-        </mat-form-field>
+          @if (selectedTariff) {
+            <div class="selected-entity span-2">
+              <mat-icon>check_circle</mat-icon>
+              <strong>{{ selectedTariff.code }}</strong> — {{ selectedTariff.description }}
+              @if (selectedTariff.category) {
+                <span>({{ selectedTariff.category }})</span>
+              }
+            </div>
+          }
 
-        <mat-form-field appearance="outline">
-          <mat-label>Quantity</mat-label>
-          <input matInput type="number" formControlName="qty">
-        </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Value</mat-label>
+            <input matInput type="number" formControlName="value" step="0.01">
+          </mat-form-field>
 
-        <mat-form-field appearance="outline">
-          <mat-label>Agreed Rate Override</mat-label>
-          <input matInput type="number" formControlName="agreedRateOverride">
-        </mat-form-field>
-      </div>
-      <div class="form-row">
-        <mat-form-field appearance="outline">
-          <mat-label>Date of Procedure</mat-label>
-          <input matInput [matDatepicker]="picker" formControlName="dateOfProcedure">
-          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-          <mat-datepicker #picker></mat-datepicker>
-        </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Qty</mat-label>
+            <input matInput type="number" formControlName="qty" step="0.5" min="0.5">
+          </mat-form-field>
 
-        <mat-checkbox formControlName="valueIsTotal">Value is Total</mat-checkbox>
-        <mat-checkbox formControlName="rejected">Rejected</mat-checkbox>
-      </div>
-      <div class="form-actions">
-        <button mat-raised-button color="primary" type="submit">Save</button>
-        <button mat-stroked-button type="button" (click)="showAddForm = false">Cancel</button>
-      </div>
-    </form>
-  </div>
+          <mat-form-field appearance="outline">
+            <mat-label>Date</mat-label>
+            <input matInput [matDatepicker]="datePicker" formControlName="dateOfProcedure">
+            <mat-datepicker-toggle matIconSuffix [for]="datePicker"></mat-datepicker-toggle>
+            <mat-datepicker #datePicker></mat-datepicker>
+          </mat-form-field>
 
-  <table mat-table [dataSource]="items" class="full-width">
-    <ng-container matColumnDef="tariffCode">
-      <th mat-header-cell *matHeaderCellDef>Code</th>
-      <td mat-cell *matCellDef="let item">{{ item.tariffCode }}</td>
-    </ng-container>
+          <mat-form-field appearance="outline">
+            <mat-label>Override Agreed Rate</mat-label>
+            <input matInput type="number" formControlName="agreedRateOverride" step="0.01">
+          </mat-form-field>
+        </div>
 
-    <ng-container matColumnDef="tariffDescription">
-      <th mat-header-cell *matHeaderCellDef>Description</th>
-      <td mat-cell *matCellDef="let item">{{ item.tariffDescription }}</td>
-    </ng-container>
+        <div class="checkbox-row">
+          <mat-checkbox formControlName="valueIsTotal">Total</mat-checkbox>
+          <mat-checkbox formControlName="rejected">Reject Entire Record</mat-checkbox>
+        </div>
 
-    <ng-container matColumnDef="value">
-      <th mat-header-cell *matHeaderCellDef>Value</th>
-      <td mat-cell *matCellDef="let item">{{ item.value | currency:'ZAR' }}</td>
-    </ng-container>
+        <div class="form-actions">
+          <button mat-raised-button color="primary" type="submit" [disabled]="!selectedTariff">Save</button>
+          <button mat-stroked-button type="button" (click)="showAddForm = false">Cancel</button>
+        </div>
+      </form>
+    </div>
+  }
 
-    <ng-container matColumnDef="qty">
-      <th mat-header-cell *matHeaderCellDef>Qty</th>
-      <td mat-cell *matCellDef="let item">{{ item.qty }}</td>
-    </ng-container>
+  <!-- Tariff Records Table -->
+  @if (items.length > 0) {
+    <table mat-table [dataSource]="items" class="full-width-table">
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let item">
+          @if (item.rejected || item.colour === 'Red') {
+            <mat-icon class="tariff-rejected-icon" matTooltip="Rejected / Overcharged">cancel</mat-icon>
+          } @else {
+            <mat-icon class="tariff-ok-icon" matTooltip="Active">check_circle</mat-icon>
+          }
+        </td>
+      </ng-container>
 
-    <ng-container matColumnDef="dateOfProcedure">
-      <th mat-header-cell *matHeaderCellDef>Date</th>
-      <td mat-cell *matCellDef="let item">{{ item.dateOfProcedure | date:'shortDate' }}</td>
-    </ng-container>
+      <ng-container matColumnDef="tariffCode">
+        <th mat-header-cell *matHeaderCellDef>Code</th>
+        <td mat-cell *matCellDef="let item">{{ item.tariffCode }}</td>
+      </ng-container>
 
-    <ng-container matColumnDef="rejected">
-      <th mat-header-cell *matHeaderCellDef>Rejected</th>
-      <td mat-cell *matCellDef="let item">{{ item.rejected ? 'Yes' : 'No' }}</td>
-    </ng-container>
+      <ng-container matColumnDef="value">
+        <th mat-header-cell *matHeaderCellDef>Value</th>
+        <td mat-cell *matCellDef="let item">{{ item.value != null ? (item.value ?? 0).toFixed(2) : '—' }}</td>
+      </ng-container>
 
-    <ng-container matColumnDef="actions">
-      <th mat-header-cell *matHeaderCellDef>Actions</th>
-      <td mat-cell *matCellDef="let item">
-        <button mat-icon-button color="warn" (click)="onDelete(item)" aria-label="Delete">
-          <mat-icon>delete</mat-icon>
-        </button>
-      </td>
-    </ng-container>
+      <ng-container matColumnDef="qty">
+        <th mat-header-cell *matHeaderCellDef>Qty</th>
+        <td mat-cell *matCellDef="let item">{{ item.qty }}</td>
+      </ng-container>
 
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-  </table>
+      <ng-container matColumnDef="fullValue">
+        <th mat-header-cell *matHeaderCellDef>Full Value</th>
+        <td mat-cell *matCellDef="let item">{{ item.fullValue != null ? (item.fullValue ?? 0).toFixed(2) : getFullValue(item).toFixed(2) }}</td>
+      </ng-container>
 
-  <p *ngIf="items.length === 0" class="empty-message">No tariffs assigned to this case.</p>
+      <ng-container matColumnDef="agreedRate">
+        <th mat-header-cell *matHeaderCellDef>Agreed Rate</th>
+        <td mat-cell *matCellDef="let item" [class.rate-highlight]="item.agreedRate && item.agreedRate > 0">
+          {{ item.agreedRate != null ? (item.agreedRate ?? 0).toFixed(2) : '—' }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="discount">
+        <th mat-header-cell *matHeaderCellDef>Discount</th>
+        <td mat-cell *matCellDef="let item">{{ item.discount != null ? (item.discount ?? 0).toFixed(2) : '0.00' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="totalOvercharged">
+        <th mat-header-cell *matHeaderCellDef>Overcharged</th>
+        <td mat-cell *matCellDef="let item" [class.overcharged]="item.totalOvercharged && item.totalOvercharged > 0">
+          {{ item.totalOvercharged != null ? (item.totalOvercharged ?? 0).toFixed(2) : '0.00' }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="totalPayable">
+        <th mat-header-cell *matHeaderCellDef>Total Payable</th>
+        <td mat-cell *matCellDef="let item">{{ item.totalPayable != null ? (item.totalPayable ?? 0).toFixed(2) : '—' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="dateOfProcedure">
+        <th mat-header-cell *matHeaderCellDef>Date</th>
+        <td mat-cell *matCellDef="let item">{{ item.dateOfProcedure }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let item">
+          <button mat-icon-button color="warn" (click)="onDelete(item)" aria-label="Delete">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+          [class.rejected-row]="row.rejected || row.colour === 'Red'"></tr>
+    </table>
+  }
+
+  @if (items.length === 0 && !showAddForm) {
+    <p class="empty-message">No tariffs assigned to this case.</p>
+  }
 </div>

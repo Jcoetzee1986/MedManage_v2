@@ -1,21 +1,45 @@
 <div class="tab-content">
-  <mat-card>
+  <!-- Refer To Provider -->
+  <mat-card class="summary-card">
     <mat-card-header>
-      <mat-card-title>Provider Information</mat-card-title>
+      <mat-card-title>Refer To Practice</mat-card-title>
     </mat-card-header>
     <mat-card-content>
       <div class="info-grid">
         <div class="info-item">
-          <span class="info-label">Refer To</span>
-          <span class="info-value">{{ caseData.referToName || '—' }}</span>
+          <span class="info-label">Practice Name</span>
+          <span class="info-value">{{ caseData.referToPracticeName || '—' }}</span>
         </div>
         <div class="info-item">
-          <span class="info-label">Refer From</span>
-          <span class="info-value">{{ caseData.referFromName || '—' }}</span>
+          <span class="info-label">Provider</span>
+          <span class="info-value">{{ (caseData.referToPersonSurname || '') + (caseData.referToPersonName ? ', ' + caseData.referToPersonName : '') || '—' }}</span>
         </div>
         <div class="info-item">
-          <span class="info-label">Practice</span>
-          <span class="info-value">{{ caseData.practiceName || '—' }}</span>
+          <span class="info-label">Speciality</span>
+          <span class="info-value">{{ caseData.referToSpeciality || '—' }}</span>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Refer From Provider -->
+  <mat-card class="summary-card">
+    <mat-card-header>
+      <mat-card-title>Refer From Practice</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">Practice Name</span>
+          <span class="info-value">{{ caseData.referFromPracticeName || '—' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Provider</span>
+          <span class="info-value">{{ (caseData.referFromPersonSurname || '') + (caseData.referFromPersonName ? ', ' + caseData.referFromPersonName : '') || '—' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Speciality</span>
+          <span class="info-value">{{ caseData.referFromSpeciality || '—' }}</span>
         </div>
       </div>
     </mat-card-content>

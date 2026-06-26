@@ -1,31 +1,206 @@
 <div class="tab-content">
-  <mat-card>
-    <mat-card-header>
-      <mat-card-title>Member Information</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="info-label">Member Name</span>
-          <span class="info-value">{{ caseData.memberName || '—' }}</span>
+  @if (loading) {
+    <p>Loading member details...</p>
+  }
+
+  @if (member) {
+    <!-- Summary Header -->
+    <div class="member-summary-header">
+      <h3>{{ member.lastName }}, {{ member.firstName }} <span class="member-number">({{ member.memberNumber }})</span></h3>
+      <button mat-raised-button color="primary" (click)="openMemberDetail()">
+        <mat-icon>open_in_new</mat-icon> Edit Member Details
+      </button>
+    </div>
+
+    <!-- Personal Information -->
+    <mat-card class="summary-card">
+      <mat-card-header>
+        <mat-card-title>Personal Information</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Surname</span>
+            <span class="info-value">{{ member.lastName || '—' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Name</span>
+            <span class="info-value">{{ member.firstName || '—' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Initials</span>
+            <span class="info-value">{{ member.initials || '—' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">ID Number</span>
+            <span class="info-value">{{ member.idNumber || '—' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Date of Birth</span>
+            <span class="info-value">{{ member.dateOfBirth | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Gender</span>
+            <span class="info-value">{{ member.genderName || '—' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Title</span>
+            <span class="info-value">{{ member.titleName || '—' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Pensioner</span>
+            <span class="info-value">{{ member.isPensioner ? 'Yes' : 'No' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">MBOD/RMA</span>
+            <span class="info-value">{{ member.isMbodRma ? 'Yes' : 'No' }}</span>
+          </div>
         </div>
-        <div class="info-item">
-          <span class="info-label">Member Number</span>
-          <span class="info-value">{{ caseData.memberNumber || '—' }}</span>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Medical Aid -->
+    <mat-card class="summary-card">
+      <mat-card-header>
+        <mat-card-title>Medical Aid</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Medical Funder</span>
+            <span class="info-value">{{ member.medicalAidName || '—' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Member Status</span>
+            <span class="info-value">{{ member.memberStatusName || '—' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Member Number</span>
+            <span class="info-value">{{ member.memberNumber || '—' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Date of Benefit</span>
+            <span class="info-value">{{ member.dateOfBenefit | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Date Joined</span>
+            <span class="info-value">{{ member.dateJoined | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Med Aid Exhausted</span>
+            <span class="info-value">{{ member.isMedAidExhausted ? 'Yes' : 'No' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Waiting Period</span>
+            <span class="info-value">{{ member.isWaitingPeriod ? 'Yes' : 'No' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Reinstated</span>
+            <span class="info-value">{{ member.isReinstated ? 'Yes' : 'No' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Deceased</span>
+            <span class="info-value">{{ member.isDeceased ? 'Yes' : 'No' }}</span>
+          </div>
         </div>
-        <div class="info-item">
-          <span class="info-label">Medical Aid</span>
-          <span class="info-value">{{ caseData.medicalAidName || '—' }}</span>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Contact & Address -->
+    <mat-card class="summary-card">
+      <mat-card-header>
+        <mat-card-title>Contact &amp; Address</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Phone</span>
+            <span class="info-value">{{ member.phoneNumber || '—' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Cell</span>
+            <span class="info-value">{{ member.cellNumber || '—' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Address</span>
+            <span class="info-value">
+              {{ member.addressLine1 || '' }}
+              {{ member.addressLine2 ? ', ' + member.addressLine2 : '' }}
+              {{ member.addressLine3 ? ', ' + member.addressLine3 : '' }}
+              {{ member.addressCode ? ' (' + member.addressCode + ')' : '' }}
+              {{ !member.addressLine1 ? '—' : '' }}
+            </span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Passport Number</span>
+            <span class="info-value">{{ member.passportNumber || '—' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Passport Expiry</span>
+            <span class="info-value">{{ member.passportExpiryDate | date:'dd/MM/yyyy' }}</span>
+          </div>
         </div>
-        <div class="info-item">
-          <span class="info-label">Product</span>
-          <span class="info-value">{{ caseData.productName || '—' }}</span>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Next of Kin -->
+    <mat-card class="summary-card">
+      <mat-card-header>
+        <mat-card-title>Next of Kin &amp; Employer</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Next of Kin</span>
+            <span class="info-value">{{ member.nextOfKin || '—' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Relationship</span>
+            <span class="info-value">{{ member.relationship || '—' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Contact Number</span>
+            <span class="info-value">{{ member.contactNumber || '—' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Dependents</span>
+            <span class="info-value">{{ member.dependents || '—' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Employer Address</span>
+            <span class="info-value">{{ member.employerAddress || '—' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Employer Phone</span>
+            <span class="info-value">{{ member.employerPhoneNumber || '—' }}</span>
+          </div>
         </div>
-        <div class="info-item">
-          <span class="info-label">Main Client</span>
-          <span class="info-value">{{ caseData.mainClientName || '—' }}</span>
-        </div>
-      </div>
-    </mat-card-content>
-  </mat-card>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Suspension -->
+    @if (member.isSuspended) {
+      <mat-card class="summary-card warning-card">
+        <mat-card-header>
+          <mat-card-title>⚠ Suspension</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">Suspended</span>
+              <span class="info-value">Yes</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Date Suspended</span>
+              <span class="info-value">{{ member.dateSuspended | date:'dd/MM/yyyy' }}</span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+  }
+
+  @if (!member && !loading) {
+    <p class="no-data">No member linked to this case.</p>
+  }
 </div>

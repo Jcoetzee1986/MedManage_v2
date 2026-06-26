@@ -4,5 +4,5 @@ namespace MedManage.Core.Interfaces.Services;
 
 public interface IDashboardService
 {
-    Task<DashboardStatsDto> GetStatsAsync(CancellationToken cancellationToken = default);
+    Task<DashboardStatsDto> GetStatsAsync(int? mainClientId = null, CancellationToken cancellationToken = default);
 }

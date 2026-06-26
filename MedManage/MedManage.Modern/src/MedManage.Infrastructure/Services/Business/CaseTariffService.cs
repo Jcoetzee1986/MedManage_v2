@@ -1,6 +1,7 @@
 using MedManage.Infrastructure.Mapping.Manual;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
@@ -26,8 +27,54 @@ public class CaseTariffService : ICaseTariffService
 
     public async Task<IEnumerable<CaseTariffDto>> GetByCaseIdAsync(int caseId)
     {
-        var tariffs = await _unitOfWork.CaseTariffs.GetByCaseIdAsync(caseId);
-        return tariffs.Select(e => e.ToDto());
+        // Call the existing stored procedure which calculates agreed rates, discounts, penalties
+        var connection = _dbContext.Database.GetDbConnection();
+        var results = new List<CaseTariffDto>();
+
+        try
+        {
+            await connection.OpenAsync();
+            using var command = connection.CreateCommand();
+            command.CommandText = "Tariff.usp_Case_Tariff_Select";
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.Add(new SqlParameter("@CaseID", caseId));
+
+            using var reader = await command.ExecuteReaderAsync();
+            // The SP returns multiple result sets — the first one (#TariffFinal) has the calculated values
+            while (await reader.ReadAsync())
+            {
+                results.Add(new CaseTariffDto
+                {
+                    CaseIdTariffId = reader.IsDBNull("Seq") ? 0 : Convert.ToInt64(reader["Seq"]),
+                    CaseId = caseId,
+                    TariffId = reader.IsDBNull("TariffID") ? 0 : Convert.ToInt32(reader["TariffID"]),
+                    TariffCode = reader.IsDBNull("TariffCode") ? null : reader["TariffCode"].ToString(),
+                    TariffDescription = reader.IsDBNull("TariffDescription") ? null : reader["TariffDescription"].ToString(),
+                    Value = reader.IsDBNull("Value") ? null : Convert.ToDecimal(reader["Value"]),
+                    Qty = reader.IsDBNull("Qty") ? null : Convert.ToDecimal(reader["Qty"]),
+                    AgreedRateOverride = reader.IsDBNull("AgreedRateOverride") ? null : Convert.ToDecimal(reader["AgreedRateOverride"]),
+                    ValueIsTotal = reader.IsDBNull("ValueIsTotal") ? null : Convert.ToBoolean(reader["ValueIsTotal"]),
+                    Rejected = reader.IsDBNull("Rejected") ? null : Convert.ToBoolean(reader["Rejected"]),
+                    DateOfProcedure = reader.IsDBNull("DateOfProcedure") ? default : DateOnly.FromDateTime(Convert.ToDateTime(reader["DateOfProcedure"])),
+                    // Calculated fields from SP
+                    FullValue = reader.IsDBNull("FullValue") ? null : Convert.ToDecimal(reader["FullValue"]),
+                    AgreedRate = reader.IsDBNull("AgreedRate") ? null : Convert.ToDecimal(reader["AgreedRate"]),
+                    Discount = reader.IsDBNull("Discount") ? null : Convert.ToDecimal(reader["Discount"]),
+                    TotalOvercharged = reader.IsDBNull("TotalOvercharged") ? null : Convert.ToDecimal(reader["TotalOvercharged"]),
+                    TotalPayable = reader.IsDBNull("TotalPayable") ? null : Convert.ToDecimal(reader["TotalPayable"]),
+                    TotalPenalty = reader.IsDBNull("TotalPenalty") ? null : Convert.ToDecimal(reader["TotalPenalty"]),
+                    PenaltyPercentage = reader.IsDBNull("PenaltyPercentage") ? null : Convert.ToDecimal(reader["PenaltyPercentage"]),
+                    Colour = reader.IsDBNull("Colour") ? "White" : reader["Colour"].ToString(),
+                });
+            }
+        }
+        finally
+        {
+            if (connection.State == ConnectionState.Open)
+                await connection.CloseAsync();
+        }
+
+        return results;
     }
 
     public async Task<CaseTariffDto?> GetByIdAsync(int caseId, long caseIdTariffId)
@@ -39,83 +86,45 @@ public class CaseTariffService : ICaseTariffService
         return tariff == null ? null : tariff.ToDto();
     }
 
-    public async Task<CaseTariffDto> CreateAsync(int caseId, CreateCaseTariffRequest request)
+    public async Task<CaseTariffDto> CreateAsync(int caseId, CreateCaseTariffRequest dto)
     {
-        var parameters = new[]
-        {
-            new SqlParameter("@CaseID", caseId),
-            new SqlParameter("@TariffID", request.TariffId),
-            new SqlParameter("@Value", (object?)request.Value ?? DBNull.Value),
-            new SqlParameter("@Qty", (object?)request.Qty ?? DBNull.Value),
-            new SqlParameter("@AgreedRateOverride", (object?)request.AgreedRateOverride ?? DBNull.Value),
-            new SqlParameter("@ValueIsTotal", (object?)request.ValueIsTotal ?? DBNull.Value),
-            new SqlParameter("@Rejected", (object?)request.Rejected ?? DBNull.Value),
-            new SqlParameter("@DateOfProcedure", request.DateOfProcedure.ToDateTime(TimeOnly.MinValue))
-        };
+        var entity = dto.ToEntity();
+        entity.CaseId = caseId;
 
-        await _dbContext.CaseTariffs.FromSqlRaw(
-            "EXEC Tariff.usp_Case_Tariff_Insert @CaseID, @TariffID, @Value, @Qty, @AgreedRateOverride, @ValueIsTotal, @Rejected, @DateOfProcedure",
-            parameters).ToListAsync();
+        await _unitOfWork.CaseTariffs.AddAsync(entity);
+        await _unitOfWork.SaveChangesAsync();
 
-        // Retrieve the newly created tariff (latest by DateInserted for this case + tariff combo)
-        var created = (await _unitOfWork.CaseTariffs
-            .FindAsync(t => t.CaseId == caseId && t.TariffId == request.TariffId && t.DateDeleted == null))
-            .OrderByDescending(t => t.DateInserted)
-            .FirstOrDefault();
-
-        return (created!).ToDto();
+        return entity.ToDto();
     }
 
-    public async Task<CaseTariffDto> UpdateAsync(int caseId, long caseIdTariffId, UpdateCaseTariffRequest request)
+    public async Task<CaseTariffDto> UpdateAsync(int caseId, long id, UpdateCaseTariffRequest dto)
     {
-        // Verify existence first
-        var existing = (await _unitOfWork.CaseTariffs
-            .FindAsync(t => t.CaseId == caseId && t.CaseIdTariffId == caseIdTariffId && t.DateDeleted == null))
+        var entity = (await _unitOfWork.CaseTariffs
+            .FindAsync(t => t.CaseId == caseId && t.CaseIdTariffId == id && t.DateDeleted == null))
             .FirstOrDefault();
 
-        if (existing == null)
-            throw new KeyNotFoundException($"CaseTariff with CaseId {caseId} and Id {caseIdTariffId} not found");
+        if (entity == null)
+            throw new KeyNotFoundException($"Case tariff with ID {id} not found for case {caseId}");
 
-        var parameters = new[]
-        {
-            new SqlParameter("@CaseID_TariffID", caseIdTariffId),
-            new SqlParameter("@Value", (object?)request.Value ?? DBNull.Value),
-            new SqlParameter("@Qty", (object?)request.Qty ?? DBNull.Value),
-            new SqlParameter("@AgreedRateOverride", (object?)request.AgreedRateOverride ?? DBNull.Value),
-            new SqlParameter("@ValueIsTotal", (object?)request.ValueIsTotal ?? DBNull.Value),
-            new SqlParameter("@Rejected", (object?)request.Rejected ?? DBNull.Value),
-            new SqlParameter("@DateOfProcedure", request.DateOfProcedure.ToDateTime(TimeOnly.MinValue))
-        };
+        dto.ApplyTo(entity);
 
-        await _dbContext.CaseTariffs.FromSqlRaw(
-            "EXEC Tariff.usp_Case_Tariff_Update @CaseID_TariffID, @Value, @Qty, @AgreedRateOverride, @ValueIsTotal, @Rejected, @DateOfProcedure",
-            parameters).ToListAsync();
+        await _unitOfWork.CaseTariffs.UpdateAsync(entity);
+        await _unitOfWork.SaveChangesAsync();
 
-        // Retrieve updated record
-        var updated = (await _unitOfWork.CaseTariffs
-            .FindAsync(t => t.CaseId == caseId && t.CaseIdTariffId == caseIdTariffId && t.DateDeleted == null))
-            .FirstOrDefault();
-
-        return (updated!).ToDto();
+        return entity.ToDto();
     }
 
-    public async Task<bool> DeleteAsync(int caseId, long caseIdTariffId)
+    public async Task<bool> DeleteAsync(int caseId, long id)
     {
-        var existing = (await _unitOfWork.CaseTariffs
-            .FindAsync(t => t.CaseId == caseId && t.CaseIdTariffId == caseIdTariffId && t.DateDeleted == null))
+        var entity = (await _unitOfWork.CaseTariffs
+            .FindAsync(t => t.CaseId == caseId && t.CaseIdTariffId == id && t.DateDeleted == null))
             .FirstOrDefault();
 
-        if (existing == null)
-            return false;
+        if (entity == null) return false;
 
-        var parameters = new[]
-        {
-            new SqlParameter("@CaseID_TariffID", caseIdTariffId)
-        };
-
-        await _dbContext.CaseTariffs.FromSqlRaw(
-            "EXEC Tariff.usp_Case_Tariff_Delete @CaseID_TariffID",
-            parameters).ToListAsync();
+        entity.DateDeleted = DateTime.UtcNow;
+        await _unitOfWork.CaseTariffs.UpdateAsync(entity);
+        await _unitOfWork.SaveChangesAsync();
 
         return true;
     }

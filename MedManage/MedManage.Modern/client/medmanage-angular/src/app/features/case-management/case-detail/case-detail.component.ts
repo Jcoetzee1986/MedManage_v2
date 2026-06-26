@@ -24,10 +24,12 @@ import { CaseDto, CreateCaseRequest, UpdateCaseRequest } from '../models/case.mo
 import { MemberService } from '../../members/services/member.service';
 import { MemberDto } from '../../members/models/member.models';
 import { ProviderService } from '../../providers/services/provider.service';
-import { ProviderAutocompleteResult } from '../../providers/models/provider.models';
+import { ProviderAutocompleteResult, ProviderDto } from '../../providers/models/provider.models';
 import { ReportService } from '../../reports/services/report.service';
 import { ReferenceDataService } from '../../../core/services/reference-data.service';
 import { ReferenceDataItem } from '../../../core/models/reference-data.models';
+import { MemberLookupDialogComponent } from '../../../shared/components/member-lookup-dialog/member-lookup-dialog.component';
+import { ProviderLookupDialogComponent } from '../../../shared/components/provider-lookup-dialog/provider-lookup-dialog.component';
 import { HasRoleDirective } from '../../../shared/directives/has-role.directive';
 import { CaseMemberTabComponent } from '../tabs/case-member-tab/case-member-tab.component';
 import { CaseProviderTabComponent } from '../tabs/case-provider-tab/case-provider-tab.component';
@@ -136,11 +138,11 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
 
   // Provider lookup (Refer To)
   referToResults: ProviderAutocompleteResult[] = [];
-  selectedReferTo: ProviderAutocompleteResult | null = null;
+  selectedReferTo: ProviderDto | null = null;
 
   // Provider lookup (Refer From)
   referFromResults: ProviderAutocompleteResult[] = [];
-  selectedReferFrom: ProviderAutocompleteResult | null = null;
+  selectedReferFrom: ProviderDto | null = null;
 
   /** Heartbeat interval: send lock refresh every 5 minutes to prevent expiry */
   private readonly HEARTBEAT_INTERVAL_MS = 5 * 60 * 1000;
@@ -210,8 +212,6 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
       this.startHeartbeat();
     }
     this.setupAutoCalculations();
-    this.setupMemberSearch();
-    this.setupProviderSearch();
     this.loadReferenceData();
   }
 
@@ -253,27 +253,15 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
 
   // ─── Member Search ─────────────────────────────────────────────
 
-  private setupMemberSearch(): void {
-    this.form.get('memberSearch')!.valueChanges
-      .pipe(
-        debounceTime(300),
-        distinctUntilChanged(),
-        takeUntil(this.destroy$),
-        switchMap(val => {
-          if (!val || val.length < 2) {
-            this.memberSearchResults = [];
-            return of(null);
-          }
-          this.memberSearching = true;
-          return this.memberService.search({ lastName: val, pageSize: 10 });
-        })
-      )
-      .subscribe(result => {
-        this.memberSearching = false;
-        if (result) {
-          this.memberSearchResults = result.items;
-        }
-      });
+  openMemberLookup(): void {
+    const dialogRef = this.dialog.open(MemberLookupDialogComponent, {
+      width: '700px'
+    });
+    dialogRef.afterClosed().subscribe((member: MemberDto | null) => {
+      if (member) {
+        this.onMemberSelected(member);
+      }
+    });
   }
 
   onMemberSelected(member: MemberDto): void {
@@ -292,39 +280,29 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
 
   // ─── Provider Search (Refer To / Refer From) ──────────────────
 
-  private setupProviderSearch(): void {
-    this.form.get('referToSearch')!.valueChanges
-      .pipe(
-        debounceTime(300),
-        distinctUntilChanged(),
-        takeUntil(this.destroy$),
-        switchMap(val => {
-          if (!val || val.length < 2) {
-            this.referToResults = [];
-            return of([]);
-          }
-          return this.providerService.autocomplete(val);
-        })
-      )
-      .subscribe(results => this.referToResults = results);
-
-    this.form.get('referFromSearch')!.valueChanges
-      .pipe(
-        debounceTime(300),
-        distinctUntilChanged(),
-        takeUntil(this.destroy$),
-        switchMap(val => {
-          if (!val || val.length < 2) {
-            this.referFromResults = [];
-            return of([]);
-          }
-          return this.providerService.autocomplete(val);
-        })
-      )
-      .subscribe(results => this.referFromResults = results);
+  openReferToLookup(): void {
+    const dialogRef = this.dialog.open(ProviderLookupDialogComponent, {
+      width: '700px'
+    });
+    dialogRef.afterClosed().subscribe((provider: ProviderDto | null) => {
+      if (provider) {
+        this.onReferToSelected(provider);
+      }
+    });
   }
 
-  onReferToSelected(provider: ProviderAutocompleteResult): void {
+  openReferFromLookup(): void {
+    const dialogRef = this.dialog.open(ProviderLookupDialogComponent, {
+      width: '700px'
+    });
+    dialogRef.afterClosed().subscribe((provider: ProviderDto | null) => {
+      if (provider) {
+        this.onReferFromSelected(provider);
+      }
+    });
+  }
+
+  onReferToSelected(provider: ProviderDto): void {
     this.selectedReferTo = provider;
     this.form.patchValue({
       referToId: provider.id,
@@ -338,7 +316,7 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
     this.form.patchValue({ referToId: null, referToSearch: '' });
   }
 
-  onReferFromSelected(provider: ProviderAutocompleteResult): void {
+  onReferFromSelected(provider: ProviderDto): void {
     this.selectedReferFrom = provider;
     this.form.patchValue({
       referFromId: provider.id,

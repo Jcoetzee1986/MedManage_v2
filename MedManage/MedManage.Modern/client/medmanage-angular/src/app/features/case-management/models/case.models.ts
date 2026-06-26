@@ -210,6 +210,7 @@ export interface CreateCaseIcdRequest {
 /** Tariff */
 export interface CaseTariffDto {
   id: number;
+  caseIdTariffId?: number;
   caseId: number;
   tariffId?: number;
   tariffCode?: string;
@@ -220,6 +221,15 @@ export interface CaseTariffDto {
   valueIsTotal?: boolean;
   rejected?: boolean;
   dateOfProcedure?: string;
+  // Calculated fields from SP
+  fullValue?: number;
+  agreedRate?: number;
+  discount?: number;
+  totalOvercharged?: number;
+  totalPayable?: number;
+  totalPenalty?: number;
+  penaltyPercentage?: number;
+  colour?: string;
 }
 
 export interface CreateCaseTariffRequest {

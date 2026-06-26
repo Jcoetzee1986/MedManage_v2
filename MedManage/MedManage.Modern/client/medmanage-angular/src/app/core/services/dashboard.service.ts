@@ -25,8 +25,12 @@ export class DashboardService {
   private readonly http = inject(HttpClient);
   private readonly API_URL = `${environment.apiUrl}/dashboard`;
 
-  getStats(): Observable<DashboardStats> {
-    return this.http.get<ApiResponse<DashboardStats>>(`${this.API_URL}/stats`).pipe(
+  getStats(mainClientId?: number | null): Observable<DashboardStats> {
+    let url = `${this.API_URL}/stats`;
+    if (mainClientId) {
+      url += `?mainClientId=${mainClientId}`;
+    }
+    return this.http.get<ApiResponse<DashboardStats>>(url).pipe(
       map(response => response.data)
     );
   }

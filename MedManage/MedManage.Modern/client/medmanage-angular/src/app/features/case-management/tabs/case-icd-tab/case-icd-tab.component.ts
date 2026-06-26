@@ -10,8 +10,11 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { CaseService } from '../../services/case.service';
 import { CaseIcdDto, CreateCaseIcdRequest } from '../../models/case.models';
+import { CodeLookupDialogComponent } from '../../../../shared/components/code-lookup-dialog/code-lookup-dialog.component';
+import { CodeLookupResult } from '../../../../core/services/code-lookup.service';
 
 @Component({
   selector: 'app-case-icd-tab',
@@ -27,7 +30,8 @@ import { CaseIcdDto, CreateCaseIcdRequest } from '../../models/case.models';
     MatCheckboxModule,
     MatDatepickerModule,
     MatNativeDateModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatDialogModule
   ],
   templateUrl: './case-icd-tab.component.html',
   styleUrls: ['./case-icd-tab.component.scss']
@@ -38,10 +42,12 @@ export class CaseIcdTabComponent implements OnInit {
   private readonly caseService = inject(CaseService);
   private readonly fb = inject(FormBuilder);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly dialog = inject(MatDialog);
 
   items: CaseIcdDto[] = [];
-  displayedColumns = ['icdCode', 'icdDescription', 'dateOfProcedure', 'primaryCode', 'secondaryCode', 'coMorbidityCode', 'actions'];
+  displayedColumns = ['diagnosisCode', 'diagnosisDesc', 'dateOfProcedure', 'primaryCode', 'secondaryCode', 'coMorbidityCode', 'actions'];
   showAddForm = false;
+  selectedIcd: CodeLookupResult | null = null;
 
   addForm = this.fb.group({
     icdId: [null as number | null],
@@ -62,11 +68,42 @@ export class CaseIcdTabComponent implements OnInit {
     });
   }
 
+  onOpenLookup(): void {
+    const dialogRef = this.dialog.open(CodeLookupDialogComponent, {
+      width: '700px',
+      data: { codeType: 'icd', title: 'ICD Lookup' }
+    });
+
+    dialogRef.afterClosed().subscribe((result: CodeLookupResult | null) => {
+      if (result) {
+        this.selectedIcd = result;
+        this.addForm.patchValue({ icdId: result.id });
+      }
+    });
+  }
+
+  clearSelectedIcd(): void {
+    this.selectedIcd = null;
+    this.addForm.patchValue({ icdId: null });
+  }
+
+  onShowAddForm(): void {
+    this.showAddForm = true;
+    this.selectedIcd = null;
+    this.addForm.reset();
+  }
+
   onAdd(): void {
+    if (!this.addForm.value.icdId) {
+      this.snackBar.open('Please select an ICD code first', 'Close', { duration: 3000 });
+      return;
+    }
+
     const val = this.addForm.value;
-    const request: CreateCaseIcdRequest = {
-      icdId: val.icdId || undefined,
-      dateOfProcedure: val.dateOfProcedure?.toISOString(),
+    // Backend expects: icdid (not icdId), DateOfProcedure as date-only string
+    const request: any = {
+      icdid: val.icdId,
+      dateOfProcedure: val.dateOfProcedure ? val.dateOfProcedure.toISOString().split('T')[0] : null,
       primaryCode: val.primaryCode || false,
       secondaryCode: val.secondaryCode || false,
       coMorbidityCode: val.coMorbidityCode || false
@@ -76,6 +113,7 @@ export class CaseIcdTabComponent implements OnInit {
       next: () => {
         this.loadItems();
         this.addForm.reset();
+        this.selectedIcd = null;
         this.showAddForm = false;
         this.snackBar.open('ICD code added', 'Close', { duration: 3000 });
       },

@@ -123,7 +123,13 @@ public class MedicalAidService : IMedicalAidService
 
     public async Task<IEnumerable<MedicalAidProductDto>> GetProductsByMedicalAidIdAsync(int medicalAidId, CancellationToken cancellationToken = default)
     {
-        var entities = await _unitOfWork.MedicalAidProducts.GetByMedicalAidIdAsync(medicalAidId);
+        // Products are linked to MainClient, not MedicalAid directly.
+        // First get the MainClientId from the MedicalAid, then find products for that client.
+        var medicalAid = await _unitOfWork.MedicalAids.GetByIdAsync(medicalAidId);
+        if (medicalAid?.MainClientId == null)
+            return Enumerable.Empty<MedicalAidProductDto>();
+
+        var entities = await _unitOfWork.MedicalAidProducts.GetByMedicalAidIdAsync(medicalAid.MainClientId.Value);
         return entities.Select(e => e.ToDto());
     }
 

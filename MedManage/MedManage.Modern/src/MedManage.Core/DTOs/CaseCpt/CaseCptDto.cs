@@ -16,6 +16,7 @@ public class CaseCptDto
     public string? CptCode { get; set; }
     public string? CptShortDescription { get; set; }
     public string? CptMediumDescription { get; set; }
+    public string? CptLongDescription { get; set; }
 
     // Audit fields
     public DateTime? DateInserted { get; set; }

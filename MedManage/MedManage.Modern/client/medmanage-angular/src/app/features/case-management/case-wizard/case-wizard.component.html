@@ -15,24 +15,13 @@
     <mat-step [stepControl]="memberForm" label="Select Member">
       <div class="wizard-step-content">
         <h3 class="section-header">Search for an existing member</h3>
-        <div class="form-grid">
-          <mat-form-field appearance="outline" class="span-2">
-            <mat-label>Search Member (type surname)</mat-label>
-            <input matInput [formControl]="memberForm.controls.memberSearch"
-                   [matAutocomplete]="memberAuto">
-            <button mat-icon-button matSuffix *ngIf="memberForm.get('memberId')?.value" (click)="clearMember()">
-              <mat-icon>clear</mat-icon>
-            </button>
-            <mat-autocomplete #memberAuto="matAutocomplete">
-              @for (m of memberSearchResults; track m.id) {
-                <mat-option [value]="m.lastName + ', ' + m.firstName"
-                            (onSelectionChange)="onMemberSelected(m)">
-                  {{ m.lastName }}, {{ m.firstName }} — {{ m.memberNumber }}
-                </mat-option>
-              }
-            </mat-autocomplete>
-            <mat-hint *ngIf="memberSearching">Searching...</mat-hint>
-          </mat-form-field>
+        <div class="d-flex gap-2 align-center">
+          <button mat-raised-button color="primary" (click)="openMemberLookup()">
+            <mat-icon>search</mat-icon> Search Member
+          </button>
+          <button mat-stroked-button *ngIf="selectedMember" (click)="clearMember()">
+            <mat-icon>clear</mat-icon> Clear
+          </button>
         </div>
 
         <!-- Selected member details -->
@@ -114,23 +103,13 @@
     <mat-step [stepControl]="referFromForm" [optional]="true" label="Refer From">
       <div class="wizard-step-content">
         <h3 class="section-header">Refer From Practice (Optional)</h3>
-        <div class="form-grid">
-          <mat-form-field appearance="outline" class="span-2">
-            <mat-label>Search Provider (type practice name)</mat-label>
-            <input matInput [formControl]="referFromForm.controls.referFromSearch"
-                   [matAutocomplete]="referFromAuto">
-            <button mat-icon-button matSuffix *ngIf="referFromForm.get('referFromId')?.value" (click)="clearReferFrom()">
-              <mat-icon>clear</mat-icon>
-            </button>
-            <mat-autocomplete #referFromAuto="matAutocomplete">
-              @for (p of referFromResults; track p.id) {
-                <mat-option [value]="p.practiceName + ' - ' + p.lastName + ', ' + p.firstName"
-                            (onSelectionChange)="onReferFromSelected(p)">
-                  {{ p.practiceName }} — {{ p.lastName }}, {{ p.firstName }} ({{ p.specialityName || 'N/A' }})
-                </mat-option>
-              }
-            </mat-autocomplete>
-          </mat-form-field>
+        <div class="d-flex gap-2 align-center">
+          <button mat-raised-button color="primary" (click)="openReferFromLookup()">
+            <mat-icon>search</mat-icon> Search Provider
+          </button>
+          <button mat-stroked-button *ngIf="selectedReferFrom" (click)="clearReferFrom()">
+            <mat-icon>clear</mat-icon> Clear
+          </button>
         </div>
 
         <div class="info-grid" *ngIf="selectedReferFrom">
@@ -145,6 +124,10 @@
           <div class="info-item">
             <span class="info-label">Speciality</span>
             <span class="info-value">{{ selectedReferFrom.specialityName || '—' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Practice Nr</span>
+            <span class="info-value">{{ selectedReferFrom.providerNumber || '—' }}</span>
           </div>
         </div>
       </div>
@@ -162,23 +145,13 @@
     <mat-step [stepControl]="referToForm" label="Refer To">
       <div class="wizard-step-content">
         <h3 class="section-header">Refer To Practice *</h3>
-        <div class="form-grid">
-          <mat-form-field appearance="outline" class="span-2">
-            <mat-label>Search Provider (type practice name)</mat-label>
-            <input matInput [formControl]="referToForm.controls.referToSearch"
-                   [matAutocomplete]="referToAuto">
-            <button mat-icon-button matSuffix *ngIf="referToForm.get('referToId')?.value" (click)="clearReferTo()">
-              <mat-icon>clear</mat-icon>
-            </button>
-            <mat-autocomplete #referToAuto="matAutocomplete">
-              @for (p of referToResults; track p.id) {
-                <mat-option [value]="p.practiceName + ' - ' + p.lastName + ', ' + p.firstName"
-                            (onSelectionChange)="onReferToSelected(p)">
-                  {{ p.practiceName }} — {{ p.lastName }}, {{ p.firstName }} ({{ p.specialityName || 'N/A' }})
-                </mat-option>
-              }
-            </mat-autocomplete>
-          </mat-form-field>
+        <div class="d-flex gap-2 align-center">
+          <button mat-raised-button color="primary" (click)="openReferToLookup()">
+            <mat-icon>search</mat-icon> Search Provider
+          </button>
+          <button mat-stroked-button *ngIf="selectedReferTo" (click)="clearReferTo()">
+            <mat-icon>clear</mat-icon> Clear
+          </button>
         </div>
 
         <div class="info-grid" *ngIf="selectedReferTo">
@@ -193,6 +166,10 @@
           <div class="info-item">
             <span class="info-label">Speciality</span>
             <span class="info-value">{{ selectedReferTo.specialityName || '—' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Practice Nr</span>
+            <span class="info-value">{{ selectedReferTo.providerNumber || '—' }}</span>
           </div>
         </div>
       </div>

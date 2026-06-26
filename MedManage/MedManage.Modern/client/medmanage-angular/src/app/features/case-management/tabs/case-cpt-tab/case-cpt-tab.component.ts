@@ -10,8 +10,11 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { CaseService } from '../../services/case.service';
 import { CaseCptDto, CreateCaseCptRequest } from '../../models/case.models';
+import { CodeLookupDialogComponent } from '../../../../shared/components/code-lookup-dialog/code-lookup-dialog.component';
+import { CodeLookupResult } from '../../../../core/services/code-lookup.service';
 
 @Component({
   selector: 'app-case-cpt-tab',
@@ -27,7 +30,8 @@ import { CaseCptDto, CreateCaseCptRequest } from '../../models/case.models';
     MatCheckboxModule,
     MatDatepickerModule,
     MatNativeDateModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatDialogModule
   ],
   templateUrl: './case-cpt-tab.component.html',
   styleUrls: ['./case-cpt-tab.component.scss']
@@ -38,10 +42,12 @@ export class CaseCptTabComponent implements OnInit {
   private readonly caseService = inject(CaseService);
   private readonly fb = inject(FormBuilder);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly dialog = inject(MatDialog);
 
   items: CaseCptDto[] = [];
   displayedColumns = ['cptCode', 'cptDescription', 'dateOfProcedure', 'primaryCode', 'secondaryCode', 'actions'];
   showAddForm = false;
+  selectedCpt: CodeLookupResult | null = null;
 
   addForm = this.fb.group({
     cptId: [null as number | null],
@@ -61,11 +67,42 @@ export class CaseCptTabComponent implements OnInit {
     });
   }
 
+  onOpenLookup(): void {
+    const dialogRef = this.dialog.open(CodeLookupDialogComponent, {
+      width: '700px',
+      data: { codeType: 'cpt', title: 'CPT Lookup' }
+    });
+
+    dialogRef.afterClosed().subscribe((result: CodeLookupResult | null) => {
+      if (result) {
+        this.selectedCpt = result;
+        this.addForm.patchValue({ cptId: result.id });
+      }
+    });
+  }
+
+  clearSelectedCpt(): void {
+    this.selectedCpt = null;
+    this.addForm.patchValue({ cptId: null });
+  }
+
+  onShowAddForm(): void {
+    this.showAddForm = true;
+    this.selectedCpt = null;
+    this.addForm.reset();
+  }
+
   onAdd(): void {
+    if (!this.addForm.value.cptId) {
+      this.snackBar.open('Please select a CPT code first', 'Close', { duration: 3000 });
+      return;
+    }
+
     const val = this.addForm.value;
-    const request: CreateCaseCptRequest = {
-      cptId: val.cptId || undefined,
-      dateOfProcedure: val.dateOfProcedure?.toISOString(),
+    // Backend expects: Cptid (not cptId), DateOfProcedure as date-only string (YYYY-MM-DD)
+    const request: any = {
+      cptid: val.cptId,
+      dateOfProcedure: val.dateOfProcedure ? val.dateOfProcedure.toISOString().split('T')[0] : null,
       primaryCode: val.primaryCode || false,
       secondaryCode: val.secondaryCode || false
     };
@@ -74,6 +111,7 @@ export class CaseCptTabComponent implements OnInit {
       next: () => {
         this.loadItems();
         this.addForm.reset();
+        this.selectedCpt = null;
         this.showAddForm = false;
         this.snackBar.open('CPT code added', 'Close', { duration: 3000 });
       },

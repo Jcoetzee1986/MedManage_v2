@@ -180,6 +180,7 @@ public static class CaseCptMappers
         CptCode = entity.Cpt?.Code,
         CptShortDescription = entity.Cpt?.ShortDescr,
         CptMediumDescription = entity.Cpt?.MediumDescr,
+        CptLongDescription = entity.Cpt?.LongDescr,
     };
 
     public static CaseCpt ToEntity(this CreateCaseCptDto dto) => new()

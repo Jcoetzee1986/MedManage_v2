@@ -19,6 +19,18 @@ public class TariffController : ControllerBase
         _tariffService = tariffService;
     }
 
+    // --- Tariff Search (simple text search for autocomplete) ---
+
+    [HttpGet("search")]
+    public async Task<IActionResult> SearchTariffs([FromQuery] string q)
+    {
+        if (string.IsNullOrWhiteSpace(q) || q.Length < 2)
+            return Ok(ApiResponse<IEnumerable<BaseTariffDto>>.SuccessResponse(Enumerable.Empty<BaseTariffDto>()));
+
+        var results = await _tariffService.SearchBaseTariffsAsync(q);
+        return Ok(ApiResponse<IEnumerable<BaseTariffDto>>.SuccessResponse(results));
+    }
+
     // --- Tariff Lookup (wraps SP) ---
 
     [HttpPost("lookup")]

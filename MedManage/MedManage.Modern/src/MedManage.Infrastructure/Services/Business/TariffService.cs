@@ -56,6 +56,21 @@ public class TariffService : ITariffService
         return results;
     }
 
+    // --- Base Tariff Search (simple text search for autocomplete) ---
+
+    public async Task<IEnumerable<BaseTariffDto>> SearchBaseTariffsAsync(string query)
+    {
+        var tariffs = await _context.BaseTariffs
+            .Where(bt => bt.DateDeleted == null &&
+                (bt.BaseTariffId.Contains(query) || 
+                 (bt.TariffDescription != null && bt.TariffDescription.Contains(query))))
+            .OrderBy(bt => bt.BaseTariffId)
+            .Take(20)
+            .ToListAsync();
+
+        return tariffs.Select(t => t.ToDto());
+    }
+
     // --- Base Tariff CRUD (standard EF Core LINQ) ---
 
     public async Task<IEnumerable<BaseTariffDto>> GetAllBaseTariffsAsync()

@@ -188,18 +188,22 @@ export interface CreateMemberNoteRequest {
 
 export interface MemberMedicalAidProductDto {
   id: number;
+  medAidProductIdMemberId: number;
   memberId: number;
+  medAidProductId: number;
   medicalAidProductId: number;
   medicalAidProductName: string;
   medicalAidName: string;
+  startDate: string | null;
+  endDate: string | null;
   dateFrom: string | null;
   dateTo: string | null;
 }
 
 export interface CreateMemberMedicalAidProductRequest {
-  medicalAidProductId: number;
-  dateFrom?: string | null;
-  dateTo?: string | null;
+  medAidProductId: number;
+  startDate: string;
+  endDate?: string | null;
 }
 
 export interface PagedResult<T> {
