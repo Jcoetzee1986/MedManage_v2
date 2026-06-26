@@ -1,4 +1,4 @@
-using AutoMapper;
+using MedManage.Infrastructure.Mapping.Manual;
 using MedManage.Core.DTOs.ReferenceData;
 using MedManage.Core.Entities;
 using MedManage.Core.Interfaces;
@@ -9,13 +9,11 @@ namespace MedManage.Infrastructure.Services.Business;
 public class MemberStatusService : IMemberStatusService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IMapper _mapper;
     private readonly Core.Interfaces.ICurrentUserService _currentUserService;
 
-    public MemberStatusService(IUnitOfWork unitOfWork, IMapper mapper, Core.Interfaces.ICurrentUserService currentUserService)
+    public MemberStatusService(IUnitOfWork unitOfWork, Core.Interfaces.ICurrentUserService currentUserService)
     {
         _unitOfWork = unitOfWork;
-        _mapper = mapper;
         _currentUserService = currentUserService;
     }
 
@@ -28,23 +26,23 @@ public class MemberStatusService : IMemberStatusService
             entities = entities.Where(x => x.DateDeleted == null);
         }
         
-        return _mapper.Map<IEnumerable<MemberStatusDto>>(entities);
+        return entities.Select(e => e.ToDto());
     }
 
     public async Task<MemberStatusDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         var entity = await _unitOfWork.MemberStatuses.GetByIdAsync(id);
-        return entity == null ? null : _mapper.Map<MemberStatusDto>(entity);
+        return entity == null ? null : entity.ToDto();
     }
 
     public async Task<MemberStatusDto> CreateAsync(CreateMemberStatusDto dto, CancellationToken cancellationToken = default)
     {
-        var entity = _mapper.Map<MemberStatus>(dto);
+        var entity = dto.ToEntity();
         
         await _unitOfWork.MemberStatuses.AddAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
-        return _mapper.Map<MemberStatusDto>(entity);
+        return entity.ToDto();
     }
 
     public async Task<MemberStatusDto> UpdateAsync(UpdateMemberStatusDto dto, CancellationToken cancellationToken = default)
@@ -55,12 +53,12 @@ public class MemberStatusService : IMemberStatusService
             throw new KeyNotFoundException($"MemberStatus with ID {dto.MemberStatusId} not found");
         }
         
-        _mapper.Map(dto, entity);
+        dto.ApplyTo(entity);
         
         await _unitOfWork.MemberStatuses.UpdateAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
-        return _mapper.Map<MemberStatusDto>(entity);
+        return entity.ToDto();
     }
 
     public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default)

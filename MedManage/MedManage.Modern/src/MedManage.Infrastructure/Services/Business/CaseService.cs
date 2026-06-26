@@ -1,4 +1,3 @@
-using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using MedManage.Core.DTOs.Case;
 using MedManage.Core.DTOs.Common;
@@ -6,6 +5,7 @@ using MedManage.Core.Entities;
 using MedManage.Core.Interfaces;
 using MedManage.Core.Interfaces.Repositories;
 using MedManage.Core.Interfaces.Services;
+using MedManage.Infrastructure.Mapping.Manual;
 using MedManage.Infrastructure.Persistence;
 
 namespace MedManage.Infrastructure.Services.Business;
@@ -14,18 +14,15 @@ public class CaseService : ICaseService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly MedManageDbContext _context;
-    private readonly IMapper _mapper;
     private readonly ICurrentUserService _currentUserService;
 
     public CaseService(
         IUnitOfWork unitOfWork,
         MedManageDbContext context,
-        IMapper mapper,
         ICurrentUserService currentUserService)
     {
         _unitOfWork = unitOfWork;
         _context = context;
-        _mapper = mapper;
         _currentUserService = currentUserService;
     }
 
@@ -44,7 +41,7 @@ public class CaseService : ICaseService
                 .ThenInclude(p => p!.Speciality)
             .FirstOrDefaultAsync(c => c.CaseId == caseId && c.DateDeleted == null, cancellationToken);
 
-        return caseEntity == null ? null : _mapper.Map<CaseDto>(caseEntity);
+        return caseEntity?.ToDto();
     }
 
     public async Task<PagedResult<CaseDto>> SearchAsync(CaseSearchRequest request, CancellationToken cancellationToken = default)
@@ -196,7 +193,7 @@ public class CaseService : ICaseService
 
         return new PagedResult<CaseDto>
         {
-            Items = _mapper.Map<List<CaseDto>>(cases),
+            Items = cases.ToDtoList(),
             TotalCount = totalCount,
             PageNumber = request.PageNumber,
             PageSize = request.PageSize
@@ -205,11 +202,11 @@ public class CaseService : ICaseService
 
     public async Task<CaseDto> CreateAsync(CreateCaseRequest request, CancellationToken cancellationToken = default)
     {
-        var caseEntity = _mapper.Map<Case>(request);
+        var caseEntity = request.ToEntity();
 
         await _unitOfWork.Cases.AddAsync(caseEntity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        return _mapper.Map<CaseDto>(caseEntity);
+        return caseEntity.ToDto();
     }
 
     public async Task<CaseDto> UpdateAsync(UpdateCaseRequest request, CancellationToken cancellationToken = default)
@@ -220,11 +217,11 @@ public class CaseService : ICaseService
             throw new KeyNotFoundException($"Case with ID {request.CaseId} not found");
         }
 
-        _mapper.Map(request, existingCase);
+        request.ApplyTo(existingCase);
 
         await _unitOfWork.Cases.UpdateAsync(existingCase);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        return _mapper.Map<CaseDto>(existingCase);
+        return existingCase.ToDto();
     }
 
     public async Task<bool> DeleteAsync(int caseId, CancellationToken cancellationToken = default)
@@ -275,7 +272,7 @@ public class CaseService : ICaseService
         return new DuplicateCheckResult
         {
             HasDuplicates = duplicates.Any(),
-            PossibleDuplicates = _mapper.Map<List<CaseDto>>(duplicates),
+            PossibleDuplicates = duplicates.ToDtoList(),
             Message = duplicates.Any()
                 ? $"Found {duplicates.Count} possible duplicate case(s) for the same member, provider, and admission date."
                 : null
@@ -328,6 +325,6 @@ public class CaseService : ICaseService
             .Take(100)
             .ToListAsync(cancellationToken);
 
-        return _mapper.Map<IEnumerable<CaseDto>>(cases);
+        return cases.Select(c => c.ToDto());
     }
 }

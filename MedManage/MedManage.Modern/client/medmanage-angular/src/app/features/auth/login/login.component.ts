@@ -55,7 +55,13 @@ export class LoginComponent implements OnInit {
     this.route.queryParams.subscribe(params => {
       this.returnUrl = params['returnUrl'] || '/dashboard';
       if (params['message']) {
-        this.infoMessage = params['message'];
+        // Show session expired message as amber toast at the bottom
+        this.snackBar.open(params['message'], 'Dismiss', {
+          duration: 8000,
+          panelClass: ['snackbar-warning'],
+          verticalPosition: 'bottom',
+          horizontalPosition: 'center'
+        });
       }
     });
 

@@ -17,37 +17,8 @@ import { AvailableClientDto } from '../../../core/models/auth.models';
     MatProgressSpinnerModule,
     MatSnackBarModule
   ],
-  template: `
-    <div class="client-switcher">
-      @if (loading) {
-        <mat-spinner diameter="20"></mat-spinner>
-      } @else if (clients.length > 0) {
-        <mat-form-field appearance="outline" class="client-select">
-          <mat-label>Active Client</mat-label>
-          <mat-select [value]="selectedClientId" (selectionChange)="onClientChange($event.value)">
-            @for (client of clients; track client.mainClientId) {
-              <mat-option [value]="client.mainClientId">
-                {{ client.mainClientName }}
-              </mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-      }
-    </div>
-  `,
-  styles: [`
-    .client-switcher {
-      display: inline-flex;
-      align-items: center;
-    }
-    .client-select {
-      min-width: 180px;
-      font-size: 0.85rem;
-    }
-    ::ng-deep .client-select .mat-mdc-form-field-subscript-wrapper {
-      display: none;
-    }
-  `]
+  templateUrl: './client-switcher.component.html',
+  styleUrls: ['./client-switcher.component.scss']
 })
 export class ClientSwitcherComponent implements OnInit {
   private readonly authService = inject(AuthService);
@@ -57,10 +28,7 @@ export class ClientSwitcherComponent implements OnInit {
   selectedClientId: number | null = null;
   loading = false;
 
-  private readonly STORAGE_KEY = 'medmanage_active_client_id';
-
   ngOnInit(): void {
-    // Restore from auth service
     this.selectedClientId = this.authService.activeClientId;
     this.loadClients();
   }
@@ -71,7 +39,6 @@ export class ClientSwitcherComponent implements OnInit {
       next: (clients) => {
         this.clients = clients;
         if (clients.length > 0) {
-          // Use stored value if it matches an available client, otherwise default to first
           const storedId = this.selectedClientId;
           if (storedId && clients.some(c => c.mainClientId === storedId)) {
             this.selectedClientId = storedId;

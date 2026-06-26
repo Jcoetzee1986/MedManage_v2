@@ -1,4 +1,4 @@
-using AutoMapper;
+using MedManage.Infrastructure.Mapping.Manual;
 using MedManage.Core.DTOs.CaseFacilityType;
 using MedManage.Core.Entities;
 using MedManage.Core.Interfaces;
@@ -9,18 +9,16 @@ namespace MedManage.Infrastructure.Services.Business;
 public class CaseFacilityTypeService : ICaseFacilityTypeService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IMapper _mapper;
 
-    public CaseFacilityTypeService(IUnitOfWork unitOfWork, IMapper mapper)
+    public CaseFacilityTypeService(IUnitOfWork unitOfWork)
     {
         _unitOfWork = unitOfWork;
-        _mapper = mapper;
     }
 
     public async Task<IEnumerable<CaseFacilityTypeDto>> GetByCaseIdAsync(int caseId)
     {
         var facilityTypes = await _unitOfWork.CaseFacilityTypes.GetByCaseIdAsync(caseId);
-        return _mapper.Map<IEnumerable<CaseFacilityTypeDto>>(facilityTypes);
+        return facilityTypes.Select(e => e.ToDto());
     }
 
     public async Task<CaseFacilityTypeDto?> GetByIdAsync(int id)
@@ -29,12 +27,12 @@ public class CaseFacilityTypeService : ICaseFacilityTypeService
         if (facilityType == null || facilityType.DateDeleted != null)
             return null;
 
-        return _mapper.Map<CaseFacilityTypeDto>(facilityType);
+        return facilityType.ToDto();
     }
 
     public async Task<CaseFacilityTypeDto> CreateAsync(CreateCaseFacilityTypeRequest request)
     {
-        var entity = _mapper.Map<CaseFacilityType>(request);
+        var entity = request.ToEntity();
         entity.DateInserted = DateTime.Now;
 
         // Calculate LOS from dates if not explicitly provided
@@ -47,7 +45,7 @@ public class CaseFacilityTypeService : ICaseFacilityTypeService
         await _unitOfWork.CaseFacilityTypes.AddAsync(entity);
         await _unitOfWork.SaveChangesAsync();
 
-        return _mapper.Map<CaseFacilityTypeDto>(entity);
+        return entity.ToDto();
     }
 
     public async Task<CaseFacilityTypeDto> UpdateAsync(int id, UpdateCaseFacilityTypeRequest request)
@@ -56,7 +54,7 @@ public class CaseFacilityTypeService : ICaseFacilityTypeService
         if (entity == null || entity.DateDeleted != null)
             throw new KeyNotFoundException($"CaseFacilityType with ID {id} not found");
 
-        _mapper.Map(request, entity);
+        request.ApplyTo(entity);
         entity.DateUpdated = DateTime.Now;
 
         // Recalculate LOS from dates if not explicitly provided
@@ -69,7 +67,7 @@ public class CaseFacilityTypeService : ICaseFacilityTypeService
         await _unitOfWork.CaseFacilityTypes.UpdateAsync(entity);
         await _unitOfWork.SaveChangesAsync();
 
-        return _mapper.Map<CaseFacilityTypeDto>(entity);
+        return entity.ToDto();
     }
 
     public async Task<bool> DeleteAsync(int id)

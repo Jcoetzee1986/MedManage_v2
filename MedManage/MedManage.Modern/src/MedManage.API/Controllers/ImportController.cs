@@ -8,7 +8,7 @@ namespace MedManage.API.Controllers;
 
 [ApiController]
 [Route("api/imports")]
-[Authorize(Roles = "Admin")]
+[Authorize(Roles = "System Administrator,Imports")]
 public class ImportController : ControllerBase
 {
     private readonly IImportService _importService;

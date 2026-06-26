@@ -1,8 +1,8 @@
+using MedManage.Infrastructure.Mapping.Manual;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AutoMapper;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using MedManage.Core.DTOs.CaseTariff;
@@ -17,19 +17,17 @@ public class CaseTariffService : ICaseTariffService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly MedManageDbContext _dbContext;
-    private readonly IMapper _mapper;
 
-    public CaseTariffService(IUnitOfWork unitOfWork, MedManageDbContext dbContext, IMapper mapper)
+    public CaseTariffService(IUnitOfWork unitOfWork, MedManageDbContext dbContext)
     {
         _unitOfWork = unitOfWork;
         _dbContext = dbContext;
-        _mapper = mapper;
     }
 
     public async Task<IEnumerable<CaseTariffDto>> GetByCaseIdAsync(int caseId)
     {
         var tariffs = await _unitOfWork.CaseTariffs.GetByCaseIdAsync(caseId);
-        return _mapper.Map<IEnumerable<CaseTariffDto>>(tariffs);
+        return tariffs.Select(e => e.ToDto());
     }
 
     public async Task<CaseTariffDto?> GetByIdAsync(int caseId, long caseIdTariffId)
@@ -38,7 +36,7 @@ public class CaseTariffService : ICaseTariffService
             .FindAsync(t => t.CaseId == caseId && t.CaseIdTariffId == caseIdTariffId && t.DateDeleted == null))
             .FirstOrDefault();
 
-        return tariff == null ? null : _mapper.Map<CaseTariffDto>(tariff);
+        return tariff == null ? null : tariff.ToDto();
     }
 
     public async Task<CaseTariffDto> CreateAsync(int caseId, CreateCaseTariffRequest request)
@@ -65,7 +63,7 @@ public class CaseTariffService : ICaseTariffService
             .OrderByDescending(t => t.DateInserted)
             .FirstOrDefault();
 
-        return _mapper.Map<CaseTariffDto>(created!);
+        return (created!).ToDto();
     }
 
     public async Task<CaseTariffDto> UpdateAsync(int caseId, long caseIdTariffId, UpdateCaseTariffRequest request)
@@ -98,7 +96,7 @@ public class CaseTariffService : ICaseTariffService
             .FindAsync(t => t.CaseId == caseId && t.CaseIdTariffId == caseIdTariffId && t.DateDeleted == null))
             .FirstOrDefault();
 
-        return _mapper.Map<CaseTariffDto>(updated!);
+        return (updated!).ToDto();
     }
 
     public async Task<bool> DeleteAsync(int caseId, long caseIdTariffId)

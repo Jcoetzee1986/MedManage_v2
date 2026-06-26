@@ -1,4 +1,4 @@
-using AutoMapper;
+using MedManage.Infrastructure.Mapping.Manual;
 using MedManage.Core.DTOs.ReferenceData;
 using MedManage.Core.Entities;
 using MedManage.Core.Interfaces;
@@ -9,13 +9,11 @@ namespace MedManage.Infrastructure.Services.Business;
 public class SpecialityService : ISpecialityService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IMapper _mapper;
     private readonly Core.Interfaces.ICurrentUserService _currentUserService;
 
-    public SpecialityService(IUnitOfWork unitOfWork, IMapper mapper, Core.Interfaces.ICurrentUserService currentUserService)
+    public SpecialityService(IUnitOfWork unitOfWork, Core.Interfaces.ICurrentUserService currentUserService)
     {
         _unitOfWork = unitOfWork;
-        _mapper = mapper;
         _currentUserService = currentUserService;
     }
 
@@ -28,23 +26,23 @@ public class SpecialityService : ISpecialityService
             entities = entities.Where(x => x.DateDeleted == null);
         }
         
-        return _mapper.Map<IEnumerable<SpecialityDto>>(entities);
+        return entities.Select(e => e.ToDto());
     }
 
     public async Task<SpecialityDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         var entity = await _unitOfWork.Specialities.GetByIdAsync(id);
-        return entity == null ? null : _mapper.Map<SpecialityDto>(entity);
+        return entity == null ? null : entity.ToDto();
     }
 
     public async Task<SpecialityDto> CreateAsync(CreateSpecialityDto dto, CancellationToken cancellationToken = default)
     {
-        var entity = _mapper.Map<Speciality>(dto);
+        var entity = dto.ToEntity();
         
         await _unitOfWork.Specialities.AddAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
-        return _mapper.Map<SpecialityDto>(entity);
+        return entity.ToDto();
     }
 
     public async Task<SpecialityDto> UpdateAsync(UpdateSpecialityDto dto, CancellationToken cancellationToken = default)
@@ -55,12 +53,12 @@ public class SpecialityService : ISpecialityService
             throw new KeyNotFoundException($"Speciality with ID {dto.SpecialityId} not found");
         }
         
-        _mapper.Map(dto, entity);
+        dto.ApplyTo(entity);
         
         await _unitOfWork.Specialities.UpdateAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
-        return _mapper.Map<SpecialityDto>(entity);
+        return entity.ToDto();
     }
 
     public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default)

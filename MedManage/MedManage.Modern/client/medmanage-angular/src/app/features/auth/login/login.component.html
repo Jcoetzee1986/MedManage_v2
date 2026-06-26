@@ -1,24 +1,10 @@
 <div class="auth-container">
     <mat-card class="auth-card">
-        <mat-card-header>
-            <mat-card-title>
-                <mat-icon>medical_services</mat-icon>
-                MedManage
-            </mat-card-title>
-            <mat-card-subtitle>
-                Medical Case Management System
-            </mat-card-subtitle>
-        </mat-card-header>
+        <div class="auth-logo">
+            <img src="assets/icons/medmanage-logo-full.svg" alt="MedManage by Iconic Developments CC" class="login-logo">
+        </div>
 
         <mat-card-content>
-            <!-- Info Message from Query Params -->
-            @if (infoMessage) {
-              <div class="info-message">
-                  <mat-icon>info</mat-icon>
-                  {{ infoMessage }}
-              </div>
-            }
-
             <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
                 <!-- Username Field -->
                 <mat-form-field appearance="outline" class="full-width">
@@ -27,7 +13,7 @@
                            type="text" 
                            formControlName="username"
                            placeholder="Enter your username">
-                    <mat-icon matPrefix>person</mat-icon>
+                    <!-- <mat-icon matPrefix>person</mat-icon> -->
                     @if (loginForm.get('username')?.hasError('required')) {
                       <mat-error>
                           Username is required
@@ -42,7 +28,7 @@
                            [type]="hidePassword ? 'password' : 'text'" 
                            formControlName="password"
                            placeholder="Enter your password">
-                    <mat-icon matPrefix>lock</mat-icon>
+                    <!-- <mat-icon matPrefix>lock</mat-icon> -->
                     <button mat-icon-button 
                             matSuffix 
                             type="button"
@@ -86,12 +72,5 @@
                 }
             </form>
         </mat-card-content>
-
-        <mat-card-actions>
-            <p class="register-link">
-                Don't have an account?
-                <a routerLink="/register">Create one</a>
-            </p>
-        </mat-card-actions>
     </mat-card>
 </div>

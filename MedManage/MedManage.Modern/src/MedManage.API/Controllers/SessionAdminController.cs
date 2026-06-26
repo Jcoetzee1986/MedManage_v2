@@ -11,7 +11,7 @@ namespace MedManage.API.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/admin/sessions")]
-[Authorize(Roles = "Admin")]
+[Authorize(Roles = "System Administrator")]
 public class SessionAdminController : ControllerBase
 {
     private readonly ISessionAdminService _service;

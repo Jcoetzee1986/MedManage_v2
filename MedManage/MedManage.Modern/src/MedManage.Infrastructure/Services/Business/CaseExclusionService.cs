@@ -1,8 +1,8 @@
+using MedManage.Infrastructure.Mapping.Manual;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AutoMapper;
 using MedManage.Core.DTOs.CaseExclusion;
 using MedManage.Core.Entities;
 using MedManage.Core.Interfaces;
@@ -13,19 +13,17 @@ namespace MedManage.Infrastructure.Services.Business;
 public class CaseExclusionService : ICaseExclusionService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IMapper _mapper;
 
-    public CaseExclusionService(IUnitOfWork unitOfWork, IMapper mapper)
+    public CaseExclusionService(IUnitOfWork unitOfWork)
     {
         _unitOfWork = unitOfWork;
-        _mapper = mapper;
     }
 
     public async Task<IEnumerable<CaseExclusionDto>> GetAllAsync()
     {
         var exclusions = await _unitOfWork.CaseExclusions
             .FindAsync(c => c.DateDeleted == null);
-        return _mapper.Map<IEnumerable<CaseExclusionDto>>(exclusions.OrderByDescending(c => c.DateInserted));
+        return exclusions.OrderByDescending(c => c.DateInserted).Select(e => e.ToDto());
     }
 
     public async Task<CaseExclusionDto?> GetByIdAsync(int caseId, int exclusionId)
@@ -34,25 +32,25 @@ public class CaseExclusionService : ICaseExclusionService
             .FindAsync(c => c.CaseId == caseId && c.ExclusionId == exclusionId && c.DateDeleted == null))
             .FirstOrDefault();
 
-        return exclusion == null ? null : _mapper.Map<CaseExclusionDto>(exclusion);
+        return exclusion == null ? null : exclusion.ToDto();
     }
 
     public async Task<IEnumerable<CaseExclusionDto>> GetByCaseIdAsync(int caseId)
     {
         var exclusions = await _unitOfWork.CaseExclusions
             .FindAsync(c => c.CaseId == caseId && c.DateDeleted == null);
-        return _mapper.Map<IEnumerable<CaseExclusionDto>>(exclusions.OrderByDescending(c => c.DateInserted));
+        return exclusions.OrderByDescending(c => c.DateInserted).Select(e => e.ToDto());
     }
 
     public async Task<CaseExclusionDto> CreateAsync(CreateCaseExclusionDto dto)
     {
-        var exclusion = _mapper.Map<CaseExclusion>(dto);
+        var exclusion = dto.ToEntity();
         exclusion.DateInserted = DateTime.Now;
 
         await _unitOfWork.CaseExclusions.AddAsync(exclusion);
         await _unitOfWork.SaveChangesAsync();
 
-        return _mapper.Map<CaseExclusionDto>(exclusion);
+        return exclusion.ToDto();
     }
 
     public async Task<CaseExclusionDto> UpdateAsync(int caseId, int exclusionId, UpdateCaseExclusionDto dto)
@@ -64,13 +62,13 @@ public class CaseExclusionService : ICaseExclusionService
         if (exclusion == null)
             throw new KeyNotFoundException($"CaseExclusion with CaseId {caseId} and ExclusionId {exclusionId} not found");
 
-        _mapper.Map(dto, exclusion);
+        dto.ApplyTo(exclusion);
         exclusion.DateUpdated = DateTime.Now;
 
         await _unitOfWork.CaseExclusions.UpdateAsync(exclusion);
         await _unitOfWork.SaveChangesAsync();
 
-        return _mapper.Map<CaseExclusionDto>(exclusion);
+        return exclusion.ToDto();
     }
 
     public async Task<bool> DeleteAsync(int caseId, int exclusionId)

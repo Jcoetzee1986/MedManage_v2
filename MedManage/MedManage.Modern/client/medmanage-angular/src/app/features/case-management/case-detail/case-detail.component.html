@@ -30,7 +30,7 @@
       <mat-icon>event</mat-icon> Create Booking
     </button>
 
-    <ng-container *hasRole="['CaseManager', 'Admin']">
+    <ng-container *hasRole="['Case Manager', 'System Administrator']">
       <button mat-stroked-button (click)="onCopyCase()" *ngIf="!isNewCase" matTooltip="Copy this case">
         <mat-icon>content_copy</mat-icon> Copy
       </button>
@@ -61,7 +61,7 @@
 
               <mat-form-field appearance="outline">
                 <mat-label>Auth Number</mat-label>
-                <input matInput formControlName="authNumber">
+                <input matInput formControlName="authNumber" readonly>
               </mat-form-field>
 
               <mat-form-field appearance="outline">
@@ -249,31 +249,27 @@
             <mat-divider></mat-divider>
 
             <h3 class="section-header">Dates</h3>
-            <div class="form-grid">
-              <mat-form-field appearance="outline">
-                <mat-label>Admission Date</mat-label>
-                <input matInput [matDatepicker]="admPicker" formControlName="admissionDate">
-                <mat-datepicker-toggle matSuffix [for]="admPicker"></mat-datepicker-toggle>
-                <mat-datepicker #admPicker></mat-datepicker>
-              </mat-form-field>
-              <mat-form-field appearance="outline">
-                <mat-label>Admission Time</mat-label>
-                <input matInput type="time" formControlName="admissionTime">
-              </mat-form-field>
-              <mat-form-field appearance="outline">
-                <mat-label>Discharge Date</mat-label>
-                <input matInput [matDatepicker]="disPicker" formControlName="dischargeDate">
-                <mat-datepicker-toggle matSuffix [for]="disPicker"></mat-datepicker-toggle>
-                <mat-datepicker #disPicker></mat-datepicker>
-              </mat-form-field>
-              <mat-form-field appearance="outline">
-                <mat-label>Discharge Time</mat-label>
-                <input matInput type="time" formControlName="dischargeTime">
-              </mat-form-field>
-              <mat-form-field appearance="outline">
-                <mat-label>Total LOS (days)</mat-label>
-                <input matInput [value]="totalLos ?? '—'" readonly>
-              </mat-form-field>
+            <div class="info-grid" *ngIf="!isNewCase">
+              <div class="info-item">
+                <span class="info-label">Admission Date</span>
+                <span class="info-value">{{ caseData?.admissionDate || caseData?.dateAdmitted | date:'dd/MM/yyyy' }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Admission Time</span>
+                <span class="info-value">{{ caseData?.admissionTime || '—' }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Discharge Date</span>
+                <span class="info-value">{{ caseData?.dischargeDate || caseData?.dateDischarged | date:'dd/MM/yyyy' }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Discharge Time</span>
+                <span class="info-value">{{ caseData?.dischargeTime || '—' }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Total LOS (days)</span>
+                <span class="info-value">{{ caseData?.totalLos ?? caseData?.totalLengthOfStay ?? '—' }}</span>
+              </div>
             </div>
 
             <mat-divider></mat-divider>

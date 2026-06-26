@@ -67,6 +67,12 @@ public partial class AspnetMembership
     [Column(TypeName = "ntext")]
     public string? Comment { get; set; }
 
+    /// <summary>
+    /// Indicates whether the user has been permanently blocked/deactivated by an administrator.
+    /// Unlike IsLockedOut (which is temporary from failed attempts), this is a permanent deactivation.
+    /// </summary>
+    public bool IsPermanentlyBlocked { get; set; }
+
     // Audit columns
     [Column(TypeName = "datetime")]
     public DateTime DateInserted { get; set; }

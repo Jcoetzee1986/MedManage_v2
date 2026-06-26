@@ -1,4 +1,4 @@
-using AutoMapper;
+using MedManage.Infrastructure.Mapping.Manual;
 using MedManage.Core.DTOs.CaseIcd;
 using MedManage.Core.Entities;
 using MedManage.Core.Interfaces;
@@ -9,18 +9,16 @@ namespace MedManage.Infrastructure.Services.Business;
 public class CaseIcdService : ICaseIcdService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IMapper _mapper;
 
-    public CaseIcdService(IUnitOfWork unitOfWork, IMapper mapper)
+    public CaseIcdService(IUnitOfWork unitOfWork)
     {
         _unitOfWork = unitOfWork;
-        _mapper = mapper;
     }
 
     public async Task<IEnumerable<CaseIcdDto>> GetByCaseIdAsync(int caseId, CancellationToken cancellationToken = default)
     {
         var items = await _unitOfWork.CaseIcds.GetByCaseIdAsync(caseId);
-        return _mapper.Map<IEnumerable<CaseIcdDto>>(items);
+        return items.Select(e => e.ToDto());
     }
 
     public async Task<CaseIcdDto?> GetByIdAsync(int caseId, int icdId, CancellationToken cancellationToken = default)
@@ -30,12 +28,12 @@ public class CaseIcdService : ICaseIcdService
         if (entity == null)
             return null;
 
-        return _mapper.Map<CaseIcdDto>(entity);
+        return entity.ToDto();
     }
 
     public async Task<CaseIcdDto> CreateAsync(int caseId, CreateCaseIcdDto dto, CancellationToken cancellationToken = default)
     {
-        var entity = _mapper.Map<CaseIcd>(dto);
+        var entity = dto.ToEntity();
         entity.CaseId = caseId;
         entity.DateInserted = DateTime.UtcNow;
 
@@ -45,7 +43,7 @@ public class CaseIcdService : ICaseIcdService
         // Reload with includes to get ICD code info
         var items = await _unitOfWork.CaseIcds.GetByCaseIdAsync(caseId);
         var created = items.FirstOrDefault(x => x.Icdid == entity.Icdid);
-        return _mapper.Map<CaseIcdDto>(created ?? entity);
+        return (created ?? entity).ToDto();
     }
 
     public async Task<CaseIcdDto> UpdateAsync(int caseId, int icdId, UpdateCaseIcdDto dto, CancellationToken cancellationToken = default)
@@ -55,7 +53,7 @@ public class CaseIcdService : ICaseIcdService
         if (entity == null)
             throw new KeyNotFoundException($"Case ICD with CaseId {caseId} and ICDID {icdId} not found");
 
-        _mapper.Map(dto, entity);
+        dto.ApplyTo(entity);
         entity.CaseId = caseId;
         entity.DateUpdated = DateTime.UtcNow;
 
@@ -65,7 +63,7 @@ public class CaseIcdService : ICaseIcdService
         // Reload with includes
         var reloaded = await _unitOfWork.CaseIcds.GetByCaseIdAsync(caseId);
         var updated = reloaded.FirstOrDefault(x => x.Icdid == icdId);
-        return _mapper.Map<CaseIcdDto>(updated ?? entity);
+        return (updated ?? entity).ToDto();
     }
 
     public async Task<bool> DeleteAsync(int caseId, int icdId, CancellationToken cancellationToken = default)

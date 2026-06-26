@@ -99,7 +99,7 @@ public class ReportsController : ControllerBase
     /// Generate a billing summary report.
     /// </summary>
     [HttpPost("billing-summary")]
-    [Authorize(Roles = "Admin,BillingOfficer")]
+    [Authorize(Roles = "System Administrator,Billing Auditing")]
     [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status500InternalServerError)]

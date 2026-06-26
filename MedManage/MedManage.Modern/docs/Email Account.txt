@@ -1,0 +1,7 @@
+Account: Noreply@iconicdev.com
+Password: c1JzEpG3adfh@P1ssS#c^
+Incoming Server:	mail.iconicdev.com
+IMAP Port: 993 POP3 Port: 995
+Outgoing Server:	mail.iconicdev.com
+SMTP Port: 465
+IMAP, POP3, and SMTP require authentication.

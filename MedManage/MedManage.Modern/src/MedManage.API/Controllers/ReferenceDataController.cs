@@ -97,7 +97,7 @@ public abstract class ReferenceDataController<TDto, TCreateDto, TUpdateDto> : Co
     /// Delete an item (soft delete)
     /// </summary>
     [HttpDelete("{id}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "System Administrator,Metadata Administrator")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)

@@ -1,4 +1,4 @@
-using AutoMapper;
+using MedManage.Infrastructure.Mapping.Manual;
 using MedManage.Core.DTOs.CaseCpt;
 using MedManage.Core.Entities;
 using MedManage.Core.Interfaces;
@@ -9,18 +9,16 @@ namespace MedManage.Infrastructure.Services.Business;
 public class CaseCptService : ICaseCptService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IMapper _mapper;
 
-    public CaseCptService(IUnitOfWork unitOfWork, IMapper mapper)
+    public CaseCptService(IUnitOfWork unitOfWork)
     {
         _unitOfWork = unitOfWork;
-        _mapper = mapper;
     }
 
     public async Task<IEnumerable<CaseCptDto>> GetByCaseIdAsync(int caseId, CancellationToken cancellationToken = default)
     {
         var items = await _unitOfWork.CaseCpts.GetByCaseIdAsync(caseId);
-        return _mapper.Map<IEnumerable<CaseCptDto>>(items);
+        return items.Select(e => e.ToDto());
     }
 
     public async Task<CaseCptDto?> GetByIdAsync(int caseId, int id, CancellationToken cancellationToken = default)
@@ -29,12 +27,12 @@ public class CaseCptService : ICaseCptService
         if (entity == null || entity.CaseId != caseId || entity.DateDeleted != null)
             return null;
 
-        return _mapper.Map<CaseCptDto>(entity);
+        return entity.ToDto();
     }
 
     public async Task<CaseCptDto> CreateAsync(int caseId, CreateCaseCptDto dto, CancellationToken cancellationToken = default)
     {
-        var entity = _mapper.Map<CaseCpt>(dto);
+        var entity = dto.ToEntity();
         entity.CaseId = caseId;
         entity.DateInserted = DateTime.UtcNow;
 
@@ -44,7 +42,7 @@ public class CaseCptService : ICaseCptService
         // Reload with includes to get CPT code info
         var items = await _unitOfWork.CaseCpts.GetByCaseIdAsync(caseId);
         var created = items.FirstOrDefault(x => x.CaseIdCptid == entity.CaseIdCptid);
-        return _mapper.Map<CaseCptDto>(created ?? entity);
+        return (created ?? entity).ToDto();
     }
 
     public async Task<CaseCptDto> UpdateAsync(int caseId, int id, UpdateCaseCptDto dto, CancellationToken cancellationToken = default)
@@ -53,7 +51,7 @@ public class CaseCptService : ICaseCptService
         if (entity == null || entity.CaseId != caseId || entity.DateDeleted != null)
             throw new KeyNotFoundException($"Case CPT with ID {id} not found for case {caseId}");
 
-        _mapper.Map(dto, entity);
+        dto.ApplyTo(entity);
         entity.CaseId = caseId;
         entity.DateUpdated = DateTime.UtcNow;
 
@@ -63,7 +61,7 @@ public class CaseCptService : ICaseCptService
         // Reload with includes
         var items = await _unitOfWork.CaseCpts.GetByCaseIdAsync(caseId);
         var updated = items.FirstOrDefault(x => x.CaseIdCptid == id);
-        return _mapper.Map<CaseCptDto>(updated ?? entity);
+        return (updated ?? entity).ToDto();
     }
 
     public async Task<bool> DeleteAsync(int caseId, int id, CancellationToken cancellationToken = default)

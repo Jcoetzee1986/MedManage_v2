@@ -11,7 +11,7 @@ namespace MedManage.API.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/system-data")]
-[Authorize(Roles = "Admin")]
+[Authorize(Roles = "System Administrator")]
 public class SystemDataController : ControllerBase
 {
     private readonly ISystemDataService _service;

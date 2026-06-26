@@ -1,4 +1,4 @@
-using AutoMapper;
+using MedManage.Infrastructure.Mapping.Manual;
 using MedManage.Core.DTOs.ReferenceData;
 using MedManage.Core.Entities;
 using MedManage.Core.Interfaces;
@@ -9,13 +9,11 @@ namespace MedManage.Infrastructure.Services.Business;
 public class CaseStatusService : ICaseStatusService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IMapper _mapper;
     private readonly Core.Interfaces.ICurrentUserService _currentUserService;
 
-    public CaseStatusService(IUnitOfWork unitOfWork, IMapper mapper, Core.Interfaces.ICurrentUserService currentUserService)
+    public CaseStatusService(IUnitOfWork unitOfWork, Core.Interfaces.ICurrentUserService currentUserService)
     {
         _unitOfWork = unitOfWork;
-        _mapper = mapper;
         _currentUserService = currentUserService;
     }
 
@@ -28,23 +26,23 @@ public class CaseStatusService : ICaseStatusService
             entities = entities.Where(x => x.DateDeleted == null);
         }
         
-        return _mapper.Map<IEnumerable<CaseStatusDto>>(entities);
+        return entities.Select(e => e.ToDto());
     }
 
     public async Task<CaseStatusDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         var entity = await _unitOfWork.CaseStatuses.GetByIdAsync(id);
-        return entity == null ? null : _mapper.Map<CaseStatusDto>(entity);
+        return entity == null ? null : entity.ToDto();
     }
 
     public async Task<CaseStatusDto> CreateAsync(CreateCaseStatusDto dto, CancellationToken cancellationToken = default)
     {
-        var entity = _mapper.Map<CaseStatus>(dto);
+        var entity = dto.ToEntity();
         
         await _unitOfWork.CaseStatuses.AddAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
-        return _mapper.Map<CaseStatusDto>(entity);
+        return entity.ToDto();
     }
 
     public async Task<CaseStatusDto> UpdateAsync(UpdateCaseStatusDto dto, CancellationToken cancellationToken = default)
@@ -55,12 +53,12 @@ public class CaseStatusService : ICaseStatusService
             throw new KeyNotFoundException($"CaseStatus with ID {dto.CaseStatusId} not found");
         }
         
-        _mapper.Map(dto, entity);
+        dto.ApplyTo(entity);
         
         await _unitOfWork.CaseStatuses.UpdateAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
-        return _mapper.Map<CaseStatusDto>(entity);
+        return entity.ToDto();
     }
 
     public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default)

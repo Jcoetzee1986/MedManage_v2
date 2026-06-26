@@ -1,0 +1,16 @@
+<div class="client-switcher">
+  @if (loading) {
+    <mat-spinner diameter="20"></mat-spinner>
+  } @else if (clients.length > 0) {
+    <mat-form-field appearance="outline" class="client-select">
+      <mat-label>Active Client</mat-label>
+      <mat-select [value]="selectedClientId" (selectionChange)="onClientChange($event.value)">
+        @for (client of clients; track client.mainClientId) {
+          <mat-option [value]="client.mainClientId">
+            {{ client.mainClientName }}
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  }
+</div>

@@ -56,6 +56,12 @@ public class MemberDto
     public int? SuspendedReasonId { get; set; }
     public int? MedAidProductId { get; set; }
 
+    // Flattened navigation properties for list views
+    public string? MedicalAidName { get; set; }
+    public string? MemberStatusName { get; set; }
+    public string? GenderName { get; set; }
+    public string? TitleName { get; set; }
+
     // Audit fields
     public DateTime DateInserted { get; set; }
     public string UserID { get; set; } = string.Empty;

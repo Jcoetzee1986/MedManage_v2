@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 100" width="400" height="100">
+  <!-- MedManage Full Logo - Icon + Wordmark -->
+  
+  <!-- Icon (compact version) -->
+  <g transform="translate(12, 12) scale(1.1)">
+    <!-- Node 1 - left (navy) -->
+    <circle cx="22" cy="36" r="16" fill="none" stroke="#1B2A4A" stroke-width="2.5"/>
+    <!-- Node 2 - top right (teal, slightly larger) -->
+    <circle cx="40" cy="22" r="17" fill="none" stroke="#0EA5A0" stroke-width="3"/>
+    <!-- Node 3 - bottom right (amber) -->
+    <circle cx="40" cy="46" r="16" fill="none" stroke="#E8893C" stroke-width="2.5"/>
+    <!-- Intersection dots -->
+    <circle cx="31" cy="28" r="3.5" fill="#0EA5A0"/>
+    <circle cx="31" cy="42" r="3.5" fill="#E8893C"/>
+    <circle cx="41" cy="34" r="3.5" fill="#0EA5A0"/>
+  </g>
+  
+  <!-- Wordmark -->
+  <text x="90" y="48" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="30" font-weight="700" fill="#1B2A4A">
+    Med<tspan fill="#0EA5A0">Manage</tspan>
+  </text>
+  
+  <!-- Tagline -->
+  <text x="90" y="72" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="400" fill="#546E7A" letter-spacing="0.5">
+    by Iconic Developments CC
+  </text>
+</svg>

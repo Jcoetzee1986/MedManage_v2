@@ -12,7 +12,7 @@ export const CASE_ROUTES: Routes = [
   },
   {
     path: 'new',
-    loadComponent: () => import('./case-detail/case-detail.component').then(m => m.CaseDetailComponent)
+    loadComponent: () => import('./case-wizard/case-wizard.component').then(m => m.CaseWizardComponent)
   },
   {
     path: ':id',

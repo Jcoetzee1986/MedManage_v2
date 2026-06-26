@@ -1,4 +1,3 @@
-using AutoMapper;
 using MedManage.Core.DTOs.CaseBilling;
 using MedManage.Core.Entities;
 using MedManage.Core.Interfaces;

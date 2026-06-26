@@ -1,4 +1,4 @@
-using AutoMapper;
+using MedManage.Infrastructure.Mapping.Manual;
 using Microsoft.EntityFrameworkCore;
 using MedManage.Core.DTOs.Case;
 using MedManage.Core.Entities;
@@ -11,16 +11,13 @@ namespace MedManage.Infrastructure.Services.Business;
 public class CaseCopyService : ICaseCopyService
 {
     private readonly MedManageDbContext _context;
-    private readonly IMapper _mapper;
     private readonly ICurrentUserService _currentUserService;
 
     public CaseCopyService(
         MedManageDbContext context,
-        IMapper mapper,
         ICurrentUserService currentUserService)
     {
         _context = context;
-        _mapper = mapper;
         _currentUserService = currentUserService;
     }
 
@@ -132,7 +129,7 @@ public class CaseCopyService : ICaseCopyService
             .Include(c => c.ReferFrom)
             .FirstAsync(c => c.CaseId == newCaseId, cancellationToken);
 
-        return _mapper.Map<CaseDto>(createdCase);
+        return createdCase.ToDto();
     }
 
     private async Task CopyCptCodes(int sourceCaseId, int newCaseId, CancellationToken cancellationToken)

@@ -1,4 +1,4 @@
-using AutoMapper;
+using MedManage.Infrastructure.Mapping.Manual;
 using MedManage.Core.DTOs.Exclusion;
 using MedManage.Core.Entities;
 using MedManage.Core.Interfaces;
@@ -9,16 +9,13 @@ namespace MedManage.Infrastructure.Services.Business;
 public class ExclusionService : IExclusionService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IMapper _mapper;
     private readonly ICurrentUserService _currentUserService;
 
     public ExclusionService(
         IUnitOfWork unitOfWork,
-        IMapper mapper,
         ICurrentUserService currentUserService)
     {
         _unitOfWork = unitOfWork;
-        _mapper = mapper;
         _currentUserService = currentUserService;
     }
 
@@ -31,13 +28,13 @@ public class ExclusionService : IExclusionService
             entities = entities.Where(x => x.DateDeleted == null);
         }
         
-        return _mapper.Map<IEnumerable<ExclusionDto>>(entities);
+        return entities.Select(e => e.ToDto());
     }
 
     public async Task<IEnumerable<ExclusionDto>> GetActiveAsync(CancellationToken cancellationToken = default)
     {
         var entities = await _unitOfWork.Exclusions.GetActiveAsync();
-        return _mapper.Map<IEnumerable<ExclusionDto>>(entities);
+        return entities.Select(e => e.ToDto());
     }
 
     public async Task<ExclusionDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
@@ -47,17 +44,17 @@ public class ExclusionService : IExclusionService
         {
             return null;
         }
-        return _mapper.Map<ExclusionDto>(entity);
+        return entity.ToDto();
     }
 
     public async Task<ExclusionDto> CreateAsync(CreateExclusionDto dto, CancellationToken cancellationToken = default)
     {
-        var entity = _mapper.Map<Exclusion>(dto);
+        var entity = dto.ToEntity();
         
         await _unitOfWork.Exclusions.AddAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
-        return _mapper.Map<ExclusionDto>(entity);
+        return entity.ToDto();
     }
 
     public async Task<ExclusionDto> UpdateAsync(UpdateExclusionDto dto, CancellationToken cancellationToken = default)
@@ -68,12 +65,12 @@ public class ExclusionService : IExclusionService
             throw new KeyNotFoundException($"Exclusion with ID {dto.ExclusionId} not found");
         }
         
-        _mapper.Map(dto, entity);
+        dto.ApplyTo(entity);
         
         await _unitOfWork.Exclusions.UpdateAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
-        return _mapper.Map<ExclusionDto>(entity);
+        return entity.ToDto();
     }
 
     public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default)

@@ -1,4 +1,4 @@
-using AutoMapper;
+using MedManage.Infrastructure.Mapping.Manual;
 using MedManage.Core.DTOs.ReferenceData;
 using MedManage.Core.Entities;
 using MedManage.Core.Interfaces;
@@ -9,13 +9,11 @@ namespace MedManage.Infrastructure.Services.Business;
 public class MarritalStatusService : IMarritalStatusService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IMapper _mapper;
     private readonly Core.Interfaces.ICurrentUserService _currentUserService;
 
-    public MarritalStatusService(IUnitOfWork unitOfWork, IMapper mapper, Core.Interfaces.ICurrentUserService currentUserService)
+    public MarritalStatusService(IUnitOfWork unitOfWork, Core.Interfaces.ICurrentUserService currentUserService)
     {
         _unitOfWork = unitOfWork;
-        _mapper = mapper;
         _currentUserService = currentUserService;
     }
 
@@ -28,23 +26,23 @@ public class MarritalStatusService : IMarritalStatusService
             entities = entities.Where(x => x.DateDeleted == null);
         }
         
-        return _mapper.Map<IEnumerable<MarritalStatusDto>>(entities);
+        return entities.Select(e => e.ToDto());
     }
 
     public async Task<MarritalStatusDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         var entity = await _unitOfWork.MarritalStatuses.GetByIdAsync(id);
-        return entity == null ? null : _mapper.Map<MarritalStatusDto>(entity);
+        return entity == null ? null : entity.ToDto();
     }
 
     public async Task<MarritalStatusDto> CreateAsync(CreateMarritalStatusDto dto, CancellationToken cancellationToken = default)
     {
-        var entity = _mapper.Map<MarritalStatus>(dto);
+        var entity = dto.ToEntity();
         
         await _unitOfWork.MarritalStatuses.AddAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
-        return _mapper.Map<MarritalStatusDto>(entity);
+        return entity.ToDto();
     }
 
     public async Task<MarritalStatusDto> UpdateAsync(UpdateMarritalStatusDto dto, CancellationToken cancellationToken = default)
@@ -55,12 +53,12 @@ public class MarritalStatusService : IMarritalStatusService
             throw new KeyNotFoundException($"MarritalStatus with ID {dto.MarritalStatusId} not found");
         }
         
-        _mapper.Map(dto, entity);
+        dto.ApplyTo(entity);
         
         await _unitOfWork.MarritalStatuses.UpdateAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
-        return _mapper.Map<MarritalStatusDto>(entity);
+        return entity.ToDto();
     }
 
     public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default)

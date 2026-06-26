@@ -1,4 +1,4 @@
-using AutoMapper;
+using MedManage.Infrastructure.Mapping.Manual;
 using Microsoft.EntityFrameworkCore;
 using MedManage.Core.DTOs.CaseComment;
 using MedManage.Core.Entities;
@@ -10,24 +10,22 @@ namespace MedManage.Infrastructure.Services.Business;
 public class CaseCommentService : ICaseCommentService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IMapper _mapper;
 
-    public CaseCommentService(IUnitOfWork unitOfWork, IMapper mapper)
+    public CaseCommentService(IUnitOfWork unitOfWork)
     {
         _unitOfWork = unitOfWork;
-        _mapper = mapper;
     }
 
     public async Task<IEnumerable<CaseCommentDto>> GetAllAsync()
     {
         var caseComments = await _unitOfWork.CaseComments.GetAllAsync();
-        return _mapper.Map<IEnumerable<CaseCommentDto>>(caseComments);
+        return caseComments.Select(e => e.ToDto());
     }
 
     public async Task<CaseCommentDto?> GetByIdAsync(int id)
     {
         var caseComment = await _unitOfWork.CaseComments.GetByIdAsync(id);
-        return caseComment == null ? null : _mapper.Map<CaseCommentDto>(caseComment);
+        return caseComment == null ? null : caseComment.ToDto();
     }
 
     public async Task<IEnumerable<CaseCommentDto>> GetByCaseIdAsync(int caseId)
@@ -36,18 +34,18 @@ public class CaseCommentService : ICaseCommentService
             .FindAsync(cc => cc.CaseId == caseId);
         
         var sortedComments = caseComments.OrderByDescending(cc => cc.DateCreated);
-        return _mapper.Map<IEnumerable<CaseCommentDto>>(sortedComments);
+        return sortedComments.Select(e => e.ToDto());
     }
 
     public async Task<CaseCommentDto> CreateAsync(CreateCaseCommentDto dto)
     {
-        var caseComment = _mapper.Map<CaseComment>(dto);
+        var caseComment = dto.ToEntity();
         caseComment.DateInserted = DateTime.UtcNow;
         
         await _unitOfWork.CaseComments.AddAsync(caseComment);
         await _unitOfWork.SaveChangesAsync();
         
-        return _mapper.Map<CaseCommentDto>(caseComment);
+        return caseComment.ToDto();
     }
 
     public async Task<CaseCommentDto> UpdateAsync(int id, UpdateCaseCommentDto dto)
@@ -56,13 +54,13 @@ public class CaseCommentService : ICaseCommentService
         if (caseComment == null)
             throw new KeyNotFoundException($"CaseComment with ID {id} not found");
 
-        _mapper.Map(dto, caseComment);
+        dto.ApplyTo(caseComment);
         caseComment.DateUpdated = DateTime.UtcNow;
         
         await _unitOfWork.CaseComments.UpdateAsync(caseComment);
         await _unitOfWork.SaveChangesAsync();
         
-        return _mapper.Map<CaseCommentDto>(caseComment);
+        return caseComment.ToDto();
     }
 
     public async Task<bool> DeleteAsync(int id)

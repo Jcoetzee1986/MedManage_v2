@@ -10,6 +10,7 @@ public class MemberSearchRequest
     public string? Name { get; set; }
     public string? Idnumber { get; set; }
     public int? MedicalAidId { get; set; }
+    public int? MainClientId { get; set; }
     public int? MemberStatusId { get; set; }
     public bool? HasMedicalAid { get; set; }
     public bool? Suspended { get; set; }

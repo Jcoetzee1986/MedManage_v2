@@ -1,4 +1,4 @@
-using AutoMapper;
+using MedManage.Infrastructure.Mapping.Manual;
 using MedManage.Core.DTOs.CaseLink;
 using MedManage.Core.Entities;
 using MedManage.Core.Interfaces;
@@ -9,12 +9,10 @@ namespace MedManage.Infrastructure.Services.Business;
 public class CaseLinkService : ICaseLinkService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IMapper _mapper;
 
-    public CaseLinkService(IUnitOfWork unitOfWork, IMapper mapper)
+    public CaseLinkService(IUnitOfWork unitOfWork)
     {
         _unitOfWork = unitOfWork;
-        _mapper = mapper;
     }
 
     public async Task<IEnumerable<LinkedCaseDto>> GetByCaseIdAsync(int caseId, CancellationToken cancellationToken = default)
@@ -48,7 +46,7 @@ public class CaseLinkService : ICaseLinkService
         await _unitOfWork.CaseLinks.AddAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return _mapper.Map<CaseLinkDto>(entity);
+        return entity.ToDto();
     }
 
     public async Task<bool> DeleteAsync(int caseId, int linkedCaseId, CancellationToken cancellationToken = default)

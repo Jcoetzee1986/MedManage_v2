@@ -1,4 +1,4 @@
-using AutoMapper;
+using MedManage.Infrastructure.Mapping.Manual;
 using Microsoft.EntityFrameworkCore;
 using MedManage.Core.DTOs.CaseLinkedFile;
 using MedManage.Core.Entities;
@@ -10,24 +10,22 @@ namespace MedManage.Infrastructure.Services.Business;
 public class CaseLinkedFileService : ICaseLinkedFileService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IMapper _mapper;
 
-    public CaseLinkedFileService(IUnitOfWork unitOfWork, IMapper mapper)
+    public CaseLinkedFileService(IUnitOfWork unitOfWork)
     {
         _unitOfWork = unitOfWork;
-        _mapper = mapper;
     }
 
     public async Task<IEnumerable<CaseLinkedFileDto>> GetAllAsync()
     {
         var files = await _unitOfWork.CaseLinkedFiles.GetAllAsync();
-        return _mapper.Map<IEnumerable<CaseLinkedFileDto>>(files);
+        return files.Select(e => e.ToDto());
     }
 
     public async Task<CaseLinkedFileDto?> GetByIdAsync(int id)
     {
         var file = await _unitOfWork.CaseLinkedFiles.GetByIdAsync(id);
-        return file == null ? null : _mapper.Map<CaseLinkedFileDto>(file);
+        return file == null ? null : file.ToDto();
     }
 
     public async Task<IEnumerable<CaseLinkedFileDto>> GetByCaseIdAsync(int caseId)
@@ -36,7 +34,7 @@ public class CaseLinkedFileService : ICaseLinkedFileService
             .FindAsync(f => f.CaseId == caseId);
         
         var sortedFiles = files.OrderByDescending(f => f.DateAdded);
-        return _mapper.Map<IEnumerable<CaseLinkedFileDto>>(sortedFiles);
+        return sortedFiles.Select(e => e.ToDto());
     }
 
     public async Task<IEnumerable<CaseLinkedFileDto>> GetByMemberIdAsync(int memberId)
@@ -45,18 +43,18 @@ public class CaseLinkedFileService : ICaseLinkedFileService
             .FindAsync(f => f.MemberId == memberId);
         
         var sortedFiles = files.OrderByDescending(f => f.DateAdded);
-        return _mapper.Map<IEnumerable<CaseLinkedFileDto>>(sortedFiles);
+        return sortedFiles.Select(e => e.ToDto());
     }
 
     public async Task<CaseLinkedFileDto> CreateAsync(CreateCaseLinkedFileDto dto)
     {
-        var file = _mapper.Map<CaseLinkedFile>(dto);
+        var file = dto.ToEntity();
         file.DateInserted = DateTime.UtcNow;
         
         await _unitOfWork.CaseLinkedFiles.AddAsync(file);
         await _unitOfWork.SaveChangesAsync();
         
-        return _mapper.Map<CaseLinkedFileDto>(file);
+        return file.ToDto();
     }
 
     public async Task<CaseLinkedFileDto> UpdateAsync(int id, UpdateCaseLinkedFileDto dto)
@@ -65,13 +63,13 @@ public class CaseLinkedFileService : ICaseLinkedFileService
         if (file == null)
             throw new KeyNotFoundException($"CaseLinkedFile with ID {id} not found");
 
-        _mapper.Map(dto, file);
+        dto.ApplyTo(file);
         file.DateUpdated = DateTime.UtcNow;
         
         await _unitOfWork.CaseLinkedFiles.UpdateAsync(file);
         await _unitOfWork.SaveChangesAsync();
         
-        return _mapper.Map<CaseLinkedFileDto>(file);
+        return file.ToDto();
     }
 
     public async Task<bool> DeleteAsync(int id)

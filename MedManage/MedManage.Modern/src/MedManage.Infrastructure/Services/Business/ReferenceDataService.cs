@@ -1,7 +1,7 @@
-using AutoMapper;
 using MedManage.Core.Entities;
 using MedManage.Core.Interfaces;
 using MedManage.Core.Interfaces.Services;
+using MedManage.Infrastructure.Mapping.Manual;
 
 namespace MedManage.Infrastructure.Services.Business;
 
@@ -19,14 +19,14 @@ public class ReferenceDataService<TEntity, TDto, TCreateDto, TUpdateDto>
 {
     private readonly IRepository<TEntity> _repository;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IMapper _mapper;
+    private readonly IEntityMapper<TEntity, TDto, TCreateDto, TUpdateDto> _mapper;
     private readonly ICurrentUserService _currentUserService;
     private readonly string _entityName;
 
     public ReferenceDataService(
         IRepository<TEntity> repository,
         IUnitOfWork unitOfWork,
-        IMapper mapper,
+        IEntityMapper<TEntity, TDto, TCreateDto, TUpdateDto> mapper,
         ICurrentUserService currentUserService)
     {
         _repository = repository;
@@ -39,24 +39,24 @@ public class ReferenceDataService<TEntity, TDto, TCreateDto, TUpdateDto>
     public async Task<IEnumerable<TDto>> GetAllAsync(bool includeDeleted = false, CancellationToken cancellationToken = default)
     {
         var entities = await _repository.GetAllAsync(includeDeleted);
-        return _mapper.Map<IEnumerable<TDto>>(entities);
+        return entities.Select(e => _mapper.ToDto(e));
     }
 
     public async Task<TDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         var entity = await _repository.GetByIdAsync(id);
-        return entity == null ? default : _mapper.Map<TDto>(entity);
+        return entity == null ? default : _mapper.ToDto(entity);
     }
 
     public async Task<TDto> CreateAsync(TCreateDto dto, CancellationToken cancellationToken = default)
     {
-        var entity = _mapper.Map<TEntity>(dto);
+        var entity = _mapper.ToEntity(dto);
         entity.DateInserted = DateTime.UtcNow;
         entity.UserID = _currentUserService.UserId;
 
         await _repository.AddAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        return _mapper.Map<TDto>(entity);
+        return _mapper.ToDto(entity);
     }
 
     public async Task<TDto> UpdateAsync(int id, TUpdateDto dto, CancellationToken cancellationToken = default)
@@ -67,13 +67,13 @@ public class ReferenceDataService<TEntity, TDto, TCreateDto, TUpdateDto>
             throw new KeyNotFoundException($"{_entityName} with ID {id} not found");
         }
 
-        _mapper.Map(dto, entity);
+        _mapper.ApplyUpdate(dto, entity);
         entity.DateUpdated = DateTime.UtcNow;
         entity.UpdatedUserID = _currentUserService.UserId;
 
         await _repository.UpdateAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        return _mapper.Map<TDto>(entity);
+        return _mapper.ToDto(entity);
     }
 
     public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default)

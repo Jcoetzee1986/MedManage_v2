@@ -10,6 +10,8 @@ public class UserDto
     public string? Email { get; set; }
     public bool IsApproved { get; set; }
     public bool IsLockedOut { get; set; }
+    public bool IsPermanentlyBlocked { get; set; }
+    public int FailedPasswordAttemptCount { get; set; }
     public DateTime CreateDate { get; set; }
     public DateTime LastLoginDate { get; set; }
     public DateTime LastActivityDate { get; set; }
@@ -79,4 +81,25 @@ public class RoleDto
     public Guid RoleId { get; set; }
     public string RoleName { get; set; } = string.Empty;
     public string? Description { get; set; }
+}
+
+/// <summary>
+/// Request to create a new user (admin)
+/// </summary>
+public class CreateUserRequest
+{
+    public string Username { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string? TemporaryPassword { get; set; }
+    public List<string> Roles { get; set; } = new();
+    public bool SendWelcomeEmail { get; set; } = true;
+}
+
+/// <summary>
+/// Request to reset a user's password (admin)
+/// </summary>
+public class AdminResetPasswordRequest
+{
+    public string? NewPassword { get; set; }
+    public bool SendEmail { get; set; } = true;
 }

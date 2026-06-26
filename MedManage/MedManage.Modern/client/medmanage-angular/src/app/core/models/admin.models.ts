@@ -69,6 +69,8 @@ export interface UserDto {
   email: string | null;
   isApproved: boolean;
   isLockedOut: boolean;
+  isPermanentlyBlocked: boolean;
+  failedPasswordAttemptCount: number;
   createDate: string;
   lastLoginDate: string;
   lastActivityDate: string;
@@ -86,6 +88,21 @@ export interface RoleDto {
 export interface AssignRolesRequest {
   userId: string;
   roles: string[];
+}
+
+/** Create user request (admin) */
+export interface CreateUserRequest {
+  username: string;
+  email: string;
+  temporaryPassword?: string | null;
+  roles: string[];
+  sendWelcomeEmail: boolean;
+}
+
+/** Admin reset password request */
+export interface AdminResetPasswordRequest {
+  newPassword?: string | null;
+  sendEmail: boolean;
 }
 
 /** Generic API response wrapper */

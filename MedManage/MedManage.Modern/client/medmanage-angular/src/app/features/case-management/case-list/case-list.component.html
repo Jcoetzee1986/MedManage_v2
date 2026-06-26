@@ -11,11 +11,11 @@
       <mat-icon>edit</mat-icon> Open
     </button>
 
-    <button mat-button matTooltip="Create New Case" (click)="onNewCase()" *hasRole="['CaseManager', 'Admin']">
+    <button mat-button matTooltip="Create New Case" (click)="onNewCase()" *hasRole="['Case Manager', 'System Administrator']">
       <mat-icon>add_circle</mat-icon> New Case
     </button>
 
-    <button mat-button matTooltip="Copy Selected Case" (click)="onCopyCase()" *hasRole="['CaseManager', 'Admin']">
+    <button mat-button matTooltip="Copy Selected Case" (click)="onCopyCase()" *hasRole="['Case Manager', 'System Administrator']">
       <mat-icon>content_copy</mat-icon> Copy
     </button>
 

@@ -28,4 +28,20 @@ public interface IEmailService
     /// <param name="to">Recipient email address</param>
     /// <param name="username">Username</param>
     Task<bool> SendWelcomeEmailAsync(string to, string username);
+
+    /// <summary>
+    /// Sends a welcome email with temporary password to admin-created users
+    /// </summary>
+    /// <param name="to">Recipient email address</param>
+    /// <param name="username">Username</param>
+    /// <param name="temporaryPassword">Temporary password for first login</param>
+    Task<bool> SendWelcomeEmailWithPasswordAsync(string to, string username, string temporaryPassword);
+
+    /// <summary>
+    /// Sends a password reset email with the new password (admin-initiated)
+    /// </summary>
+    /// <param name="to">Recipient email address</param>
+    /// <param name="username">Username</param>
+    /// <param name="newPassword">The new password</param>
+    Task<bool> SendAdminPasswordResetEmailAsync(string to, string username, string newPassword);
 }

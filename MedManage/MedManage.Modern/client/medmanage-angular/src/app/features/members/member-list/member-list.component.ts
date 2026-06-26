@@ -16,6 +16,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MemberService } from '../services/member.service';
 import { MemberDto, MemberSearchRequest } from '../models/member.models';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-member-list',
@@ -41,6 +42,7 @@ import { MemberDto, MemberSearchRequest } from '../models/member.models';
 })
 export class MemberListComponent implements OnInit {
   private readonly memberService = inject(MemberService);
+  private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
 
@@ -77,6 +79,7 @@ export class MemberListComponent implements OnInit {
       passportNumber: formValue.passportNumber || undefined,
       idNumber: formValue.idNumber || undefined,
       dateOfBirth: formValue.dateOfBirth ? formValue.dateOfBirth.toISOString() : undefined,
+      mainClientId: this.authService.activeClientId ?? undefined,
       pageNumber: this.pageIndex + 1,
       pageSize: this.pageSize,
       sortField: this.sortField,

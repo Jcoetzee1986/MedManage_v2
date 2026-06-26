@@ -1,4 +1,4 @@
-using AutoMapper;
+using MedManage.Infrastructure.Mapping.Manual;
 using MedManage.Core.DTOs.Common;
 using MedManage.Core.DTOs.Episode;
 using MedManage.Core.Entities;
@@ -10,16 +10,13 @@ namespace MedManage.Infrastructure.Services.Business;
 public class EpisodeService : IEpisodeService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IMapper _mapper;
     private readonly ICurrentUserService _currentUserService;
 
     public EpisodeService(
         IUnitOfWork unitOfWork,
-        IMapper mapper,
         ICurrentUserService currentUserService)
     {
         _unitOfWork = unitOfWork;
-        _mapper = mapper;
         _currentUserService = currentUserService;
     }
 
@@ -32,7 +29,7 @@ public class EpisodeService : IEpisodeService
             entities = entities.Where(x => x.DateDeleted == null);
         }
         
-        return _mapper.Map<IEnumerable<EpisodeDto>>(entities);
+        return entities.Select(e => e.ToDto());
     }
 
     public async Task<EpisodeDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
@@ -42,13 +39,13 @@ public class EpisodeService : IEpisodeService
         {
             return null;
         }
-        return _mapper.Map<EpisodeDto>(entity);
+        return entity.ToDto();
     }
 
     public async Task<EpisodeDto?> GetByIdWithCasesAsync(int id, CancellationToken cancellationToken = default)
     {
         var entity = await _unitOfWork.Episodes.GetByIdWithCasesAsync(id);
-        return entity == null ? null : _mapper.Map<EpisodeDto>(entity);
+        return entity == null ? null : entity.ToDto();
     }
 
     public async Task<PagedResult<EpisodeDto>> SearchAsync(EpisodeSearchFilters filters, CancellationToken cancellationToken = default)
@@ -75,7 +72,7 @@ public class EpisodeService : IEpisodeService
 
         return new PagedResult<EpisodeDto>
         {
-            Items = _mapper.Map<IEnumerable<EpisodeDto>>(paged),
+            Items = paged.Select(e => e.ToDto()),
             TotalCount = totalCount,
             PageNumber = filters.PageNumber,
             PageSize = filters.PageSize
@@ -84,7 +81,7 @@ public class EpisodeService : IEpisodeService
 
     public async Task<EpisodeDto> CreateAsync(CreateEpisodeDto dto, CancellationToken cancellationToken = default)
     {
-        var entity = _mapper.Map<Episode>(dto);
+        var entity = dto.ToEntity();
         
         // If DateCreated is not provided, set it to today
         if (!entity.DateCreated.HasValue)
@@ -95,7 +92,7 @@ public class EpisodeService : IEpisodeService
         await _unitOfWork.Episodes.AddAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
-        return _mapper.Map<EpisodeDto>(entity);
+        return entity.ToDto();
     }
 
     public async Task<EpisodeDto> UpdateAsync(UpdateEpisodeDto dto, CancellationToken cancellationToken = default)
@@ -106,12 +103,12 @@ public class EpisodeService : IEpisodeService
             throw new KeyNotFoundException($"Episode with ID {dto.EpisodeId} not found");
         }
         
-        _mapper.Map(dto, entity);
+        dto.ApplyTo(entity);
         
         await _unitOfWork.Episodes.UpdateAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
-        return _mapper.Map<EpisodeDto>(entity);
+        return entity.ToDto();
     }
 
     public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default)

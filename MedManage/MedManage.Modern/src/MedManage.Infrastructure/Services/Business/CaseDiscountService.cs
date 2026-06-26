@@ -1,9 +1,9 @@
+using MedManage.Infrastructure.Mapping.Manual;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using AutoMapper;
 using MedManage.Core.DTOs.CaseBilling;
 using MedManage.Core.Entities;
 using MedManage.Core.Interfaces;
@@ -14,18 +14,16 @@ namespace MedManage.Infrastructure.Services.Business;
 public class CaseDiscountService : ICaseDiscountService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IMapper _mapper;
 
-    public CaseDiscountService(IUnitOfWork unitOfWork, IMapper mapper)
+    public CaseDiscountService(IUnitOfWork unitOfWork)
     {
         _unitOfWork = unitOfWork;
-        _mapper = mapper;
     }
 
     public async Task<IEnumerable<CaseDiscountDto>> GetByCaseIdAsync(int caseId, CancellationToken cancellationToken = default)
     {
         var discounts = await _unitOfWork.CaseDiscounts.GetByCaseIdAsync(caseId);
-        return _mapper.Map<IEnumerable<CaseDiscountDto>>(discounts);
+        return discounts.Select(e => e.ToDto());
     }
 
     public async Task<CaseDiscountDto> CreateAsync(int caseId, CreateCaseDiscountDto dto, CancellationToken cancellationToken = default)
@@ -40,7 +38,7 @@ public class CaseDiscountService : ICaseDiscountService
         await _unitOfWork.CaseDiscounts.AddAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return _mapper.Map<CaseDiscountDto>(entity);
+        return entity.ToDto();
     }
 
     public async Task<bool> DeleteAsync(int caseId, decimal discount, CancellationToken cancellationToken = default)

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- MedManage Favicon - compact 3-node mark with teal emphasis -->
+  
+  <!-- Node 1 - left (navy) -->
+  <circle cx="22" cy="38" r="16" fill="none" stroke="#1B2A4A" stroke-width="3"/>
+  
+  <!-- Node 2 - top right (teal, slightly larger) -->
+  <circle cx="40" cy="24" r="17" fill="none" stroke="#0EA5A0" stroke-width="3.5"/>
+  
+  <!-- Node 3 - bottom right (amber) -->
+  <circle cx="40" cy="48" r="16" fill="none" stroke="#E8893C" stroke-width="3"/>
+  
+  <!-- Intersection dots -->
+  <circle cx="31" cy="30" r="4" fill="#0EA5A0"/>
+  <circle cx="31" cy="44" r="4" fill="#E8893C"/>
+  <circle cx="41" cy="36" r="4" fill="#0EA5A0"/>
+</svg>

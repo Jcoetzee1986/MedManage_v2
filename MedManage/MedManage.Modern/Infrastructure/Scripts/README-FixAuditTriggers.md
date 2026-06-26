@@ -66,7 +66,7 @@ The script drops old trigger names from a previous version that used incorrect n
 
 ```sql
 -- Connect to the MedManage database and execute:
-sqlcmd -S <server> -d MedManage -i FixAuditTriggers.sql
+sqlcmd -S <server> -d MedManage -i Infrastructure\Scripts\002_FixAuditTriggers.sql
 ```
 
 Or open in SSMS and execute the full script.

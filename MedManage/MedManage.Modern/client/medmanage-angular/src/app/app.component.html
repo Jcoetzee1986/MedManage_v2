@@ -1,9 +1,38 @@
 <div class="app-container">
   @if (isAuthenticated) {
-    <div class="app-header">
-      <app-client-switcher></app-client-switcher>
-    </div>
+    <!-- Global Header -->
+    <header class="app-header">
+      <!-- Left: Logo + Nav -->
+      <div class="header-left">
+        <a routerLink="/dashboard" class="app-brand">
+          <img src="assets/icons/medmanage-favicon.svg" alt="MedManage" class="app-logo">
+          <span class="app-title">MedManage</span>
+        </a>
+        <nav class="header-nav">
+          <a routerLink="/cases" routerLinkActive="nav-active">Cases</a>
+          <a routerLink="/members" routerLinkActive="nav-active">Members</a>
+          <a routerLink="/providers" routerLinkActive="nav-active">Providers</a>
+          <a routerLink="/finance" routerLinkActive="nav-active">Finance</a>
+          <a routerLink="/bookings" routerLinkActive="nav-active">Bookings</a>
+          <a routerLink="/reports" routerLinkActive="nav-active">Reports</a>
+          <a routerLink="/admin" routerLinkActive="nav-active">Admin</a>
+        </nav>
+      </div>
+
+      <!-- Right: Client Switcher + User -->
+      <div class="header-right">
+        <app-client-switcher></app-client-switcher>
+        <div class="user-menu">
+          <mat-icon class="user-icon">account_circle</mat-icon>
+          <span class="user-name">{{ currentUserName }}</span>
+          <button mat-icon-button (click)="onLogout()" matTooltip="Logout" class="logout-btn">
+            <mat-icon>logout</mat-icon>
+          </button>
+        </div>
+      </div>
+    </header>
   }
+
   <div class="app-content">
     <router-outlet></router-outlet>
   </div>

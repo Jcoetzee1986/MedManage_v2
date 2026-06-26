@@ -173,7 +173,7 @@ public class CasesController : ControllerBase
     /// Soft delete a case
     /// </summary>
     [HttpDelete("{id}")]
-    [Authorize(Roles = "Admin,CaseManager")]
+    [Authorize(Roles = "System Administrator,Case Manager")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)

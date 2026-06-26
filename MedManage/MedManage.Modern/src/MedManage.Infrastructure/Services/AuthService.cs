@@ -75,6 +75,16 @@ public class AuthService : IAuthService
                 };
             }
 
+            // Check if account is permanently blocked/deactivated
+            if (membership.IsPermanentlyBlocked)
+            {
+                return new AuthResponse
+                {
+                    Success = false,
+                    Message = "Account has been deactivated. Contact your administrator."
+                };
+            }
+
             // Check if account is approved
             if (!membership.IsApproved)
             {

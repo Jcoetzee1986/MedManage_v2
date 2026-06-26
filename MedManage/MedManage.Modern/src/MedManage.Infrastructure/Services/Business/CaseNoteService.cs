@@ -1,4 +1,4 @@
-using AutoMapper;
+using MedManage.Infrastructure.Mapping.Manual;
 using MedManage.Core.DTOs.CaseNote;
 using MedManage.Core.Entities;
 using MedManage.Core.Interfaces;
@@ -9,16 +9,13 @@ namespace MedManage.Infrastructure.Services.Business;
 public class CaseNoteService : ICaseNoteService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IMapper _mapper;
     private readonly ICurrentUserService _currentUserService;
 
     public CaseNoteService(
         IUnitOfWork unitOfWork,
-        IMapper mapper,
         ICurrentUserService currentUserService)
     {
         _unitOfWork = unitOfWork;
-        _mapper = mapper;
         _currentUserService = currentUserService;
     }
 
@@ -31,7 +28,7 @@ public class CaseNoteService : ICaseNoteService
             notes = notes.Where(n => n.DateDeleted == null);
         }
         
-        return _mapper.Map<IEnumerable<CaseNoteDto>>(notes);
+        return notes.Select(e => e.ToDto());
     }
 
     public async Task<CaseNoteDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
@@ -43,7 +40,7 @@ public class CaseNoteService : ICaseNoteService
             return null;
         }
         
-        return _mapper.Map<CaseNoteDto>(note);
+        return note.ToDto();
     }
 
     public async Task<IEnumerable<CaseNoteDto>> GetByCaseIdAsync(int caseId, bool includeDeleted = false, CancellationToken cancellationToken = default)
@@ -57,12 +54,12 @@ public class CaseNoteService : ICaseNoteService
             notes = notes.Where(n => n.DateDeleted == null);
         }
         
-        return _mapper.Map<IEnumerable<CaseNoteDto>>(notes.OrderByDescending(n => n.DateCreated ?? n.DateInserted));
+        return notes.OrderByDescending(n => n.DateCreated ?? n.DateInserted).Select(e => e.ToDto());
     }
 
     public async Task<CaseNoteDto> CreateAsync(CreateCaseNoteDto dto, CancellationToken cancellationToken = default)
     {
-        var note = _mapper.Map<CaseNote>(dto);
+        var note = dto.ToEntity();
         
         // Set DateCreated to now if not provided
         if (!note.DateCreated.HasValue)
@@ -73,7 +70,7 @@ public class CaseNoteService : ICaseNoteService
         await _unitOfWork.CaseNotes.AddAsync(note);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
-        return _mapper.Map<CaseNoteDto>(note);
+        return note.ToDto();
     }
 
     public async Task<CaseNoteDto> UpdateAsync(int id, UpdateCaseNoteDto dto, CancellationToken cancellationToken = default)
@@ -85,12 +82,12 @@ public class CaseNoteService : ICaseNoteService
             throw new KeyNotFoundException($"CaseNote with ID {id} not found");
         }
         
-        _mapper.Map(dto, note);
+        dto.ApplyTo(note);
         
         await _unitOfWork.CaseNotes.UpdateAsync(note);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
-        return _mapper.Map<CaseNoteDto>(note);
+        return note.ToDto();
     }
 
     public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default)

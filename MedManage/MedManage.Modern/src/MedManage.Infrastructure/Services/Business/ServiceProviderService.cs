@@ -1,4 +1,4 @@
-using AutoMapper;
+using MedManage.Infrastructure.Mapping.Manual;
 using Microsoft.EntityFrameworkCore;
 using MedManage.Core.DTOs.Common;
 using MedManage.Core.DTOs.ServiceProvider;
@@ -13,13 +13,11 @@ namespace MedManage.Infrastructure.Services.Business;
 public class ServiceProviderService : IServiceProviderService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IMapper _mapper;
     private readonly ICurrentUserService _currentUserService;
 
-    public ServiceProviderService(IUnitOfWork unitOfWork, IMapper mapper, ICurrentUserService currentUserService)
+    public ServiceProviderService(IUnitOfWork unitOfWork, ICurrentUserService currentUserService)
     {
         _unitOfWork = unitOfWork;
-        _mapper = mapper;
         _currentUserService = currentUserService;
     }
 
@@ -28,7 +26,7 @@ public class ServiceProviderService : IServiceProviderService
     public async Task<ServiceProviderDto?> GetByIdAsync(int serviceProviderId, CancellationToken cancellationToken = default)
     {
         var serviceProvider = await _unitOfWork.ServiceProviders.GetByIdAsync(serviceProviderId);
-        return serviceProvider == null ? null : _mapper.Map<ServiceProviderDto>(serviceProvider);
+        return serviceProvider == null ? null : serviceProvider.ToDto();
     }
 
     public async Task<PagedResult<ServiceProviderDto>> SearchAsync(ServiceProviderSearchRequest request, CancellationToken cancellationToken = default)
@@ -88,7 +86,7 @@ public class ServiceProviderService : IServiceProviderService
 
         return new PagedResult<ServiceProviderDto>
         {
-            Items = _mapper.Map<List<ServiceProviderDto>>(serviceProviders),
+            Items = serviceProviders.Select(e => e.ToDto()).ToList(),
             TotalCount = totalCount,
             PageNumber = request.PageNumber,
             PageSize = request.PageSize
@@ -97,11 +95,11 @@ public class ServiceProviderService : IServiceProviderService
 
     public async Task<ServiceProviderDto> CreateAsync(CreateServiceProviderRequest request, CancellationToken cancellationToken = default)
     {
-        var serviceProvider = _mapper.Map<ServiceProvider>(request);
+        var serviceProvider = request.ToEntity();
         
         await _unitOfWork.ServiceProviders.AddAsync(serviceProvider);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        return _mapper.Map<ServiceProviderDto>(serviceProvider);
+        return serviceProvider.ToDto();
     }
 
     public async Task<ServiceProviderDto> UpdateAsync(UpdateServiceProviderRequest request, CancellationToken cancellationToken = default)
@@ -112,11 +110,11 @@ public class ServiceProviderService : IServiceProviderService
             throw new KeyNotFoundException($"ServiceProvider with ID {request.ServiceProviderId} not found");
         }
 
-        _mapper.Map(request, existingServiceProvider);
+        request.ApplyTo(existingServiceProvider);
         
         await _unitOfWork.ServiceProviders.UpdateAsync(existingServiceProvider);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        return _mapper.Map<ServiceProviderDto>(existingServiceProvider);
+        return existingServiceProvider.ToDto();
     }
 
     public async Task<bool> DeleteAsync(int serviceProviderId, CancellationToken cancellationToken = default)
@@ -150,7 +148,7 @@ public class ServiceProviderService : IServiceProviderService
         }
 
         var results = await _unitOfWork.ServiceProviders.AutocompleteSearchAsync(query);
-        return _mapper.Map<IEnumerable<ServiceProviderAutocompleteDto>>(results);
+        return results.Select(e => e.ToAutocompleteDto());
     }
 
     #endregion
@@ -160,26 +158,26 @@ public class ServiceProviderService : IServiceProviderService
     public async Task<IEnumerable<ServiceProviderTariffDto>> GetTariffsAsync(int serviceProviderId, CancellationToken cancellationToken = default)
     {
         var tariffs = await _unitOfWork.ServiceProviderTariffs.GetByServiceProviderIdAsync(serviceProviderId);
-        return _mapper.Map<IEnumerable<ServiceProviderTariffDto>>(tariffs);
+        return tariffs.Select(e => e.ToDto());
     }
 
     public async Task<ServiceProviderTariffDto?> GetTariffByIdAsync(int serviceProviderId, long tariffId, CancellationToken cancellationToken = default)
     {
         var tariffs = await _unitOfWork.ServiceProviderTariffs.GetByServiceProviderIdAsync(serviceProviderId);
         var tariff = tariffs.FirstOrDefault(t => t.ServiceProviderTariffId == tariffId);
-        return tariff == null ? null : _mapper.Map<ServiceProviderTariffDto>(tariff);
+        return tariff == null ? null : tariff.ToDto();
     }
 
     public async Task<ServiceProviderTariffDto> CreateTariffAsync(int serviceProviderId, CreateServiceProviderTariffRequest request, CancellationToken cancellationToken = default)
     {
-        var entity = _mapper.Map<ServiceProviderTariff>(request);
+        var entity = request.ToEntity();
         entity.ServiceProviderId = serviceProviderId;
         entity.DateInserted = DateTime.UtcNow;
         entity.UserID = _currentUserService.UserId;
 
         await _unitOfWork.ServiceProviderTariffs.AddAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        return _mapper.Map<ServiceProviderTariffDto>(entity);
+        return entity.ToDto();
     }
 
     public async Task<ServiceProviderTariffDto> UpdateTariffAsync(int serviceProviderId, UpdateServiceProviderTariffRequest request, CancellationToken cancellationToken = default)
@@ -203,7 +201,7 @@ public class ServiceProviderService : IServiceProviderService
 
         await _unitOfWork.ServiceProviderTariffs.UpdateAsync(existing);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        return _mapper.Map<ServiceProviderTariffDto>(existing);
+        return existing.ToDto();
     }
 
     public async Task<bool> DeleteTariffAsync(int serviceProviderId, long tariffId, CancellationToken cancellationToken = default)
@@ -228,26 +226,26 @@ public class ServiceProviderService : IServiceProviderService
     public async Task<IEnumerable<ServiceProviderTariffCustomDto>> GetCustomTariffsAsync(int serviceProviderId, CancellationToken cancellationToken = default)
     {
         var customTariffs = await _unitOfWork.ServiceProviderTariffCustoms.GetByServiceProviderIdAsync(serviceProviderId);
-        return _mapper.Map<IEnumerable<ServiceProviderTariffCustomDto>>(customTariffs);
+        return customTariffs.Select(e => e.ToDto());
     }
 
     public async Task<ServiceProviderTariffCustomDto?> GetCustomTariffByIdAsync(int serviceProviderId, long customTariffId, CancellationToken cancellationToken = default)
     {
         var customTariffs = await _unitOfWork.ServiceProviderTariffCustoms.GetByServiceProviderIdAsync(serviceProviderId);
         var customTariff = customTariffs.FirstOrDefault(t => t.ServiceProviderTariffCustomId == customTariffId);
-        return customTariff == null ? null : _mapper.Map<ServiceProviderTariffCustomDto>(customTariff);
+        return customTariff == null ? null : customTariff.ToDto();
     }
 
     public async Task<ServiceProviderTariffCustomDto> CreateCustomTariffAsync(int serviceProviderId, CreateServiceProviderTariffCustomRequest request, CancellationToken cancellationToken = default)
     {
-        var entity = _mapper.Map<ServiceProviderTariffCustom>(request);
+        var entity = request.ToEntity();
         entity.ServiceProviderId = serviceProviderId;
         entity.DateInserted = DateTime.UtcNow;
         entity.UserID = _currentUserService.UserId;
 
         await _unitOfWork.ServiceProviderTariffCustoms.AddAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        return _mapper.Map<ServiceProviderTariffCustomDto>(entity);
+        return entity.ToDto();
     }
 
     public async Task<ServiceProviderTariffCustomDto> UpdateCustomTariffAsync(int serviceProviderId, UpdateServiceProviderTariffCustomRequest request, CancellationToken cancellationToken = default)
@@ -270,7 +268,7 @@ public class ServiceProviderService : IServiceProviderService
 
         await _unitOfWork.ServiceProviderTariffCustoms.UpdateAsync(existing);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        return _mapper.Map<ServiceProviderTariffCustomDto>(existing);
+        return existing.ToDto();
     }
 
     public async Task<bool> DeleteCustomTariffAsync(int serviceProviderId, long customTariffId, CancellationToken cancellationToken = default)
@@ -295,13 +293,13 @@ public class ServiceProviderService : IServiceProviderService
     public async Task<IEnumerable<ServiceProviderDiscountDto>> GetDiscountsAsync(int serviceProviderId, CancellationToken cancellationToken = default)
     {
         var discounts = await _unitOfWork.ServiceProviderDiscounts.GetByServiceProviderIdAsync(serviceProviderId);
-        return _mapper.Map<IEnumerable<ServiceProviderDiscountDto>>(discounts);
+        return discounts.Select(e => e.ToDto());
     }
 
     public async Task<ServiceProviderDiscountDto?> GetDiscountByClientAsync(int serviceProviderId, int mainClientId, CancellationToken cancellationToken = default)
     {
         var discount = await _unitOfWork.ServiceProviderDiscounts.GetByProviderAndClientAsync(serviceProviderId, mainClientId);
-        return discount == null ? null : _mapper.Map<ServiceProviderDiscountDto>(discount);
+        return discount == null ? null : discount.ToDto();
     }
 
     public async Task<ServiceProviderDiscountDto> CreateDiscountAsync(int serviceProviderId, CreateServiceProviderDiscountRequest request, CancellationToken cancellationToken = default)
@@ -317,7 +315,7 @@ public class ServiceProviderService : IServiceProviderService
 
         await _unitOfWork.ServiceProviderDiscounts.AddAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        return _mapper.Map<ServiceProviderDiscountDto>(entity);
+        return entity.ToDto();
     }
 
     public async Task<ServiceProviderDiscountDto> UpdateDiscountAsync(int serviceProviderId, UpdateServiceProviderDiscountRequest request, CancellationToken cancellationToken = default)
@@ -335,7 +333,7 @@ public class ServiceProviderService : IServiceProviderService
 
         await _unitOfWork.ServiceProviderDiscounts.UpdateAsync(existing);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        return _mapper.Map<ServiceProviderDiscountDto>(existing);
+        return existing.ToDto();
     }
 
     public async Task<bool> DeleteDiscountAsync(int serviceProviderId, int mainClientId, CancellationToken cancellationToken = default)

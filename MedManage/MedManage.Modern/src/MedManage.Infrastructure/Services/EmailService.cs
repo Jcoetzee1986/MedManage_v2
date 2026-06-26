@@ -155,6 +155,42 @@ public class EmailService : IEmailService
         return await SendEmailAsync(to, subject, body, isHtml: true);
     }
 
+    public async Task<bool> SendWelcomeEmailWithPasswordAsync(string to, string username, string temporaryPassword)
+    {
+        var subject = "Welcome to MedManage - Your Account Has Been Created";
+        
+        var body = GetWelcomeWithPasswordFallbackTemplate();
+        var replacements = new Dictionary<string, string>
+        {
+            { "Username", username },
+            { "TemporaryPassword", temporaryPassword },
+            { "LoginUrl", "https://medmanage.com/login" },
+            { "Year", DateTime.Now.Year.ToString() }
+        };
+
+        body = ReplaceTemplatePlaceholders(body, replacements);
+
+        return await SendEmailAsync(to, subject, body, isHtml: true);
+    }
+
+    public async Task<bool> SendAdminPasswordResetEmailAsync(string to, string username, string newPassword)
+    {
+        var subject = "MedManage - Your Password Has Been Reset";
+        
+        var body = GetAdminPasswordResetFallbackTemplate();
+        var replacements = new Dictionary<string, string>
+        {
+            { "Username", username },
+            { "NewPassword", newPassword },
+            { "LoginUrl", "https://medmanage.com/login" },
+            { "Year", DateTime.Now.Year.ToString() }
+        };
+
+        body = ReplaceTemplatePlaceholders(body, replacements);
+
+        return await SendEmailAsync(to, subject, body, isHtml: true);
+    }
+
     #region Fallback Templates
     
     private string GetPasswordResetPinFallbackTemplate()
@@ -236,6 +272,105 @@ public class EmailService : IEmailService
                 <li>Collaborate with your healthcare team</li>
             </ul>
             <p>If you have any questions or need assistance, please don't hesitate to contact our support team.</p>
+            <p style='text-align: center;'>
+                <a href='{{LoginUrl}}' class='button'>Login to MedManage</a>
+            </p>
+        </div>
+        <div class='footer'>
+            <p>&copy; {{Year}} MedManage. All rights reserved.</p>
+            <p>This is an automated message, please do not reply.</p>
+        </div>
+    </div>
+</body>
+</html>";
+    }
+
+    private string GetWelcomeWithPasswordFallbackTemplate()
+    {
+        return @"
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #28a745; color: white; padding: 20px; text-align: center; }
+        .content { background-color: #f8f9fa; padding: 30px; border-radius: 5px; margin-top: 20px; }
+        .password-box { background-color: #fff; border: 2px solid #28a745; padding: 15px; text-align: center; 
+                    font-size: 18px; font-weight: bold; margin: 20px 0; border-radius: 5px; }
+        .button { background-color: #28a745; color: white; padding: 12px 30px; text-decoration: none; 
+                  border-radius: 5px; display: inline-block; margin-top: 20px; }
+        .warning { color: #dc3545; font-weight: bold; margin-top: 20px; }
+        .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #6c757d; }
+    </style>
+</head>
+<body>
+    <div class='container'>
+        <div class='header'>
+            <h1>Welcome to MedManage!</h1>
+        </div>
+        <div class='content'>
+            <p>Hello <strong>{{Username}}</strong>,</p>
+            <p>An administrator has created an account for you on MedManage. Here are your login details:</p>
+            
+            <p><strong>Username:</strong> {{Username}}</p>
+            <div class='password-box'>
+                Temporary Password: {{TemporaryPassword}}
+            </div>
+            
+            <div class='warning'>
+                ⚠️ Please change your password after your first login for security purposes.
+            </div>
+            
+            <p style='text-align: center;'>
+                <a href='{{LoginUrl}}' class='button'>Login to MedManage</a>
+            </p>
+        </div>
+        <div class='footer'>
+            <p>&copy; {{Year}} MedManage. All rights reserved.</p>
+            <p>This is an automated message, please do not reply.</p>
+        </div>
+    </div>
+</body>
+</html>";
+    }
+
+    private string GetAdminPasswordResetFallbackTemplate()
+    {
+        return @"
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #007bff; color: white; padding: 20px; text-align: center; }
+        .content { background-color: #f8f9fa; padding: 30px; border-radius: 5px; margin-top: 20px; }
+        .password-box { background-color: #fff; border: 2px solid #007bff; padding: 15px; text-align: center; 
+                    font-size: 18px; font-weight: bold; margin: 20px 0; border-radius: 5px; }
+        .button { background-color: #007bff; color: white; padding: 12px 30px; text-decoration: none; 
+                  border-radius: 5px; display: inline-block; margin-top: 20px; }
+        .warning { color: #dc3545; font-weight: bold; margin-top: 20px; }
+        .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #6c757d; }
+    </style>
+</head>
+<body>
+    <div class='container'>
+        <div class='header'>
+            <h1>Password Reset</h1>
+        </div>
+        <div class='content'>
+            <p>Hello <strong>{{Username}}</strong>,</p>
+            <p>Your password has been reset by an administrator. Here is your new password:</p>
+            
+            <div class='password-box'>
+                New Password: {{NewPassword}}
+            </div>
+            
+            <div class='warning'>
+                ⚠️ Please change your password after logging in for security purposes.
+            </div>
+            
             <p style='text-align: center;'>
                 <a href='{{LoginUrl}}' class='button'>Login to MedManage</a>
             </p>

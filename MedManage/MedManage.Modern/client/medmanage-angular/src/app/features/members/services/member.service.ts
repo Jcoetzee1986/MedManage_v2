@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import {
   MemberDto, CreateMemberRequest, UpdateMemberRequest, MemberSearchRequest, PagedResult,
@@ -8,6 +8,8 @@ import {
   MemberNoteDto, CreateMemberNoteRequest,
   MemberMedicalAidProductDto, CreateMemberMedicalAidProductRequest
 } from '../models/member.models';
+
+interface ApiResponse<T> { success: boolean; data: T; message?: string; }
 
 @Injectable({
   providedIn: 'root'
@@ -19,7 +21,8 @@ export class MemberService {
   // ─── Member CRUD ─────────────────────────────────────────────
 
   search(request: MemberSearchRequest): Observable<PagedResult<MemberDto>> {
-    return this.http.post<PagedResult<MemberDto>>(`${this.baseUrl}/search`, request);
+    return this.http.post<ApiResponse<PagedResult<MemberDto>>>(`${this.baseUrl}/search`, request)
+      .pipe(map(r => r.data));
   }
 
   getAll(): Observable<MemberDto[]> {

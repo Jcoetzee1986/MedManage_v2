@@ -41,4 +41,24 @@ public interface IUserManagementService
     /// Gets all available roles in the system
     /// </summary>
     Task<IEnumerable<RoleDto>> GetAllRolesAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Creates a new user (admin operation)
+    /// </summary>
+    Task<UserDto> CreateUserAsync(CreateUserRequest request, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Resets a user's password (admin operation)
+    /// </summary>
+    Task<bool> AdminResetPasswordAsync(Guid userId, AdminResetPasswordRequest request, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Clears failed login attempts for a user
+    /// </summary>
+    Task<bool> ClearFailedAttemptsAsync(Guid userId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Permanently blocks/deactivates a user account
+    /// </summary>
+    Task<bool> PermanentlyBlockUserAsync(Guid userId, CancellationToken cancellationToken = default);
 }

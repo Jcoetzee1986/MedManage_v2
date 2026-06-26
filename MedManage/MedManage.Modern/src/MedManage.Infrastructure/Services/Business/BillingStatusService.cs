@@ -1,4 +1,4 @@
-using AutoMapper;
+using MedManage.Infrastructure.Mapping.Manual;
 using MedManage.Core.DTOs.ReferenceData;
 using MedManage.Core.Entities;
 using MedManage.Core.Interfaces;
@@ -9,13 +9,11 @@ namespace MedManage.Infrastructure.Services.Business;
 public class BillingStatusService : IBillingStatusService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IMapper _mapper;
     private readonly Core.Interfaces.ICurrentUserService _currentUserService;
 
-    public BillingStatusService(IUnitOfWork unitOfWork, IMapper mapper, Core.Interfaces.ICurrentUserService currentUserService)
+    public BillingStatusService(IUnitOfWork unitOfWork, Core.Interfaces.ICurrentUserService currentUserService)
     {
         _unitOfWork = unitOfWork;
-        _mapper = mapper;
         _currentUserService = currentUserService;
     }
 
@@ -28,23 +26,23 @@ public class BillingStatusService : IBillingStatusService
             entities = entities.Where(x => x.DateDeleted == null);
         }
         
-        return _mapper.Map<IEnumerable<BillingStatusDto>>(entities);
+        return entities.Select(e => e.ToDto());
     }
 
     public async Task<BillingStatusDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         var entity = await _unitOfWork.BillingStatuses.GetByIdAsync(id);
-        return entity == null ? null : _mapper.Map<BillingStatusDto>(entity);
+        return entity == null ? null : entity.ToDto();
     }
 
     public async Task<BillingStatusDto> CreateAsync(CreateBillingStatusDto dto, CancellationToken cancellationToken = default)
     {
-        var entity = _mapper.Map<BillingStatus>(dto);
+        var entity = dto.ToEntity();
         
         await _unitOfWork.BillingStatuses.AddAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
-        return _mapper.Map<BillingStatusDto>(entity);
+        return entity.ToDto();
     }
 
     public async Task<BillingStatusDto> UpdateAsync(UpdateBillingStatusDto dto, CancellationToken cancellationToken = default)
@@ -55,12 +53,12 @@ public class BillingStatusService : IBillingStatusService
             throw new KeyNotFoundException($"BillingStatus with ID {dto.BillingStatusId} not found");
         }
         
-        _mapper.Map(dto, entity);
+        dto.ApplyTo(entity);
         
         await _unitOfWork.BillingStatuses.UpdateAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
-        return _mapper.Map<BillingStatusDto>(entity);
+        return entity.ToDto();
     }
 
     public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default)

@@ -1,8 +1,8 @@
+using MedManage.Infrastructure.Mapping.Manual;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AutoMapper;
 using MedManage.Core.DTOs.Tariff;
 using MedManage.Core.Entities;
 using MedManage.Core.Interfaces;
@@ -17,13 +17,11 @@ public class TariffService : ITariffService
 {
     private readonly MedManageDbContext _context;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IMapper _mapper;
 
-    public TariffService(MedManageDbContext context, IUnitOfWork unitOfWork, IMapper mapper)
+    public TariffService(MedManageDbContext context, IUnitOfWork unitOfWork)
     {
         _context = context;
         _unitOfWork = unitOfWork;
-        _mapper = mapper;
     }
 
     // --- SP-wrapped tariff lookup ---
@@ -64,7 +62,7 @@ public class TariffService : ITariffService
     {
         var tariffs = await _unitOfWork.BaseTariffs
             .FindAsync(bt => bt.DateDeleted == null);
-        return _mapper.Map<IEnumerable<BaseTariffDto>>(tariffs.OrderBy(bt => bt.TariffDescription));
+        return tariffs.OrderBy(bt => bt.TariffDescription).Select(e => e.ToDto());
     }
 
     public async Task<BaseTariffDto?> GetBaseTariffByIdAsync(string id)
@@ -73,18 +71,18 @@ public class TariffService : ITariffService
             .FindAsync(bt => bt.BaseTariffId == id && bt.DateDeleted == null);
         var tariff = tariffs.FirstOrDefault();
         if (tariff == null) return null;
-        return _mapper.Map<BaseTariffDto>(tariff);
+        return tariff.ToDto();
     }
 
     public async Task<BaseTariffDto> CreateBaseTariffAsync(CreateBaseTariffDto dto)
     {
-        var tariff = _mapper.Map<BaseTariff>(dto);
+        var tariff = dto.ToEntity();
         tariff.DateInserted = DateTime.Now;
 
         await _unitOfWork.BaseTariffs.AddAsync(tariff);
         await _unitOfWork.SaveChangesAsync();
 
-        return _mapper.Map<BaseTariffDto>(tariff);
+        return tariff.ToDto();
     }
 
     public async Task<BaseTariffDto> UpdateBaseTariffAsync(string id, UpdateBaseTariffDto dto)
@@ -95,13 +93,13 @@ public class TariffService : ITariffService
         if (tariff == null)
             throw new KeyNotFoundException($"BaseTariff with ID {id} not found");
 
-        _mapper.Map(dto, tariff);
+        dto.ApplyTo(tariff);
         tariff.DateUpdated = DateTime.Now;
 
         await _unitOfWork.BaseTariffs.UpdateAsync(tariff);
         await _unitOfWork.SaveChangesAsync();
 
-        return _mapper.Map<BaseTariffDto>(tariff);
+        return tariff.ToDto();
     }
 
     public async Task<bool> DeleteBaseTariffAsync(string id)
@@ -127,7 +125,7 @@ public class TariffService : ITariffService
             .OrderBy(t => t.BaseTariffId)
             .ThenBy(t => t.StartDate)
             .ToListAsync();
-        return _mapper.Map<IEnumerable<TariffRateDto>>(rates);
+        return rates.Select(e => e.ToDto());
     }
 
     public async Task<IEnumerable<TariffRateDto>> GetTariffRatesByBaseTariffIdAsync(string baseTariffId)
@@ -136,7 +134,7 @@ public class TariffService : ITariffService
             .Where(t => t.BaseTariffId == baseTariffId && t.DateDeleted == null)
             .OrderBy(t => t.StartDate)
             .ToListAsync();
-        return _mapper.Map<IEnumerable<TariffRateDto>>(rates);
+        return rates.Select(e => e.ToDto());
     }
 
     public async Task<TariffRateDto?> GetTariffRateByIdAsync(int id)
@@ -144,18 +142,18 @@ public class TariffService : ITariffService
         var rate = await _context.Tariffs
             .FirstOrDefaultAsync(t => t.TariffId == id && t.DateDeleted == null);
         if (rate == null) return null;
-        return _mapper.Map<TariffRateDto>(rate);
+        return rate.ToDto();
     }
 
     public async Task<TariffRateDto> CreateTariffRateAsync(CreateTariffRateDto dto)
     {
-        var rate = _mapper.Map<Tariff>(dto);
+        var rate = dto.ToEntity();
         rate.DateInserted = DateTime.Now;
 
         await _context.Tariffs.AddAsync(rate);
         await _context.SaveChangesAsync();
 
-        return _mapper.Map<TariffRateDto>(rate);
+        return rate.ToDto();
     }
 
     public async Task<TariffRateDto> UpdateTariffRateAsync(int id, UpdateTariffRateDto dto)
@@ -165,13 +163,13 @@ public class TariffService : ITariffService
         if (rate == null)
             throw new KeyNotFoundException($"Tariff rate with ID {id} not found");
 
-        _mapper.Map(dto, rate);
+        dto.ApplyTo(rate);
         rate.DateUpdated = DateTime.Now;
 
         _context.Tariffs.Update(rate);
         await _context.SaveChangesAsync();
 
-        return _mapper.Map<TariffRateDto>(rate);
+        return rate.ToDto();
     }
 
     public async Task<bool> DeleteTariffRateAsync(int id)
@@ -195,7 +193,7 @@ public class TariffService : ITariffService
             .Where(tn => tn.DateDeleted == null)
             .OrderBy(tn => tn.TariffName1)
             .ToListAsync();
-        return _mapper.Map<IEnumerable<TariffNameDto>>(names);
+        return names.Select(e => e.ToDto());
     }
 
     public async Task<TariffNameDto?> GetTariffNameByIdAsync(int id)
@@ -203,18 +201,18 @@ public class TariffService : ITariffService
         var name = await _context.TariffNames
             .FirstOrDefaultAsync(tn => tn.TariffNameId == id && tn.DateDeleted == null);
         if (name == null) return null;
-        return _mapper.Map<TariffNameDto>(name);
+        return name.ToDto();
     }
 
     public async Task<TariffNameDto> CreateTariffNameAsync(CreateTariffNameDto dto)
     {
-        var name = _mapper.Map<TariffName>(dto);
+        var name = dto.ToEntity();
         name.DateInserted = DateTime.Now;
 
         await _context.TariffNames.AddAsync(name);
         await _context.SaveChangesAsync();
 
-        return _mapper.Map<TariffNameDto>(name);
+        return name.ToDto();
     }
 
     public async Task<TariffNameDto> UpdateTariffNameAsync(int id, UpdateTariffNameDto dto)
@@ -224,13 +222,13 @@ public class TariffService : ITariffService
         if (name == null)
             throw new KeyNotFoundException($"TariffName with ID {id} not found");
 
-        _mapper.Map(dto, name);
+        dto.ApplyTo(name);
         name.DateUpdated = DateTime.Now;
 
         _context.TariffNames.Update(name);
         await _context.SaveChangesAsync();
 
-        return _mapper.Map<TariffNameDto>(name);
+        return name.ToDto();
     }
 
     public async Task<bool> DeleteTariffNameAsync(int id)

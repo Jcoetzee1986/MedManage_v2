@@ -1,35 +1,73 @@
-/* You can add global styles to this file, and also import other style files */
+/* Global Styles - MedManage by Iconic Developments CC */
 @use 'sass:map';
-@import '@angular/material/prebuilt-themes/indigo-pink.css';
+@use '@angular/material' as mat;
+
+// Custom theme using brand colors
+$medmanage-primary: mat.m2-define-palette((
+  50: #e4eaf2, 100: #bccbdf, 200: #91a8ca, 300: #6685b5, 400: #456aa5,
+  500: #1B2A4A, 600: #182543, 700: #14203b, 800: #101a33, 900: #091024,
+  contrast: (50: #1B2A4A, 100: #1B2A4A, 200: #1B2A4A, 300: #ffffff, 400: #ffffff,
+    500: #ffffff, 600: #ffffff, 700: #ffffff, 800: #ffffff, 900: #ffffff)
+));
+
+$medmanage-accent: mat.m2-define-palette((
+  50: #e1f5f4, 100: #b4e6e4, 200: #83d6d3, 300: #51c5c1, 400: #2cb9b4,
+  500: #0EA5A0, 600: #0c9690, 700: #09847e, 800: #07726d, 900: #04534f,
+  contrast: (50: #1B2A4A, 100: #1B2A4A, 200: #1B2A4A, 300: #1B2A4A, 400: #ffffff,
+    500: #ffffff, 600: #ffffff, 700: #ffffff, 800: #ffffff, 900: #ffffff)
+));
+
+$medmanage-warn: mat.m2-define-palette((
+  50: #fdf1e7, 100: #f9dcc4, 200: #f5c59d, 300: #f0ae76, 400: #ec9c59,
+  500: #E8893C, 600: #e58136, 700: #e1762e, 800: #dd6c27, 900: #d5591a,
+  contrast: (50: #1B2A4A, 100: #1B2A4A, 200: #1B2A4A, 300: #1B2A4A, 400: #1B2A4A,
+    500: #ffffff, 600: #ffffff, 700: #ffffff, 800: #ffffff, 900: #ffffff)
+));
+
+$medmanage-theme: mat.m2-define-light-theme((
+  color: (
+    primary: $medmanage-primary,
+    accent: $medmanage-accent,
+    warn: $medmanage-warn
+  ),
+  typography: mat.m2-define-typography-config(
+    $font-family: '"Inter", "Roboto", "Helvetica Neue", Arial, sans-serif'
+  )
+));
+
+@include mat.all-component-themes($medmanage-theme);
 
 // ============================================================================
 // CSS Custom Properties (Design Tokens)
 // ============================================================================
 :root {
-  // Brand Colors
-  --color-primary: #667eea;
-  --color-primary-dark: #5568d3;
-  --color-primary-light: #8c9eff;
-  --color-secondary: #764ba2;
-  --color-accent: #4caf50;
+  // Brand Colors — Iconic Developments CC palette
+  --color-primary: #1B2A4A;          // Navy (anchor/primary)
+  --color-primary-dark: #111D35;
+  --color-primary-light: #2A3F6B;
+  --color-secondary: #0EA5A0;        // Teal (medical/health accent)
+  --color-secondary-dark: #0B8580;
+  --color-secondary-light: #12C9C3;
+  --color-accent: #E8893C;           // Amber (highlight/energy)
+  --color-accent-light: #F0A86A;
   
   // Status Colors
   --color-success: #2e7d32;
   --color-success-bg: #e8f5e9;
   --color-error: #c62828;
   --color-error-bg: #ffebee;
-  --color-warning: #f57c00;
+  --color-warning: #E8893C;
   --color-warning-bg: #fff3e0;
-  --color-info: #1565c0;
-  --color-info-bg: #e3f2fd;
+  --color-info: #0EA5A0;
+  --color-info-bg: #e0f7f6;
   
   // Neutral Colors
-  --color-text-primary: #333333;
-  --color-text-secondary: #666666;
-  --color-text-disabled: #999999;
-  --color-border: #dddddd;
-  --color-background: #ffffff;
-  --color-background-alt: #f5f5f5;
+  --color-text-primary: #1B2A4A;
+  --color-text-secondary: #546E7A;
+  --color-text-disabled: #90A4AE;
+  --color-border: #CFD8DC;
+  --color-background: #F8FAFB;
+  --color-background-alt: #ECEFF1;
   --color-surface: #ffffff;
   
   // Spacing Scale (8px base)
@@ -198,6 +236,159 @@ a {
   
   @include respond-to(md) {
     padding: var(--spacing-xl);
+  }
+}
+
+// ============================================================================
+// App Header & Branding
+// ============================================================================
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  background: var(--color-primary);
+  color: white;
+  height: 52px;
+  box-shadow: 0 2px 4px rgba(27, 42, 74, 0.2);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.app-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: white;
+}
+
+.app-logo {
+  width: 26px;
+  height: 26px;
+}
+
+.app-title {
+  font-family: 'Inter', 'Roboto', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: white;
+  letter-spacing: 0.3px;
+}
+
+// Navigation links
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  a {
+    color: rgba(255, 255, 255, 0.75);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 4px;
+    transition: background 0.15s, color 0.15s;
+
+    &:hover {
+      color: white;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    &.nav-active {
+      color: white;
+      background: rgba(14, 165, 160, 0.3);
+    }
+  }
+}
+
+// User menu
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+// Client switcher (in navbar)
+.client-switcher {
+  display: inline-flex;
+  align-items: center;
+
+  .client-select {
+    min-width: 180px;
+    font-size: 0.85rem;
+
+    // White text/border for dark navbar background
+    .mat-mdc-text-field-wrapper {
+      background: teal;
+    }
+
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-color: rgba(255, 255, 255, 0.4) !important;
+    }
+
+    .mat-mdc-select-value-text,
+    .mdc-floating-label,
+    .mat-mdc-select-arrow {
+      color: white !important;
+    }
+
+    .mat-mdc-form-field-subscript-wrapper {
+      display: none;
+    }
+  }
+}
+
+.user-icon {
+  font-size: 22px;
+  width: 22px;
+  height: 22px;
+}
+
+.user-name {
+  font-size: 13px;
+  font-weight: 500;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.logout-btn {
+  color: rgba(255, 255, 255, 0.7) !important;
+
+  &:hover {
+    color: white !important;
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+// Login page logo
+.auth-logo {
+  text-align: center;
+  padding: 32px 0 24px;
+
+  .login-logo {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
   }
 }
 
@@ -412,6 +603,11 @@ mat-form-field {
   .mdc-floating-label:not(.mdc-floating-label--float-above) {
     top: 50% !important;
     transform: translateY(-50%) !important;
+  }
+
+  // When a prefix icon is present, indent the label so it doesn't overlap
+  .mat-mdc-form-field-has-icon-prefix .mdc-floating-label {
+    left: 28px !important;
   }
 
   // Compact font
@@ -1778,6 +1974,237 @@ img {
         width: 1.25rem;
         height: 1.25rem;
       }
+    }
+  }
+}
+
+// ============================================================================
+// Wizard / Stepper styles
+// ============================================================================
+.case-wizard-container {
+  max-width: 800px;
+  margin: 24px auto;
+  padding: 0 16px;
+}
+
+.wizard-step-content {
+  padding: 24px 0;
+  min-height: 300px;
+}
+
+.wizard-actions {
+  display: flex;
+  justify-content: space-between;
+  padding: 16px 0;
+  border-top: 1px solid #e0e0e0;
+  margin-top: 16px;
+}
+
+.wizard-stepper {
+  margin-top: 16px;
+
+  .mat-horizontal-stepper-header-container {
+    margin-bottom: 8px;
+  }
+}
+
+.mr-2 {
+  margin-right: 8px;
+}
+
+.ml-2 {
+  margin-left: 8px;
+}
+
+// ============================================================================
+// Snackbar / Toast Styles
+// ============================================================================
+.snackbar-warning {
+  --mdc-snackbar-container-color: #E8893C !important;
+  --mdc-snackbar-supporting-text-color: white !important;
+  --mat-snack-bar-button-color: white !important;
+}
+
+.snackbar-error {
+  --mdc-snackbar-container-color: #c62828 !important;
+  --mdc-snackbar-supporting-text-color: white !important;
+  --mat-snack-bar-button-color: white !important;
+}
+
+.snackbar-success {
+  --mdc-snackbar-container-color: #2e7d32 !important;
+  --mdc-snackbar-supporting-text-color: white !important;
+  --mat-snack-bar-button-color: white !important;
+}
+
+// ============================================================================
+// User Management — Admin Actions & Statuses
+// ============================================================================
+.user-management-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+  padding: 8px 0;
+}
+
+.status-blocked {
+  color: #c62828;
+  background-color: #ffebee;
+  border-radius: 12px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+
+  .status-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.blocked-row {
+  opacity: 0.6;
+  background-color: #fafafa;
+}
+
+.blocked-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #c62828;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 8px;
+  background: #ffebee;
+  border-radius: 12px;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.block-btn {
+  color: #c62828 !important;
+}
+
+.create-user-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 400px;
+  padding-top: 8px;
+}
+
+.roles-section {
+  margin: 8px 0;
+}
+
+.roles-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.6);
+  margin-bottom: 8px;
+  display: block;
+}
+
+.roles-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-left: 8px;
+}
+
+.welcome-email-checkbox {
+  margin-top: 8px;
+}
+
+// ============================================================================
+// Member Detail — Anchor Navigation Layout
+// ============================================================================
+.member-detail-layout {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.section-nav {
+  position: sticky;
+  top: 80px;
+  align-self: start;
+
+  @media (max-width: 768px) {
+    position: static;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  a {
+    display: block;
+    padding: 8px 12px;
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    font-size: 13px;
+    border-left: 3px solid transparent;
+    cursor: pointer;
+    transition: color var(--transition-fast), background var(--transition-fast);
+
+    &:hover {
+      color: var(--color-primary);
+      background: var(--color-background-alt);
+      text-decoration: none;
+    }
+
+    &.active {
+      color: var(--color-secondary);
+      border-left-color: var(--color-secondary);
+      font-weight: 500;
+    }
+
+    @media (max-width: 768px) {
+      border-left: none;
+      border-bottom: 2px solid transparent;
+      padding: 6px 10px;
+
+      &.active {
+        border-bottom-color: var(--color-secondary);
+        border-left-color: transparent;
+      }
+    }
+  }
+}
+
+.member-form-content {
+  section {
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--color-border);
+    scroll-margin-top: 80px;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--color-primary);
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--color-secondary);
+      display: inline-block;
     }
   }
 }

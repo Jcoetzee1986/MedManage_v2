@@ -1,4 +1,4 @@
-using AutoMapper;
+using MedManage.Infrastructure.Mapping.Manual;
 using MedManage.Core.DTOs.ReferenceData;
 using MedManage.Core.Entities;
 using MedManage.Core.Interfaces;
@@ -9,13 +9,11 @@ namespace MedManage.Infrastructure.Services.Business;
 public class ChronicIllnessService : IChronicIllnessService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IMapper _mapper;
     private readonly Core.Interfaces.ICurrentUserService _currentUserService;
 
-    public ChronicIllnessService(IUnitOfWork unitOfWork, IMapper mapper, Core.Interfaces.ICurrentUserService currentUserService)
+    public ChronicIllnessService(IUnitOfWork unitOfWork, Core.Interfaces.ICurrentUserService currentUserService)
     {
         _unitOfWork = unitOfWork;
-        _mapper = mapper;
         _currentUserService = currentUserService;
     }
 
@@ -28,23 +26,23 @@ public class ChronicIllnessService : IChronicIllnessService
             entities = entities.Where(x => x.DateDeleted == null);
         }
         
-        return _mapper.Map<IEnumerable<ChronicIllnessDto>>(entities);
+        return entities.Select(e => e.ToDto());
     }
 
     public async Task<ChronicIllnessDto?> GetByIdAsync(double? id, CancellationToken cancellationToken = default)
     {
         var entity = await _unitOfWork.ChronicIllnesses.GetByChronicIllnessIdAsync(id);
-        return entity == null ? null : _mapper.Map<ChronicIllnessDto>(entity);
+        return entity == null ? null : entity.ToDto();
     }
 
     public async Task<ChronicIllnessDto> CreateAsync(CreateChronicIllnessDto dto, CancellationToken cancellationToken = default)
     {
-        var entity = _mapper.Map<ChronicIllness>(dto);
+        var entity = dto.ToEntity();
         
         await _unitOfWork.ChronicIllnesses.AddAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
-        return _mapper.Map<ChronicIllnessDto>(entity);
+        return entity.ToDto();
     }
 
     public async Task<ChronicIllnessDto> UpdateAsync(UpdateChronicIllnessDto dto, CancellationToken cancellationToken = default)
@@ -55,12 +53,12 @@ public class ChronicIllnessService : IChronicIllnessService
             throw new KeyNotFoundException($"ChronicIllness with ID {dto.ChronicIllnessId} not found");
         }
         
-        _mapper.Map(dto, entity);
+        dto.ApplyTo(entity);
         
         await _unitOfWork.ChronicIllnesses.UpdateAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
-        return _mapper.Map<ChronicIllnessDto>(entity);
+        return entity.ToDto();
     }
 
     public async Task<bool> DeleteAsync(double? id, CancellationToken cancellationToken = default)

@@ -1,4 +1,4 @@
-using AutoMapper;
+using MedManage.Infrastructure.Mapping.Manual;
 using MedManage.Core.DTOs.MedicalAid;
 using MedManage.Core.Entities;
 using MedManage.Core.Interfaces;
@@ -9,16 +9,13 @@ namespace MedManage.Infrastructure.Services.Business;
 public class MedicalAidService : IMedicalAidService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IMapper _mapper;
     private readonly ICurrentUserService _currentUserService;
 
     public MedicalAidService(
         IUnitOfWork unitOfWork,
-        IMapper mapper,
         ICurrentUserService currentUserService)
     {
         _unitOfWork = unitOfWork;
-        _mapper = mapper;
         _currentUserService = currentUserService;
     }
 
@@ -33,25 +30,25 @@ public class MedicalAidService : IMedicalAidService
             entities = entities.Where(x => x.DateDeleted == null);
         }
         
-        return _mapper.Map<IEnumerable<MedicalAidDto>>(entities);
+        return entities.Select(e => e.ToDto());
     }
 
     public async Task<IEnumerable<MedicalAidDto>> GetActiveAsync(CancellationToken cancellationToken = default)
     {
         var entities = await _unitOfWork.MedicalAids.GetActiveAsync();
-        return _mapper.Map<IEnumerable<MedicalAidDto>>(entities);
+        return entities.Select(e => e.ToDto());
     }
 
     public async Task<MedicalAidDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         var entity = await _unitOfWork.MedicalAids.GetByMedicalAidIdAsync(id);
-        return entity == null ? null : _mapper.Map<MedicalAidDto>(entity);
+        return entity == null ? null : entity.ToDto();
     }
 
     public async Task<MedicalAidDto?> GetByIdWithDetailsAsync(int id, CancellationToken cancellationToken = default)
     {
         var entity = await _unitOfWork.MedicalAids.GetByIdWithDetailsAsync(id);
-        return entity == null ? null : _mapper.Map<MedicalAidDto>(entity);
+        return entity == null ? null : entity.ToDto();
     }
 
     public async Task<IEnumerable<MedicalAidDto>> SearchAsync(MedicalAidSearchFilters filters, CancellationToken cancellationToken = default)
@@ -78,17 +75,17 @@ public class MedicalAidService : IMedicalAidService
                                           x.MedicalAidName.Contains(filters.MedicalAidName, StringComparison.OrdinalIgnoreCase));
         }
 
-        return _mapper.Map<IEnumerable<MedicalAidDto>>(entities);
+        return entities.Select(e => e.ToDto());
     }
 
     public async Task<MedicalAidDto> CreateAsync(CreateMedicalAidDto dto, CancellationToken cancellationToken = default)
     {
-        var entity = _mapper.Map<MedicalAid>(dto);
+        var entity = dto.ToEntity();
         
         await _unitOfWork.MedicalAids.AddAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
-        return _mapper.Map<MedicalAidDto>(entity);
+        return entity.ToDto();
     }
 
     public async Task<MedicalAidDto> UpdateAsync(UpdateMedicalAidDto dto, CancellationToken cancellationToken = default)
@@ -99,12 +96,12 @@ public class MedicalAidService : IMedicalAidService
             throw new KeyNotFoundException($"Medical aid with ID {dto.MedicalAidId} not found");
         }
         
-        _mapper.Map(dto, entity);
+        dto.ApplyTo(entity);
         
         await _unitOfWork.MedicalAids.UpdateAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
-        return _mapper.Map<MedicalAidDto>(entity);
+        return entity.ToDto();
     }
 
     public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default)
@@ -127,13 +124,13 @@ public class MedicalAidService : IMedicalAidService
     public async Task<IEnumerable<MedicalAidProductDto>> GetProductsByMedicalAidIdAsync(int medicalAidId, CancellationToken cancellationToken = default)
     {
         var entities = await _unitOfWork.MedicalAidProducts.GetByMedicalAidIdAsync(medicalAidId);
-        return _mapper.Map<IEnumerable<MedicalAidProductDto>>(entities);
+        return entities.Select(e => e.ToDto());
     }
 
     public async Task<MedicalAidProductDto?> GetProductByIdAsync(int productId, CancellationToken cancellationToken = default)
     {
         var entity = await _unitOfWork.MedicalAidProducts.GetByIdAsync(productId);
-        return entity == null ? null : _mapper.Map<MedicalAidProductDto>(entity);
+        return entity == null ? null : entity.ToDto();
     }
 
     public async Task<MedicalAidProductDto> CreateProductAsync(int medicalAidId, CreateMedicalAidProductDto dto, CancellationToken cancellationToken = default)
@@ -148,7 +145,7 @@ public class MedicalAidService : IMedicalAidService
         await _unitOfWork.MedicalAidProducts.AddAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return _mapper.Map<MedicalAidProductDto>(entity);
+        return entity.ToDto();
     }
 
     public async Task<MedicalAidProductDto> UpdateProductAsync(UpdateMedicalAidProductDto dto, CancellationToken cancellationToken = default)
@@ -165,7 +162,7 @@ public class MedicalAidService : IMedicalAidService
         await _unitOfWork.MedicalAidProducts.UpdateAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return _mapper.Map<MedicalAidProductDto>(entity);
+        return entity.ToDto();
     }
 
     public async Task<bool> DeleteProductAsync(int productId, CancellationToken cancellationToken = default)

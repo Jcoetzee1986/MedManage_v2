@@ -22,23 +22,38 @@ The MedManage database runs on your host machine (not in a container). Apply the
 
 ### SQL Scripts — Execution Order
 
-Run these against your `MedManage` database in SQL Server Management Studio (SSMS) or via `sqlcmd`:
+Run these against your `MedManage` database in SQL Server Management Studio (SSMS) or via `sqlcmd`.
 
-| # | Script | Purpose | Location |
+Scripts are numbered and must be executed in order:
+
+| # | Script | Purpose | Required |
 |---|--------|---------|----------|
-| 1 | *(existing schema)* | The MedManage database must already exist with all tables/schemas | Legacy DB backup or EF scaffold |
-| 2 | `FixAuditTriggers.sql` | Recreates all 24 audit triggers with explicit column names (replaces broken SELECT * triggers) | `Infrastructure/Scripts/` |
-| 3 | `RemoveAuditTriggers.sql` | *(Optional)* Drops old misnamed triggers from prior migrations | `Infrastructure/Scripts/` |
+| 1 | `001_AddAuditColumns.sql` | Adds `DateInserted`, `UserID`, `DateUpdated`, `UpdatedUserID` columns to all tables (BaseEntity pattern) | Yes |
+| 2 | `002_StandardizeDateInsertedColumns.sql` | Changes `DateInserted` from DATE to DATETIME on tables that had the wrong type | Yes |
+| 3 | `003_RemoveOldAuditTriggers.sql` | Drops old/broken audit triggers from legacy migration | Yes (first time) |
+| 4 | `004_FixAuditTriggers.sql` | Recreates all 24 audit triggers with explicit column names and SESSION_CONTEXT support | Yes |
+| 5 | `005_CreateRefreshTokensTable.sql` | Creates `RefreshTokens` table for JWT token rotation | Yes |
+| 6 | `006_CreatePasswordResetTokensTable.sql` | Creates `PasswordResetTokens` table for password recovery flow | Yes |
+| 7 | `007_AddIsPermanentlyBlocked.sql` | Adds `IsPermanentlyBlocked` column to `aspnet_Membership` for user deactivation | Yes |
 
+All scripts are located in `Infrastructure/Scripts/`.
 
 ### Applying Scripts
 
 ```powershell
-# From the project root
-sqlcmd -S localhost -d MedManage -i Infrastructure\Scripts\FixAuditTriggers.sql
+# From the project root (MedManage.Modern/)
+sqlcmd -S localhost -d MedManage -i Infrastructure\Scripts\001_AddAuditColumns.sql
+sqlcmd -S localhost -d MedManage -i Infrastructure\Scripts\002_StandardizeDateInsertedColumns.sql
+sqlcmd -S localhost -d MedManage -i Infrastructure\Scripts\003_RemoveOldAuditTriggers.sql
+sqlcmd -S localhost -d MedManage -i Infrastructure\Scripts\004_FixAuditTriggers.sql
+sqlcmd -S localhost -d MedManage -i Infrastructure\Scripts\005_CreateRefreshTokensTable.sql
+sqlcmd -S localhost -d MedManage -i Infrastructure\Scripts\006_CreatePasswordResetTokensTable.sql
+sqlcmd -S localhost -d MedManage -i Infrastructure\Scripts\007_AddIsPermanentlyBlocked.sql
 ```
 
-Or open the file in SSMS, connect to your MedManage database, and execute.
+Or open each file in SSMS, connect to your MedManage database, and execute in order.
+
+> **Note:** Script 001 generates ALTER statements but requires you to uncomment the `EXEC sp_executesql @sql` line to apply them. Review the output first. All other scripts are idempotent — re-running is safe.
 
 ### Verify Database Connectivity
 

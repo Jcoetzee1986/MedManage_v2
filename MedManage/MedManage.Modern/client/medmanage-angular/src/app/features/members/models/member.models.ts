@@ -147,6 +147,7 @@ export interface MemberSearchRequest {
   passportNumber?: string;
   dateOfBirth?: string;
   medicalAidId?: number;
+  mainClientId?: number;
   memberStatusId?: number;
   pageNumber?: number;
   pageSize?: number;

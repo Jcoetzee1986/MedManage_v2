@@ -1,4 +1,4 @@
-using AutoMapper;
+using MedManage.Infrastructure.Mapping.Manual;
 using Microsoft.EntityFrameworkCore;
 using MedManage.Core.DTOs.Booking;
 using MedManage.Core.DTOs.Case;
@@ -12,18 +12,15 @@ namespace MedManage.Infrastructure.Services.Business;
 public class BookingService : IBookingService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IMapper _mapper;
     private readonly ICurrentUserService _currentUserService;
     private readonly ICaseWorkflowService _caseWorkflowService;
 
     public BookingService(
         IUnitOfWork unitOfWork,
-        IMapper mapper,
         ICurrentUserService currentUserService,
         ICaseWorkflowService caseWorkflowService)
     {
         _unitOfWork = unitOfWork;
-        _mapper = mapper;
         _currentUserService = currentUserService;
         _caseWorkflowService = caseWorkflowService;
     }
@@ -37,25 +34,25 @@ public class BookingService : IBookingService
             entities = entities.Where(x => x.DateDeleted == null);
         }
         
-        return _mapper.Map<IEnumerable<BookingDto>>(entities);
+        return entities.Select(e => e.ToDto());
     }
 
     public async Task<BookingDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         var entity = await _unitOfWork.Bookings.GetByBookingIdAsync(id);
-        return entity == null ? null : _mapper.Map<BookingDto>(entity);
+        return entity == null ? null : entity.ToDto();
     }
 
     public async Task<IEnumerable<BookingDto>> GetByCaseIdAsync(int caseId, CancellationToken cancellationToken = default)
     {
         var entities = await _unitOfWork.Bookings.GetByCaseIdAsync(caseId);
-        return _mapper.Map<IEnumerable<BookingDto>>(entities);
+        return entities.Select(e => e.ToDto());
     }
 
     public async Task<IEnumerable<BookingDto>> GetByMemberNumberAsync(string memberNumber, CancellationToken cancellationToken = default)
     {
         var entities = await _unitOfWork.Bookings.GetByMemberNumberAsync(memberNumber);
-        return _mapper.Map<IEnumerable<BookingDto>>(entities);
+        return entities.Select(e => e.ToDto());
     }
 
     public async Task<PagedResult<BookingDto>> SearchAsync(BookingSearchFilters filters, CancellationToken cancellationToken = default)
@@ -82,7 +79,7 @@ public class BookingService : IBookingService
 
         return new PagedResult<BookingDto>
         {
-            Items = _mapper.Map<IEnumerable<BookingDto>>(paged),
+            Items = paged.Select(e => e.ToDto()),
             TotalCount = totalCount,
             PageNumber = filters.PageNumber,
             PageSize = filters.PageSize
@@ -91,12 +88,12 @@ public class BookingService : IBookingService
 
     public async Task<BookingDto> CreateAsync(CreateBookingDto dto, CancellationToken cancellationToken = default)
     {
-        var entity = _mapper.Map<Booking>(dto);
+        var entity = dto.ToEntity();
         
         await _unitOfWork.Bookings.AddAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
-        return _mapper.Map<BookingDto>(entity);
+        return entity.ToDto();
     }
 
     public async Task<BookingDto> UpdateAsync(UpdateBookingDto dto, CancellationToken cancellationToken = default)
@@ -107,12 +104,12 @@ public class BookingService : IBookingService
             throw new KeyNotFoundException($"Booking with ID {dto.BookingId} not found");
         }
         
-        _mapper.Map(dto, entity);
+        dto.ApplyTo(entity);
         
         await _unitOfWork.Bookings.UpdateAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
-        return _mapper.Map<BookingDto>(entity);
+        return entity.ToDto();
     }
 
     public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default)

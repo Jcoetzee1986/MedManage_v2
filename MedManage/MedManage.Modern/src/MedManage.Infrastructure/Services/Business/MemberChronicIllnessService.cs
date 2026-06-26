@@ -1,4 +1,4 @@
-using AutoMapper;
+using MedManage.Infrastructure.Mapping.Manual;
 using MedManage.Core.DTOs.MemberChronicIllness;
 using MedManage.Core.Entities;
 using MedManage.Core.Interfaces;
@@ -9,18 +9,16 @@ namespace MedManage.Infrastructure.Services.Business;
 public class MemberChronicIllnessService : IMemberChronicIllnessService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IMapper _mapper;
 
-    public MemberChronicIllnessService(IUnitOfWork unitOfWork, IMapper mapper)
+    public MemberChronicIllnessService(IUnitOfWork unitOfWork)
     {
         _unitOfWork = unitOfWork;
-        _mapper = mapper;
     }
 
     public async Task<IEnumerable<MemberChronicIllnessDto>> GetByMemberIdAsync(int memberId, CancellationToken cancellationToken = default)
     {
         var items = await _unitOfWork.MemberChronicIllnesses.GetByMemberIdAsync(memberId);
-        return _mapper.Map<IEnumerable<MemberChronicIllnessDto>>(items);
+        return items.Select(e => e.ToDto());
     }
 
     public async Task<MemberChronicIllnessDto> CreateAsync(int memberId, CreateMemberChronicIllnessDto dto, CancellationToken cancellationToken = default)
@@ -38,7 +36,7 @@ public class MemberChronicIllnessService : IMemberChronicIllnessService
                 existingItem.DateDeleted = null;
                 await _unitOfWork.MemberChronicIllnesses.UpdateAsync(existingItem);
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
-                return _mapper.Map<MemberChronicIllnessDto>(existingItem);
+                return existingItem.ToDto();
             }
             throw new InvalidOperationException("This chronic illness is already assigned to the member.");
         }
@@ -55,7 +53,7 @@ public class MemberChronicIllnessService : IMemberChronicIllnessService
         // Reload with include to get ChronicIllness name
         var items = await _unitOfWork.MemberChronicIllnesses.GetByMemberIdAsync(memberId);
         var created = items.FirstOrDefault(x => x.ChronicIllnessId == dto.ChronicIllnessId);
-        return _mapper.Map<MemberChronicIllnessDto>(created ?? entity);
+        return (created ?? entity).ToDto();
     }
 
     public async Task<bool> DeleteAsync(int memberId, int chronicIllnessId, CancellationToken cancellationToken = default)

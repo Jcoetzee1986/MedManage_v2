@@ -1,4 +1,4 @@
-using AutoMapper;
+using MedManage.Infrastructure.Mapping.Manual;
 using Microsoft.EntityFrameworkCore;
 using MedManage.Core.DTOs.Case;
 using MedManage.Core.Entities;
@@ -15,7 +15,6 @@ namespace MedManage.Infrastructure.Services.Business;
 public class CaseWorkflowService : ICaseWorkflowService
 {
     private readonly MedManageDbContext _context;
-    private readonly IMapper _mapper;
     private readonly ICurrentUserService _currentUserService;
 
     // Define allowed transitions: Dictionary<fromStatusName, List<toStatusName>>
@@ -28,11 +27,9 @@ public class CaseWorkflowService : ICaseWorkflowService
 
     public CaseWorkflowService(
         MedManageDbContext context,
-        IMapper mapper,
         ICurrentUserService currentUserService)
     {
         _context = context;
-        _mapper = mapper;
         _currentUserService = currentUserService;
     }
 
@@ -100,7 +97,7 @@ public class CaseWorkflowService : ICaseWorkflowService
         // Reload to get navigation properties
         await _context.Entry(caseEntity).Reference(c => c.Status).LoadAsync(cancellationToken);
 
-        return _mapper.Map<CaseDto>(caseEntity);
+        return caseEntity.ToDto();
     }
 
     private static bool IsTransitionAllowed(string currentStatus, string targetStatus)

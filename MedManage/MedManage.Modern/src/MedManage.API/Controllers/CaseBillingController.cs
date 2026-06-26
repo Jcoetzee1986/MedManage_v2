@@ -92,7 +92,7 @@ public class CaseBillingController : ControllerBase
     /// Soft-delete a billing record.
     /// </summary>
     [HttpDelete("{id}")]
-    [Authorize(Roles = "Admin,BillingOfficer")]
+    [Authorize(Roles = "System Administrator,Billing Auditing")]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(int id)
@@ -147,7 +147,7 @@ public class CaseBillingController : ControllerBase
     /// Mark one or more billing records as paid in bulk.
     /// </summary>
     [HttpPost("bulk-payment")]
-    [Authorize(Roles = "Admin,BillingOfficer")]
+    [Authorize(Roles = "System Administrator,Billing Auditing")]
     [ProducesResponseType(typeof(ApiResponse<BulkPaymentResult>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> BulkPayment([FromBody] BulkPaymentRequest request, CancellationToken cancellationToken)

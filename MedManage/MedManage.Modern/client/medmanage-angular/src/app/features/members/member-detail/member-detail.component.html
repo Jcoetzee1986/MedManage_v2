@@ -1,49 +1,479 @@
 <div class="member-detail-container" *ngIf="!loading; else loadingTpl">
   <!-- Toolbar -->
-  <mat-toolbar class="member-toolbar">
+  <div class="detail-toolbar">
     <button mat-icon-button (click)="onBackToList()" aria-label="Back to list">
       <mat-icon>arrow_back</mat-icon>
     </button>
-    <span class="member-title" *ngIf="!isNew">
-      {{ memberData?.firstName }} {{ memberData?.lastName }} - {{ memberData?.memberNumber }}
+    <span class="toolbar-title" *ngIf="!isNew">
+      {{ memberData?.firstName }} {{ memberData?.lastName }} — {{ memberData?.memberNumber }}
     </span>
-    <span class="member-title" *ngIf="isNew">New Member</span>
+    <span class="toolbar-title" *ngIf="isNew">New Member</span>
     <span class="toolbar-spacer"></span>
     <span class="status-badge" *ngIf="memberData?.memberStatusName">{{ memberData?.memberStatusName }}</span>
+    <button mat-raised-button color="primary" (click)="onSave()" [disabled]="saving">
+      <mat-icon>save</mat-icon> {{ saving ? 'Saving...' : (isNew ? 'Create' : 'Save') }}
+    </button>
     <button mat-stroked-button color="warn" (click)="onDeleteMember()" *ngIf="!isNew">
       <mat-icon>delete</mat-icon> Delete
     </button>
-  </mat-toolbar>
+  </div>
 
-  <!-- Tabbed Content -->
-  <mat-tab-group class="member-tabs" animationDuration="200ms">
-    <!-- Basic Info -->
-    <mat-tab label="Basic Info">
-      <app-member-basic-tab
-        [memberData]="memberData"
-        [isNew]="isNew"
-        (saved)="onMemberSaved($event)">
-      </app-member-basic-tab>
-    </mat-tab>
+  <!-- Layout: Section Nav + Form Content -->
+  <div class="member-detail-layout">
+    <!-- Left: Sticky Section Navigation -->
+    <nav class="section-nav">
+      <a *ngFor="let section of sections"
+         [class.active]="activeSection === section.id"
+         (click)="scrollToSection(section.id)">
+        {{ section.label }}
+      </a>
+    </nav>
 
-    <!-- Medical Aid Products (only for existing members) -->
-    <mat-tab label="Medical Aid Products" *ngIf="!isNew">
-      <app-member-products-tab
-        [memberId]="memberId"
-        [medicalAidId]="memberData?.medicalAidId ?? null">
-      </app-member-products-tab>
-    </mat-tab>
+    <!-- Right: Scrollable Form Content -->
+    <div class="member-form-content">
+      <form [formGroup]="form">
 
-    <!-- Chronic Illness (only for existing members) -->
-    <mat-tab label="Chronic Illness" *ngIf="!isNew">
-      <app-member-chronic-illness-tab [memberId]="memberId"></app-member-chronic-illness-tab>
-    </mat-tab>
+        <!-- ═══ Personal Information ═══ -->
+        <section id="personal" #sectionEl>
+          <h3>Personal Information</h3>
+          <div class="form-grid">
+            <app-reference-data-dropdown
+              resource="gender"
+              label="Gender"
+              formControlName="genderId">
+            </app-reference-data-dropdown>
 
-    <!-- Notes (only for existing members) -->
-    <mat-tab label="Notes" *ngIf="!isNew">
-      <app-member-notes-tab [memberId]="memberId"></app-member-notes-tab>
-    </mat-tab>
-  </mat-tab-group>
+            <app-reference-data-dropdown
+              resource="title"
+              label="Title"
+              formControlName="titleId">
+            </app-reference-data-dropdown>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Surname</mat-label>
+              <input matInput formControlName="lastName" required>
+              <mat-error *ngIf="form.controls.lastName.hasError('required')">Required</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Name</mat-label>
+              <input matInput formControlName="firstName" required>
+              <mat-error *ngIf="form.controls.firstName.hasError('required')">Required</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Initials</mat-label>
+              <input matInput formControlName="initials">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>ID Number</mat-label>
+              <input matInput formControlName="idNumber">
+            </mat-form-field>
+
+            <app-reference-data-dropdown
+              resource="marrital-status"
+              label="Marital Status"
+              formControlName="marritalStatusId">
+            </app-reference-data-dropdown>
+
+            <app-reference-data-dropdown
+              resource="language"
+              label="Language"
+              formControlName="languageId">
+            </app-reference-data-dropdown>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Date of Birth</mat-label>
+              <input matInput [matDatepicker]="dobPicker" formControlName="dateOfBirth">
+              <mat-datepicker-toggle matIconSuffix [for]="dobPicker"></mat-datepicker-toggle>
+              <mat-datepicker #dobPicker></mat-datepicker>
+            </mat-form-field>
+
+            <app-reference-data-dropdown
+              resource="race"
+              label="Race"
+              formControlName="raceId">
+            </app-reference-data-dropdown>
+          </div>
+
+          <div class="checkbox-row">
+            <mat-checkbox formControlName="isPensioner">Pensioner</mat-checkbox>
+            <mat-checkbox formControlName="isMbodRma">MBOD/RMA</mat-checkbox>
+          </div>
+        </section>
+
+        <!-- ═══ Medical Aid ═══ -->
+        <section id="medical-aid" #sectionEl>
+          <h3>Medical Aid</h3>
+          <div class="form-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Medical Funder</mat-label>
+              <mat-select formControlName="medicalAidId">
+                <mat-option [value]="null">-- None --</mat-option>
+                <mat-option *ngFor="let aid of medicalAids" [value]="aid.id">{{ aid.name }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <app-reference-data-dropdown
+              resource="member-status"
+              label="Member Status"
+              formControlName="memberStatusId">
+            </app-reference-data-dropdown>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Member Number</mat-label>
+              <input matInput formControlName="memberNumber" required>
+              <mat-error *ngIf="form.controls.memberNumber.hasError('required')">Required</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Date of Benefit</mat-label>
+              <input matInput [matDatepicker]="benefitPicker" formControlName="dateOfBenefit">
+              <mat-datepicker-toggle matIconSuffix [for]="benefitPicker"></mat-datepicker-toggle>
+              <mat-datepicker #benefitPicker></mat-datepicker>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Date Joined</mat-label>
+              <input matInput [matDatepicker]="joinedPicker" formControlName="dateJoined">
+              <mat-datepicker-toggle matIconSuffix [for]="joinedPicker"></mat-datepicker-toggle>
+              <mat-datepicker #joinedPicker></mat-datepicker>
+            </mat-form-field>
+          </div>
+
+          <div class="checkbox-row">
+            <mat-checkbox formControlName="isMedAidExhausted">Med Aid Exhausted?</mat-checkbox>
+            <mat-form-field appearance="outline" *ngIf="form.controls.isMedAidExhausted.value">
+              <mat-label>Date Exhausted</mat-label>
+              <input matInput [matDatepicker]="exhaustedPicker" formControlName="dateExhausted">
+              <mat-datepicker-toggle matIconSuffix [for]="exhaustedPicker"></mat-datepicker-toggle>
+              <mat-datepicker #exhaustedPicker></mat-datepicker>
+            </mat-form-field>
+          </div>
+
+          <div class="checkbox-row">
+            <mat-checkbox formControlName="isWaitingPeriod">Waiting Period?</mat-checkbox>
+          </div>
+
+          <div class="checkbox-row">
+            <mat-checkbox formControlName="isReinstated">Re-Instated?</mat-checkbox>
+            <mat-form-field appearance="outline" *ngIf="form.controls.isReinstated.value">
+              <mat-label>Date Re-Instated</mat-label>
+              <input matInput [matDatepicker]="reinstatedPicker" formControlName="dateReinstated">
+              <mat-datepicker-toggle matIconSuffix [for]="reinstatedPicker"></mat-datepicker-toggle>
+              <mat-datepicker #reinstatedPicker></mat-datepicker>
+            </mat-form-field>
+          </div>
+
+          <div class="checkbox-row">
+            <mat-checkbox formControlName="isDeceased">Deceased?</mat-checkbox>
+            <mat-form-field appearance="outline" *ngIf="form.controls.isDeceased.value">
+              <mat-label>Date Deceased</mat-label>
+              <input matInput [matDatepicker]="deceasedPicker" formControlName="dateDeceased">
+              <mat-datepicker-toggle matIconSuffix [for]="deceasedPicker"></mat-datepicker-toggle>
+              <mat-datepicker #deceasedPicker></mat-datepicker>
+            </mat-form-field>
+          </div>
+        </section>
+
+        <!-- ═══ Logistics & Address ═══ -->
+        <section id="logistics" #sectionEl>
+          <h3>Logistics &amp; Address</h3>
+          <div class="form-grid">
+            <app-reference-data-dropdown
+              resource="country"
+              label="Country"
+              formControlName="countryId">
+            </app-reference-data-dropdown>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Passport Number</mat-label>
+              <input matInput formControlName="passportNumber">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Passport Expiry Date</mat-label>
+              <input matInput [matDatepicker]="passportExpiryPicker" formControlName="passportExpiryDate">
+              <mat-datepicker-toggle matIconSuffix [for]="passportExpiryPicker"></mat-datepicker-toggle>
+              <mat-datepicker #passportExpiryPicker></mat-datepicker>
+            </mat-form-field>
+
+            <app-reference-data-dropdown
+              resource="period-in-country"
+              label="Period In Country"
+              formControlName="periodInCountryId">
+            </app-reference-data-dropdown>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Address Line 1</mat-label>
+              <input matInput formControlName="addressLine1">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Address Line 2</mat-label>
+              <input matInput formControlName="addressLine2">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Address Line 3</mat-label>
+              <input matInput formControlName="addressLine3">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Address Code</mat-label>
+              <input matInput formControlName="addressCode">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Phone Number</mat-label>
+              <input matInput formControlName="phoneNumber">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Cell Number</mat-label>
+              <input matInput formControlName="cellNumber">
+            </mat-form-field>
+          </div>
+        </section>
+
+        <!-- ═══ Next of Kin & Employment ═══ -->
+        <section id="next-of-kin" #sectionEl>
+          <h3>Next of Kin &amp; Employment</h3>
+          <div class="form-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Dependents</mat-label>
+              <input matInput formControlName="dependents">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Next of Kin</mat-label>
+              <input matInput formControlName="nextOfKin">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Relationship</mat-label>
+              <input matInput formControlName="relationship">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Contact Number</mat-label>
+              <input matInput formControlName="contactNumber">
+            </mat-form-field>
+
+            <app-reference-data-dropdown
+              resource="country"
+              label="Employer Country"
+              formControlName="employerCountryId">
+            </app-reference-data-dropdown>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Employer Address</mat-label>
+              <input matInput formControlName="employerAddress">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Employer Address Code</mat-label>
+              <input matInput formControlName="employerAddressCode">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Employer Phone Number</mat-label>
+              <input matInput formControlName="employerPhoneNumber">
+            </mat-form-field>
+          </div>
+        </section>
+
+      </form>
+
+      <!-- ═══ Medical Aid Products (sub-entity) ═══ -->
+      <section id="products" #sectionEl>
+        <h3>Medical Aid Products</h3>
+
+        <div *ngIf="isNew" class="tab-disabled-message">
+          <mat-icon>info</mat-icon>
+          <p>Save the member first to manage medical aid products.</p>
+        </div>
+
+        <div *ngIf="!isNew">
+          <div class="tab-header">
+            <span></span>
+            <button mat-raised-button color="primary" (click)="onAddProduct()">
+              <mat-icon>add</mat-icon> Add Product
+            </button>
+          </div>
+
+          <!-- Add/Edit Product Form -->
+          <div class="add-form" *ngIf="showProductForm">
+            <form [formGroup]="productForm">
+              <div class="form-grid">
+                <mat-form-field appearance="outline">
+                  <mat-label>Product</mat-label>
+                  <mat-select formControlName="medicalAidProductId">
+                    <mat-option *ngFor="let p of availableProducts" [value]="p.medAidProductId">
+                      {{ p.medAidProductName }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Start Date</mat-label>
+                  <input matInput [matDatepicker]="prodFromPicker" formControlName="dateFrom">
+                  <mat-datepicker-toggle matIconSuffix [for]="prodFromPicker"></mat-datepicker-toggle>
+                  <mat-datepicker #prodFromPicker></mat-datepicker>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>End Date</mat-label>
+                  <input matInput [matDatepicker]="prodToPicker" formControlName="dateTo">
+                  <mat-datepicker-toggle matIconSuffix [for]="prodToPicker"></mat-datepicker-toggle>
+                  <mat-datepicker #prodToPicker></mat-datepicker>
+                </mat-form-field>
+              </div>
+              <div class="form-actions">
+                <button mat-raised-button color="primary" (click)="onSaveProduct()" [disabled]="productForm.invalid">Save</button>
+                <button mat-stroked-button (click)="onCancelProduct()">Cancel</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Products Table -->
+          <table mat-table [dataSource]="memberProducts" class="full-width-table" *ngIf="memberProducts.length > 0">
+            <ng-container matColumnDef="medicalAidProductName">
+              <th mat-header-cell *matHeaderCellDef>Product</th>
+              <td mat-cell *matCellDef="let row">{{ row.medicalAidProductName }}</td>
+            </ng-container>
+            <ng-container matColumnDef="dateFrom">
+              <th mat-header-cell *matHeaderCellDef>Start Date</th>
+              <td mat-cell *matCellDef="let row">{{ row.dateFrom | date:'mediumDate' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="dateTo">
+              <th mat-header-cell *matHeaderCellDef>End Date</th>
+              <td mat-cell *matCellDef="let row">{{ row.dateTo | date:'mediumDate' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Actions</th>
+              <td mat-cell *matCellDef="let row">
+                <button mat-icon-button (click)="onEditProduct(row)" aria-label="Edit">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" (click)="onDeleteProduct(row)" aria-label="Delete">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="productDisplayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: productDisplayedColumns;"></tr>
+          </table>
+
+          <p class="empty-message" *ngIf="memberProducts.length === 0 && !showProductForm">
+            No medical aid products recorded.
+          </p>
+        </div>
+      </section>
+
+      <!-- ═══ Suspension Details ═══ -->
+      <section id="suspension" #sectionEl>
+        <h3>Suspension Details</h3>
+        <form [formGroup]="form">
+          <div class="checkbox-row">
+            <mat-checkbox formControlName="isSuspended">Suspended?</mat-checkbox>
+          </div>
+
+          <div class="form-grid" *ngIf="form.controls.isSuspended.value">
+            <mat-form-field appearance="outline">
+              <mat-label>Date Suspended</mat-label>
+              <input matInput [matDatepicker]="suspendedPicker" formControlName="dateSuspended">
+              <mat-datepicker-toggle matIconSuffix [for]="suspendedPicker"></mat-datepicker-toggle>
+              <mat-datepicker #suspendedPicker></mat-datepicker>
+            </mat-form-field>
+
+            <app-reference-data-dropdown
+              resource="suspended-reason"
+              label="Suspend Reason"
+              formControlName="suspendReasonId">
+            </app-reference-data-dropdown>
+          </div>
+        </form>
+      </section>
+
+      <!-- ═══ Member Notes (sub-entity) ═══ -->
+      <section id="notes" #sectionEl>
+        <h3>Member Notes</h3>
+
+        <div *ngIf="isNew" class="tab-disabled-message">
+          <mat-icon>info</mat-icon>
+          <p>Save the member first to manage notes.</p>
+        </div>
+
+        <div *ngIf="!isNew">
+          <div class="tab-header">
+            <span></span>
+            <button mat-raised-button color="primary" (click)="onAddNote()">
+              <mat-icon>add</mat-icon> Add Note
+            </button>
+          </div>
+
+          <!-- Add/Edit Note Form -->
+          <div class="add-form" *ngIf="showNoteForm">
+            <form [formGroup]="noteForm">
+              <div class="form-grid">
+                <mat-form-field appearance="outline" class="span-2">
+                  <mat-label>Note</mat-label>
+                  <textarea matInput formControlName="note" rows="3"></textarea>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Note Date</mat-label>
+                  <input matInput [matDatepicker]="noteDatePicker" formControlName="noteDate">
+                  <mat-datepicker-toggle matIconSuffix [for]="noteDatePicker"></mat-datepicker-toggle>
+                  <mat-datepicker #noteDatePicker></mat-datepicker>
+                </mat-form-field>
+              </div>
+              <div class="form-actions">
+                <button mat-raised-button color="primary" (click)="onSaveNote()" [disabled]="noteForm.invalid">Save</button>
+                <button mat-stroked-button (click)="onCancelNote()">Cancel</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Notes Table -->
+          <table mat-table [dataSource]="memberNotes" class="full-width-table" *ngIf="memberNotes.length > 0">
+            <ng-container matColumnDef="note">
+              <th mat-header-cell *matHeaderCellDef>Note</th>
+              <td mat-cell *matCellDef="let row">{{ row.note }}</td>
+            </ng-container>
+            <ng-container matColumnDef="noteDate">
+              <th mat-header-cell *matHeaderCellDef>Date</th>
+              <td mat-cell *matCellDef="let row">{{ row.noteDate | date:'mediumDate' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="createdBy">
+              <th mat-header-cell *matHeaderCellDef>Created By</th>
+              <td mat-cell *matCellDef="let row">{{ row.createdBy }}</td>
+            </ng-container>
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Actions</th>
+              <td mat-cell *matCellDef="let row">
+                <button mat-icon-button (click)="onEditNote(row)" aria-label="Edit">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" (click)="onDeleteNote(row)" aria-label="Delete">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="noteDisplayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: noteDisplayedColumns;"></tr>
+          </table>
+
+          <p class="empty-message" *ngIf="memberNotes.length === 0 && !showNoteForm">
+            No notes recorded.
+          </p>
+        </div>
+      </section>
+
+    </div>
+  </div>
 </div>
 
 <ng-template #loadingTpl>

@@ -170,11 +170,6 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
     // Provider - Refer From
     referFromId: [null as number | null],
     referFromSearch: [''],
-    // Dates
-    admissionDate: [null as Date | null],
-    admissionTime: [''],
-    dischargeDate: [null as Date | null],
-    dischargeTime: [''],
     // Description
     description: ['']
   });
@@ -186,12 +181,6 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
   get totalLos(): number | null {
     if (this.caseData?.totalLos != null) return this.caseData.totalLos;
     if (this.caseData?.totalLengthOfStay != null) return this.caseData.totalLengthOfStay;
-    const admDate = this.form.get('admissionDate')?.value;
-    const disDate = this.form.get('dischargeDate')?.value;
-    if (admDate && disDate) {
-      const diff = new Date(disDate).getTime() - new Date(admDate).getTime();
-      return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
-    }
     return null;
   }
 
@@ -403,12 +392,15 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
           // Acquire lock (non-blocking — allow viewing even if lock fails)
           this.caseService.lockCase(this.caseId).subscribe({
             next: () => { this.lockAcquired = true; },
-            error: () => {
-              this.snackBar.open(
-                'This case is currently being edited by another user. Your changes may not be saved.',
-                'Close',
-                { duration: 5000 }
-              );
+            error: (err) => {
+              // Only show the warning if it's a genuine conflict (409), not auth issues
+              if (err.status === 409) {
+                this.snackBar.open(
+                  'This case is currently being edited by another user. Your changes may not be saved.',
+                  'Close',
+                  { duration: 5000 }
+                );
+              }
             }
           });
         },
@@ -443,10 +435,6 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
       referFromSearch: data.referFromPracticeName
         ? `${data.referFromPracticeName} - ${data.referFromPersonSurname || ''}, ${data.referFromPersonName || ''}`
         : '',
-      admissionDate: data.admissionDate ? new Date(data.admissionDate) : null,
-      admissionTime: data.admissionTime || '',
-      dischargeDate: data.dischargeDate ? new Date(data.dischargeDate) : null,
-      dischargeTime: data.dischargeTime || '',
       description: data.description || data.caseDescription || ''
     });
     this.recalculatePenalty();
@@ -512,10 +500,10 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
       penaltyPercentage: val.penaltyPercentage ?? undefined,
       wasBooking: val.wasBooking || undefined,
       wcaIod: val.wcaIod || undefined,
-      dateAdmitted: val.admissionDate ? val.admissionDate.toISOString().split('T')[0] : undefined,
-      admissionTime: val.admissionTime || undefined,
-      dateDischarged: val.dischargeDate ? val.dischargeDate.toISOString().split('T')[0] : undefined,
-      dischargeTime: val.dischargeTime || undefined,
+      dateAdmitted: this.caseData?.dateAdmitted || this.caseData?.admissionDate || undefined,
+      admissionTime: this.caseData?.admissionTime || undefined,
+      dateDischarged: this.caseData?.dateDischarged || this.caseData?.dischargeDate || undefined,
+      dischargeTime: this.caseData?.dischargeTime || undefined,
       description: val.description || undefined,
       isBooking: false
     };

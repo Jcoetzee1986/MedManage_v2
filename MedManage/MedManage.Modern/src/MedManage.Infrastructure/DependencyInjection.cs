@@ -1,4 +1,3 @@
-using System.Reflection;
 using System.Net.Http.Headers;
 using MedManage.Core.Configuration;
 using MedManage.Core.Interfaces;
@@ -7,6 +6,7 @@ using MedManage.Core.Interfaces.Services;
 using MedManage.Core.DTOs.ReferenceData;
 using MedManage.Core.DTOs.Exclusion;
 using MedManage.Core.Entities;
+using MedManage.Infrastructure.Mapping.Manual;
 using MedManage.Infrastructure.Persistence;
 using MedManage.Infrastructure.Repositories;
 using MedManage.Infrastructure.Services;
@@ -20,8 +20,25 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services)
     {
-        // Add AutoMapper (DI extensions included in v16+)
-        services.AddAutoMapper(cfg => cfg.AddMaps(Assembly.GetExecutingAssembly()));
+        // Register IEntityMapper implementations for reference data types
+        services.AddSingleton<IEntityMapper<MarritalStatus, MarritalStatusDto, CreateMarritalStatusDto, UpdateMarritalStatusDto>, MarritalStatusMapper>();
+        services.AddSingleton<IEntityMapper<MemberStatus, MemberStatusDto, CreateMemberStatusDto, UpdateMemberStatusDto>, MemberStatusMapper>();
+        services.AddSingleton<IEntityMapper<BillingStatus, BillingStatusDto, CreateBillingStatusDto, UpdateBillingStatusDto>, BillingStatusMapper>();
+        services.AddSingleton<IEntityMapper<CaseStatus, CaseStatusDto, CreateCaseStatusDto, UpdateCaseStatusDto>, CaseStatusMapper>();
+        services.AddSingleton<IEntityMapper<CaseType, CaseTypeDto, CreateCaseTypeDto, UpdateCaseTypeDto>, CaseTypeMapper>();
+        services.AddSingleton<IEntityMapper<FacilityType, FacilityTypeDto, CreateFacilityTypeDto, UpdateFacilityTypeDto>, FacilityTypeMapper>();
+        services.AddSingleton<IEntityMapper<Speciality, SpecialityDto, CreateSpecialityDto, UpdateSpecialityDto>, SpecialityMapper>();
+        services.AddSingleton<IEntityMapper<ChronicIllness, ChronicIllnessDto, CreateChronicIllnessDto, UpdateChronicIllnessDto>, ChronicIllnessMapper>();
+        services.AddSingleton<IEntityMapper<ChecklistTemplate, ChecklistTemplateDto, CreateChecklistTemplateDto, UpdateChecklistTemplateDto>, ChecklistTemplateMapper>();
+        services.AddSingleton<IEntityMapper<Country, CountryDto, CreateCountryDto, UpdateCountryDto>, CountryMapper>();
+        services.AddSingleton<IEntityMapper<Gender, GenderDto, CreateGenderDto, UpdateGenderDto>, GenderMapper>();
+        services.AddSingleton<IEntityMapper<Language, LanguageDto, CreateLanguageDto, UpdateLanguageDto>, LanguageMapper>();
+        services.AddSingleton<IEntityMapper<Race, RaceDto, CreateRaceDto, UpdateRaceDto>, RaceMapper>();
+        services.AddSingleton<IEntityMapper<Title, TitleDto, CreateTitleDto, UpdateTitleDto>, TitleMapper>();
+        services.AddSingleton<IEntityMapper<PeriodInCountry, PeriodInCountryDto, CreatePeriodInCountryDto, UpdatePeriodInCountryDto>, PeriodInCountryMapper>();
+        services.AddSingleton<IEntityMapper<CaseCategory, CaseCategoryDto, CreateCaseCategoryDto, UpdateCaseCategoryDto>, CaseCategoryMapper>();
+        services.AddSingleton<IEntityMapper<SuspendedReason, SuspendedReasonDto, CreateSuspendedReasonDto, UpdateSuspendedReasonDto>, SuspendedReasonMapper>();
+        services.AddSingleton<IEntityMapper<Exclusion, ExclusionDto, CreateExclusionDto, UpdateExclusionDto>, ExclusionMapper>();
         
         // Add Unit of Work
         services.AddScoped<IUnitOfWork, UnitOfWork>();

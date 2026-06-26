@@ -1,8 +1,8 @@
+using MedManage.Infrastructure.Mapping.Manual;
 using MedManage.Core.DTOs.Document;
 using MedManage.Core.Interfaces.Services;
 using MedManage.Core.Interfaces;
 using MedManage.Core.Entities;
-using AutoMapper;
 using SkiaSharp;
 
 namespace MedManage.Infrastructure.Services.Business;
@@ -14,7 +14,6 @@ namespace MedManage.Infrastructure.Services.Business;
 public class DocumentService : IDocumentService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IMapper _mapper;
     private readonly string _uploadsRoot;
     private readonly string _thumbnailsRoot;
 
@@ -26,10 +25,9 @@ public class DocumentService : IDocumentService
     private const int ThumbnailMaxWidth = 200;
     private const int ThumbnailMaxHeight = 200;
 
-    public DocumentService(IUnitOfWork unitOfWork, IMapper mapper)
+    public DocumentService(IUnitOfWork unitOfWork)
     {
         _unitOfWork = unitOfWork;
-        _mapper = mapper;
         _uploadsRoot = Path.Combine(Directory.GetCurrentDirectory(), "uploads", "documents");
         _thumbnailsRoot = Path.Combine(Directory.GetCurrentDirectory(), "uploads", "thumbnails");
         Directory.CreateDirectory(_uploadsRoot);

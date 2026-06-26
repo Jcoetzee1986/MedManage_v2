@@ -1,4 +1,4 @@
-using AutoMapper;
+using MedManage.Infrastructure.Mapping.Manual;
 using MedManage.Core.DTOs.ReferenceData;
 using MedManage.Core.Entities;
 using MedManage.Core.Interfaces;
@@ -9,13 +9,11 @@ namespace MedManage.Infrastructure.Services.Business;
 public class CaseTypeService : ICaseTypeService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IMapper _mapper;
     private readonly Core.Interfaces.ICurrentUserService _currentUserService;
 
-    public CaseTypeService(IUnitOfWork unitOfWork, IMapper mapper, Core.Interfaces.ICurrentUserService currentUserService)
+    public CaseTypeService(IUnitOfWork unitOfWork, Core.Interfaces.ICurrentUserService currentUserService)
     {
         _unitOfWork = unitOfWork;
-        _mapper = mapper;
         _currentUserService = currentUserService;
     }
 
@@ -28,23 +26,23 @@ public class CaseTypeService : ICaseTypeService
             entities = entities.Where(x => x.DateDeleted == null);
         }
         
-        return _mapper.Map<IEnumerable<CaseTypeDto>>(entities);
+        return entities.Select(e => e.ToDto());
     }
 
     public async Task<CaseTypeDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         var entity = await _unitOfWork.CaseTypes.GetByIdAsync(id);
-        return entity == null ? null : _mapper.Map<CaseTypeDto>(entity);
+        return entity == null ? null : entity.ToDto();
     }
 
     public async Task<CaseTypeDto> CreateAsync(CreateCaseTypeDto dto, CancellationToken cancellationToken = default)
     {
-        var entity = _mapper.Map<CaseType>(dto);
+        var entity = dto.ToEntity();
         
         await _unitOfWork.CaseTypes.AddAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
-        return _mapper.Map<CaseTypeDto>(entity);
+        return entity.ToDto();
     }
 
     public async Task<CaseTypeDto> UpdateAsync(UpdateCaseTypeDto dto, CancellationToken cancellationToken = default)
@@ -55,12 +53,12 @@ public class CaseTypeService : ICaseTypeService
             throw new KeyNotFoundException($"CaseType with ID {dto.CaseTypeId} not found");
         }
         
-        _mapper.Map(dto, entity);
+        dto.ApplyTo(entity);
         
         await _unitOfWork.CaseTypes.UpdateAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
-        return _mapper.Map<CaseTypeDto>(entity);
+        return entity.ToDto();
     }
 
     public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default)

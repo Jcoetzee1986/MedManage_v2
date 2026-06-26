@@ -1,4 +1,4 @@
-using AutoMapper;
+using MedManage.Infrastructure.Mapping.Manual;
 using Microsoft.EntityFrameworkCore;
 using MedManage.Core.DTOs.Common;
 using MedManage.Core.DTOs.Member;
@@ -13,31 +13,40 @@ namespace MedManage.Infrastructure.Services.Business;
 public class MemberService : IMemberService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IMapper _mapper;
+    private readonly MedManageDbContext _context;
     private readonly Core.Interfaces.ICurrentUserService _currentUserService;
 
-    public MemberService(IUnitOfWork unitOfWork, IMapper mapper, Core.Interfaces.ICurrentUserService currentUserService)
+    public MemberService(IUnitOfWork unitOfWork, MedManageDbContext context, Core.Interfaces.ICurrentUserService currentUserService)
     {
         _unitOfWork = unitOfWork;
-        _mapper = mapper;
+        _context = context;
         _currentUserService = currentUserService;
     }
 
     public async Task<MemberDto?> GetByIdAsync(int memberId, CancellationToken cancellationToken = default)
     {
         var member = await _unitOfWork.Members.GetByIdAsync(memberId);
-        return member == null ? null : _mapper.Map<MemberDto>(member);
+        return member == null ? null : member.ToDto();
     }
 
     public async Task<PagedResult<MemberDto>> SearchAsync(MemberSearchRequest request, CancellationToken cancellationToken = default)
     {
-        // Build query directly on DbSet for database-level filtering
-        var query = (await _unitOfWork.Members.GetAllAsync()).AsQueryable();
+        // Build query on DbSet for proper EF Core async support
+        var query = _context.Members
+            .Include(m => m.MedicalAid)
+            .Include(m => m.MemberStatus)
+            .AsQueryable();
 
         // Apply soft delete filter first
         if (!(request.IncludeDeleted ?? false))
         {
             query = query.Where(m => m.DateDeleted == null);
+        }
+
+        // Filter by active client (through MedicalAid)
+        if (request.MainClientId.HasValue)
+        {
+            query = query.Where(m => m.MedicalAid != null && m.MedicalAid.MainClientId == request.MainClientId.Value);
         }
 
         // Apply search filters
@@ -99,7 +108,7 @@ public class MemberService : IMemberService
 
         return new PagedResult<MemberDto>
         {
-            Items = _mapper.Map<List<MemberDto>>(members),
+            Items = members.Select(e => e.ToDto()).ToList(),
             TotalCount = totalCount,
             PageNumber = request.PageNumber,
             PageSize = request.PageSize
@@ -108,11 +117,11 @@ public class MemberService : IMemberService
 
     public async Task<MemberDto> CreateAsync(CreateMemberRequest request, CancellationToken cancellationToken = default)
     {
-        var member = _mapper.Map<Member>(request);
+        var member = request.ToEntity();
         
         await _unitOfWork.Members.AddAsync(member);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        return _mapper.Map<MemberDto>(member);
+        return member.ToDto();
     }
 
     public async Task<MemberDto> UpdateAsync(UpdateMemberRequest request, CancellationToken cancellationToken = default)
@@ -123,11 +132,11 @@ public class MemberService : IMemberService
             throw new KeyNotFoundException($"Member with ID {request.MemberId} not found");
         }
 
-        _mapper.Map(request, existingMember);
+        request.ApplyTo(existingMember);
         
         await _unitOfWork.Members.UpdateAsync(existingMember);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        return _mapper.Map<MemberDto>(existingMember);
+        return existingMember.ToDto();
     }
 
     public async Task<bool> DeleteAsync(int memberId, CancellationToken cancellationToken = default)

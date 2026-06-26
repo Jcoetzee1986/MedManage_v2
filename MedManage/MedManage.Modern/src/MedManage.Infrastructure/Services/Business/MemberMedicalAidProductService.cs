@@ -1,4 +1,4 @@
-using AutoMapper;
+using MedManage.Infrastructure.Mapping.Manual;
 using MedManage.Core.DTOs.MemberMedicalAidProduct;
 using MedManage.Core.Entities;
 using MedManage.Core.Interfaces;
@@ -9,18 +9,16 @@ namespace MedManage.Infrastructure.Services.Business;
 public class MemberMedicalAidProductService : IMemberMedicalAidProductService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IMapper _mapper;
 
-    public MemberMedicalAidProductService(IUnitOfWork unitOfWork, IMapper mapper)
+    public MemberMedicalAidProductService(IUnitOfWork unitOfWork)
     {
         _unitOfWork = unitOfWork;
-        _mapper = mapper;
     }
 
     public async Task<IEnumerable<MemberMedicalAidProductDto>> GetByMemberIdAsync(int memberId, CancellationToken cancellationToken = default)
     {
         var items = await _unitOfWork.MemberMedicalAidProducts.GetByMemberIdAsync(memberId);
-        return _mapper.Map<IEnumerable<MemberMedicalAidProductDto>>(items);
+        return items.Select(e => e.ToDto());
     }
 
     public async Task<MemberMedicalAidProductDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
@@ -30,18 +28,18 @@ public class MemberMedicalAidProductService : IMemberMedicalAidProductService
         {
             return null;
         }
-        return _mapper.Map<MemberMedicalAidProductDto>(entity);
+        return entity.ToDto();
     }
 
     public async Task<MemberMedicalAidProductDto> CreateAsync(int memberId, CreateMemberMedicalAidProductDto dto, CancellationToken cancellationToken = default)
     {
-        var entity = _mapper.Map<MemberMedicalAidProduct>(dto);
+        var entity = dto.ToEntity();
         entity.MemberId = memberId;
 
         await _unitOfWork.MemberMedicalAidProducts.AddAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return _mapper.Map<MemberMedicalAidProductDto>(entity);
+        return entity.ToDto();
     }
 
     public async Task<MemberMedicalAidProductDto> UpdateAsync(int id, UpdateMemberMedicalAidProductDto dto, CancellationToken cancellationToken = default)
@@ -52,12 +50,12 @@ public class MemberMedicalAidProductService : IMemberMedicalAidProductService
             throw new KeyNotFoundException($"MemberMedicalAidProduct with ID {id} not found");
         }
 
-        _mapper.Map(dto, entity);
+        dto.ApplyTo(entity);
 
         await _unitOfWork.MemberMedicalAidProducts.UpdateAsync(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return _mapper.Map<MemberMedicalAidProductDto>(entity);
+        return entity.ToDto();
     }
 
     public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default)

@@ -11,7 +11,7 @@ namespace MedManage.API.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/users")]
-[Authorize(Roles = "Admin")]
+[Authorize(Roles = "System Administrator")]
 public class UserManagementController : ControllerBase
 {
     private readonly IUserManagementService _service;
@@ -118,5 +118,70 @@ public class UserManagementController : ControllerBase
     {
         var roles = await _service.GetAllRolesAsync(cancellationToken);
         return Ok(ApiResponse<IEnumerable<RoleDto>>.SuccessResponse(roles));
+    }
+
+    /// <summary>
+    /// Create a new user (admin operation)
+    /// </summary>
+    [HttpPost]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest request, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Email))
+            return BadRequest(ApiResponse<UserDto>.ErrorResponse("Username and Email are required"));
+
+        try
+        {
+            var user = await _service.CreateUserAsync(request, cancellationToken);
+            return Ok(ApiResponse<UserDto>.SuccessResponse(user, "User created successfully"));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to create user {Username}", request.Username);
+            return BadRequest(ApiResponse<UserDto>.ErrorResponse($"Failed to create user: {ex.Message}"));
+        }
+    }
+
+    /// <summary>
+    /// Reset a user's password (admin operation)
+    /// </summary>
+    [HttpPost("{userId}/reset-password")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> AdminResetPassword(Guid userId, [FromBody] AdminResetPasswordRequest request, CancellationToken cancellationToken)
+    {
+        var result = await _service.AdminResetPasswordAsync(userId, request, cancellationToken);
+        if (!result)
+            return NotFound(ApiResponse<bool>.ErrorResponse($"User with ID {userId} not found"));
+        return Ok(ApiResponse<bool>.SuccessResponse(true, "Password reset successfully"));
+    }
+
+    /// <summary>
+    /// Clear failed login attempts for a user
+    /// </summary>
+    [HttpPost("{userId}/clear-attempts")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ClearFailedAttempts(Guid userId, CancellationToken cancellationToken)
+    {
+        var result = await _service.ClearFailedAttemptsAsync(userId, cancellationToken);
+        if (!result)
+            return NotFound(ApiResponse<bool>.ErrorResponse($"User with ID {userId} not found"));
+        return Ok(ApiResponse<bool>.SuccessResponse(true, "Failed login attempts cleared"));
+    }
+
+    /// <summary>
+    /// Permanently block/deactivate a user account
+    /// </summary>
+    [HttpPut("{userId}/block")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> PermanentlyBlock(Guid userId, CancellationToken cancellationToken)
+    {
+        var result = await _service.PermanentlyBlockUserAsync(userId, cancellationToken);
+        if (!result)
+            return NotFound(ApiResponse<bool>.ErrorResponse($"User with ID {userId} not found"));
+        return Ok(ApiResponse<bool>.SuccessResponse(true, "User permanently blocked"));
     }
 }

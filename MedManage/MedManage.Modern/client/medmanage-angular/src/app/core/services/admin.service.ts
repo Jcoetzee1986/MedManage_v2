@@ -8,6 +8,8 @@ import {
   UserDto,
   RoleDto,
   AssignRolesRequest,
+  CreateUserRequest,
+  AdminResetPasswordRequest,
   ApiResponse
 } from '../models/admin.models';
 
@@ -110,6 +112,30 @@ export class AdminService {
   /** Get all available roles */
   getRoles(): Observable<RoleDto[]> {
     return this.http.get<ApiResponse<RoleDto[]>>(`${this.usersUrl}/roles`)
+      .pipe(map(r => r.data));
+  }
+
+  /** Create a new user (admin) */
+  createUser(request: CreateUserRequest): Observable<UserDto> {
+    return this.http.post<ApiResponse<UserDto>>(`${this.usersUrl}`, request)
+      .pipe(map(r => r.data));
+  }
+
+  /** Reset a user's password (admin) */
+  adminResetPassword(userId: string, request: AdminResetPasswordRequest): Observable<boolean> {
+    return this.http.post<ApiResponse<boolean>>(`${this.usersUrl}/${userId}/reset-password`, request)
+      .pipe(map(r => r.data));
+  }
+
+  /** Clear failed login attempts */
+  clearFailedAttempts(userId: string): Observable<boolean> {
+    return this.http.post<ApiResponse<boolean>>(`${this.usersUrl}/${userId}/clear-attempts`, {})
+      .pipe(map(r => r.data));
+  }
+
+  /** Permanently block a user */
+  permanentlyBlockUser(userId: string): Observable<boolean> {
+    return this.http.put<ApiResponse<boolean>>(`${this.usersUrl}/${userId}/block`, {})
       .pipe(map(r => r.data));
   }
 }
