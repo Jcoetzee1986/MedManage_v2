@@ -9,11 +9,10 @@ import { MatInputModule } from '@angular/material/input';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { Subject, debounceTime, distinctUntilChanged, switchMap, takeUntil, of } from 'rxjs';
+import { Subject } from 'rxjs';
 import { CaseService } from '../../services/case.service';
 import { CaseTariffDto, CreateCaseTariffRequest } from '../../models/case.models';
 import { TariffService } from '../../../tariffs/services/tariff.service';
@@ -34,7 +33,6 @@ import { TariffLookupComponent } from '../../../../shared/components/tariff-look
     MatCheckboxModule,
     MatDatepickerModule,
     MatNativeDateModule,
-    MatAutocompleteModule,
     MatSnackBarModule,
     MatDialogModule,
     MatTooltipModule
@@ -56,10 +54,7 @@ export class CaseTariffsTabComponent implements OnInit, OnDestroy {
   displayedColumns = ['status', 'tariffCode', 'value', 'qty', 'fullValue', 'agreedRate', 'discount', 'totalOvercharged', 'totalPayable', 'dateOfProcedure', 'actions'];
   showAddForm = false;
 
-  // Autocomplete for tariff code
   codeSearchControl = new FormControl('');
-  tariffSuggestions: TariffLookupResult[] = [];
-  selectedTariff: TariffLookupResult | null = null;
 
   addForm = this.fb.group({
     tariffId: [null as number | null],
@@ -74,7 +69,6 @@ export class CaseTariffsTabComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadItems();
-    this.setupAutocomplete();
   }
 
   ngOnDestroy(): void {
@@ -89,46 +83,8 @@ export class CaseTariffsTabComponent implements OnInit, OnDestroy {
     });
   }
 
-  private setupAutocomplete(): void {
-    this.codeSearchControl.valueChanges.pipe(
-      takeUntil(this.destroy$),
-      debounceTime(300),
-      distinctUntilChanged(),
-      switchMap(query => {
-        // If user types after selecting, clear the selection
-        if (this.selectedTariff && query !== this.selectedTariff.code) {
-          this.selectedTariff = null;
-          this.addForm.patchValue({ tariffId: null });
-        }
-        const trimmed = (query || '').trim();
-        if (trimmed.length < 3) {
-          this.tariffSuggestions = [];
-          return of([]);
-        }
-        return this.tariffService.lookup(trimmed);
-      })
-    ).subscribe(results => this.tariffSuggestions = results);
-  }
-
-  onTariffSelected(tariff: TariffLookupResult): void {
-    this.selectedTariff = tariff;
-    this.addForm.patchValue({
-      tariffId: tariff.id,
-      code: tariff.code,
-      value: tariff.currentRate || 0
-    });
-    this.codeSearchControl.setValue(tariff.code, { emitEvent: false });
-  }
-
-  displayTariff = (tariff: TariffLookupResult | string): string => {
-    if (!tariff) return '';
-    if (typeof tariff === 'string') return tariff;
-    return tariff.code || '';
-  };
-
   onShowAddForm(): void {
     this.showAddForm = true;
-    this.selectedTariff = null;
     this.codeSearchControl.setValue('');
     this.addForm.reset({ qty: 1, value: 0 });
   }
@@ -141,33 +97,66 @@ export class CaseTariffsTabComponent implements OnInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe((result: TariffLookupResult | null) => {
       if (result) {
-        this.onTariffSelected(result);
+        this.codeSearchControl.setValue(result.code);
       }
     });
   }
 
   onAdd(): void {
-    if (!this.addForm.value.tariffId) {
-      this.snackBar.open('Please select a tariff code first', 'Close', { duration: 3000 });
+    const code = (this.codeSearchControl.value || '').trim();
+    if (!code) {
+      this.snackBar.open('Please enter a tariff code', 'Close', { duration: 3000 });
       return;
     }
 
+    // Call the case-context SP to look up the tariff with rates
+    const val = this.addForm.value;
+    this.tariffService.lookupForCase(this.caseId, code).subscribe({
+      next: (results) => {
+        if (results.length === 0) {
+          this.snackBar.open('No tariff found for this code', 'Close', { duration: 3000 });
+          return;
+        }
+
+        if (results.length === 1) {
+          // Auto-save with the single result
+          this.saveTariff(results[0].id);
+        } else {
+          // Multiple specialities — let user choose from pre-filtered list
+          const dialogRef = this.dialog.open(TariffLookupComponent, {
+            width: '700px',
+            data: {
+              title: 'Select Tariff — Multiple specialities found',
+              preloadedResults: results
+            }
+          });
+          dialogRef.afterClosed().subscribe((selected: TariffLookupResult | null) => {
+            if (selected) {
+              this.saveTariff(selected.id);
+            }
+          });
+        }
+      },
+      error: () => this.snackBar.open('Failed to look up tariff', 'Close', { duration: 3000 })
+    });
+  }
+
+  private saveTariff(tariffId: number): void {
     const val = this.addForm.value;
     const request: CreateCaseTariffRequest = {
-      tariffId: val.tariffId || undefined,
+      tariffId: tariffId,
       value: val.value || undefined,
       qty: val.qty || 1,
       agreedRateOverride: val.agreedRateOverride || undefined,
       valueIsTotal: val.valueIsTotal || false,
       rejected: val.rejected || false,
-      dateOfProcedure: val.dateOfProcedure?.toISOString()
+      dateOfProcedure: val.dateOfProcedure?.toISOString().split('T')[0]
     };
 
     this.caseService.createTariff(this.caseId, request).subscribe({
       next: () => {
         this.loadItems();
         this.addForm.reset({ qty: 1, value: 0 });
-        this.selectedTariff = null;
         this.codeSearchControl.setValue('');
         this.showAddForm = false;
         this.snackBar.open('Tariff added', 'Close', { duration: 3000 });

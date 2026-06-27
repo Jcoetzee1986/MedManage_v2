@@ -17,7 +17,10 @@ public class TariffLookupResult
     public string? TariffCode { get; set; }
     public string? TariffDescription { get; set; }
     public int? SpecialityId { get; set; }
+    public string? Speciality { get; set; }
     public decimal? TariffAmount { get; set; }
+    public int? TariffId { get; set; }
+    public decimal? Qty { get; set; }
     public string? Metric { get; set; }
     public decimal? Quantity { get; set; }
     public string? TariffPeriodName { get; set; }
@@ -67,6 +70,9 @@ public class BaseTariffDto
     public string? ChargeCodes { get; set; }
     public DateTime? DateInserted { get; set; }
     public DateTime? DateUpdated { get; set; }
+    // From Tariff rate table (for search results)
+    public int? TariffId { get; set; }
+    public decimal? TariffAmount { get; set; }
 }
 
 public class CreateBaseTariffDto

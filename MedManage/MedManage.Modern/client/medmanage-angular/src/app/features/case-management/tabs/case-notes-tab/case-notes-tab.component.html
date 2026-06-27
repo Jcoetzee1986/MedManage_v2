@@ -1,95 +1,132 @@
 <div class="tab-content">
   <div class="tab-header">
     <h3>Notes</h3>
-    <button mat-raised-button color="primary" (click)="showAddForm = !showAddForm">
+    <button mat-raised-button color="primary" (click)="onShowAddForm()">
       <mat-icon>add</mat-icon> Add Note
     </button>
   </div>
 
-  <div class="add-form" *ngIf="showAddForm">
-    <form [formGroup]="addForm" (ngSubmit)="onAdd()">
-      <div class="form-row">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Note</mat-label>
-          <textarea matInput formControlName="note" rows="3"></textarea>
-        </mat-form-field>
-      </div>
-      <div class="form-row">
-        <mat-form-field appearance="outline">
-          <mat-label>Interim Amount 1</mat-label>
-          <input matInput type="number" formControlName="interimAmount1">
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Interim Amount 2</mat-label>
-          <input matInput type="number" formControlName="interimAmount2">
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Interim Amount 3</mat-label>
-          <input matInput type="number" formControlName="interimAmount3">
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Interim Amount 4</mat-label>
-          <input matInput type="number" formControlName="interimAmount4">
-        </mat-form-field>
-      </div>
-      <div class="form-row">
-        <mat-form-field appearance="outline">
-          <mat-label>Interim Amount 5</mat-label>
-          <input matInput type="number" formControlName="interimAmount5">
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Interim Amount 6</mat-label>
-          <input matInput type="number" formControlName="interimAmount6">
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Interim Amount 7</mat-label>
-          <input matInput type="number" formControlName="interimAmount7">
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Interim Amount 8</mat-label>
-          <input matInput type="number" formControlName="interimAmount8">
-        </mat-form-field>
-      </div>
-      <div class="form-actions">
-        <button mat-raised-button color="primary" type="submit">Save</button>
-        <button mat-stroked-button type="button" (click)="showAddForm = false">Cancel</button>
-      </div>
-    </form>
-  </div>
+  @if (showAddForm) {
+    <div class="add-form">
+      <form [formGroup]="addForm" (ngSubmit)="onSave()">
+        <div class="form-grid">
+          <mat-form-field appearance="outline" class="span-2">
+            <mat-label>Note</mat-label>
+            <textarea matInput formControlName="note" rows="3"></textarea>
+          </mat-form-field>
+        </div>
 
-  <table mat-table [dataSource]="items" class="full-width">
-    <ng-container matColumnDef="note">
-      <th mat-header-cell *matHeaderCellDef>Note</th>
-      <td mat-cell *matCellDef="let item">{{ item.note }}</td>
-    </ng-container>
-    <ng-container matColumnDef="interimAmount1">
-      <th mat-header-cell *matHeaderCellDef>Interim 1</th>
-      <td mat-cell *matCellDef="let item">{{ item.interimAmount1 | currency:'ZAR' }}</td>
-    </ng-container>
-    <ng-container matColumnDef="interimAmount2">
-      <th mat-header-cell *matHeaderCellDef>Interim 2</th>
-      <td mat-cell *matCellDef="let item">{{ item.interimAmount2 | currency:'ZAR' }}</td>
-    </ng-container>
-    <ng-container matColumnDef="dateCreated">
-      <th mat-header-cell *matHeaderCellDef>Date</th>
-      <td mat-cell *matCellDef="let item">{{ item.dateCreated | date:'short' }}</td>
-    </ng-container>
-    <ng-container matColumnDef="createdBy">
-      <th mat-header-cell *matHeaderCellDef>By</th>
-      <td mat-cell *matCellDef="let item">{{ item.createdBy }}</td>
-    </ng-container>
-    <ng-container matColumnDef="actions">
-      <th mat-header-cell *matHeaderCellDef>Actions</th>
-      <td mat-cell *matCellDef="let item">
-        <button mat-icon-button color="warn" (click)="onDelete(item)" aria-label="Delete">
-          <mat-icon>delete</mat-icon>
-        </button>
-      </td>
-    </ng-container>
+        <div class="form-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Hospital</mat-label>
+            <input matInput type="number" formControlName="interimHospital" step="0.01">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Radiology</mat-label>
+            <input matInput type="number" formControlName="interimRadiology" step="0.01">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Dialysis</mat-label>
+            <input matInput type="number" formControlName="interimDialysis" step="0.01">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Specialist</mat-label>
+            <input matInput type="number" formControlName="interimSpecialist" step="0.01">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Physio</mat-label>
+            <input matInput type="number" formControlName="interimPhysio" step="0.01">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Transport</mat-label>
+            <input matInput type="number" formControlName="interimTransport" step="0.01">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Accommodation</mat-label>
+            <input matInput type="number" formControlName="interimAccomodation" step="0.01">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Script</mat-label>
+            <input matInput type="number" formControlName="interimScript" step="0.01">
+          </mat-form-field>
+        </div>
 
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-  </table>
+        <div class="interim-total">
+          <strong>Total Interim: R{{ interimTotal.toFixed(2) }}</strong>
+        </div>
 
-  <p *ngIf="items.length === 0" class="empty-message">No notes for this case.</p>
+        <div class="form-actions">
+          <button mat-raised-button color="primary" type="submit">{{ editingItem ? 'Update' : 'Save' }}</button>
+          <button mat-stroked-button type="button" (click)="onCancel()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  }
+
+  @if (items.length > 0) {
+    <table mat-table [dataSource]="items" class="full-width-table">
+      <ng-container matColumnDef="note">
+        <th mat-header-cell *matHeaderCellDef>Note</th>
+        <td mat-cell *matCellDef="let item">{{ item.note }}</td>
+      </ng-container>
+      <ng-container matColumnDef="interimAmount">
+        <th mat-header-cell *matHeaderCellDef>Total</th>
+        <td mat-cell *matCellDef="let item">{{ (item.interimAmount || 0) | number:'1.2-2' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="interimHospital">
+        <th mat-header-cell *matHeaderCellDef>Hospital</th>
+        <td mat-cell *matCellDef="let item">{{ (item.interimHospital || 0) | number:'1.2-2' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="interimRadiology">
+        <th mat-header-cell *matHeaderCellDef>Radiology</th>
+        <td mat-cell *matCellDef="let item">{{ (item.interimRadiology || 0) | number:'1.2-2' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="interimDialysis">
+        <th mat-header-cell *matHeaderCellDef>Dialysis</th>
+        <td mat-cell *matCellDef="let item">{{ (item.interimDialysis || 0) | number:'1.2-2' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="interimSpecialist">
+        <th mat-header-cell *matHeaderCellDef>Specialist</th>
+        <td mat-cell *matCellDef="let item">{{ (item.interimSpecialist || 0) | number:'1.2-2' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="interimPhysio">
+        <th mat-header-cell *matHeaderCellDef>Physio</th>
+        <td mat-cell *matCellDef="let item">{{ (item.interimPhysio || 0) | number:'1.2-2' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="interimTransport">
+        <th mat-header-cell *matHeaderCellDef>Transport</th>
+        <td mat-cell *matCellDef="let item">{{ (item.interimTransport || 0) | number:'1.2-2' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="interimAccomodation">
+        <th mat-header-cell *matHeaderCellDef>Accomm.</th>
+        <td mat-cell *matCellDef="let item">{{ (item.interimAccomodation || 0) | number:'1.2-2' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="interimScript">
+        <th mat-header-cell *matHeaderCellDef>Script</th>
+        <td mat-cell *matCellDef="let item">{{ (item.interimScript || 0) | number:'1.2-2' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="dateCreated">
+        <th mat-header-cell *matHeaderCellDef>Date</th>
+        <td mat-cell *matCellDef="let item">{{ item.dateCreated | date:'short' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let item">
+          <button mat-icon-button (click)="onEdit(item)" aria-label="Edit">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button color="warn" (click)="onDelete(item)" aria-label="Delete">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  }
+
+  @if (items.length === 0 && !showAddForm) {
+    <p class="empty-message">No notes for this case.</p>
+  }
 </div>

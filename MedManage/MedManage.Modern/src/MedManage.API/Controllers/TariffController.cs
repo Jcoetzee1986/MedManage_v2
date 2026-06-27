@@ -19,16 +19,29 @@ public class TariffController : ControllerBase
         _tariffService = tariffService;
     }
 
-    // --- Tariff Search (simple text search for autocomplete) ---
+    // --- Tariff Search (simple text search — no rate context) ---
 
     [HttpGet("search")]
-    public async Task<IActionResult> SearchTariffs([FromQuery] string q)
+    public async Task<IActionResult> SearchTariffs([FromQuery] string? q, [FromQuery] string? code, [FromQuery] string? description)
     {
-        if (string.IsNullOrWhiteSpace(q) || q.Length < 2)
+        var query = q ?? code ?? "";
+        if (string.IsNullOrWhiteSpace(query) && string.IsNullOrWhiteSpace(description))
             return Ok(ApiResponse<IEnumerable<BaseTariffDto>>.SuccessResponse(Enumerable.Empty<BaseTariffDto>()));
 
-        var results = await _tariffService.SearchBaseTariffsAsync(q);
+        var results = await _tariffService.SearchBaseTariffsAsync(code ?? q, description);
         return Ok(ApiResponse<IEnumerable<BaseTariffDto>>.SuccessResponse(results));
+    }
+
+    // --- Tariff Search with case context (returns rates via SP) ---
+
+    [HttpGet("search-for-case/{caseId}")]
+    public async Task<IActionResult> SearchTariffsForCase(int caseId, [FromQuery] string code)
+    {
+        if (string.IsNullOrWhiteSpace(code) || code.Length < 2)
+            return Ok(ApiResponse<IEnumerable<object>>.SuccessResponse(Enumerable.Empty<object>()));
+
+        var results = await _tariffService.LookupTariffForCaseAsync(caseId, code);
+        return Ok(ApiResponse<IEnumerable<object>>.SuccessResponse(results));
     }
 
     // --- Tariff Lookup (wraps SP) ---

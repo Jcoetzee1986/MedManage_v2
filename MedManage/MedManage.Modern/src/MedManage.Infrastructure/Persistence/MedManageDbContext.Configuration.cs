@@ -271,6 +271,7 @@ public partial class MedManageDbContext
 
         modelBuilder.Entity<CaseTariff>(entity =>
         {
+            entity.HasKey(e => e.CaseIdTariffId);
             entity.Property(e => e.CaseIdTariffId).ValueGeneratedOnAdd();
         });
 

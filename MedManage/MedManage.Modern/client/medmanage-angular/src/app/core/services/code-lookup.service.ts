@@ -41,8 +41,11 @@ export class CodeLookupService {
   /**
    * Search CPT codes by code or description.
    */
-  searchCpt(query: string): Observable<CodeLookupResult[]> {
-    const params = new HttpParams().set('q', query);
+  searchCpt(query: string, code?: string, description?: string): Observable<CodeLookupResult[]> {
+    let params = new HttpParams();
+    if (code) params = params.set('code', code);
+    if (description) params = params.set('description', description);
+    if (!code && !description) params = params.set('q', query);
     return this.http.get<ApiResponse<CodeLookupResult[]>>(`${this.baseUrl}/cpt`, { params })
       .pipe(map(r => r.data));
   }
@@ -50,8 +53,11 @@ export class CodeLookupService {
   /**
    * Search ICD codes by code or description.
    */
-  searchIcd(query: string): Observable<CodeLookupResult[]> {
-    const params = new HttpParams().set('q', query);
+  searchIcd(query: string, code?: string, description?: string): Observable<CodeLookupResult[]> {
+    let params = new HttpParams();
+    if (code) params = params.set('code', code);
+    if (description) params = params.set('description', description);
+    if (!code && !description) params = params.set('q', query);
     return this.http.get<ApiResponse<CodeLookupResult[]>>(`${this.baseUrl}/icd`, { params })
       .pipe(map(r => r.data));
   }
@@ -59,8 +65,11 @@ export class CodeLookupService {
   /**
    * Search NAPPI codes by code or description, optionally filtered by effective date.
    */
-  searchNappi(query: string, effectiveDate?: Date): Observable<NappiCodeLookupResult[]> {
-    let params = new HttpParams().set('q', query);
+  searchNappi(query: string, effectiveDate?: Date, code?: string, description?: string): Observable<NappiCodeLookupResult[]> {
+    let params = new HttpParams();
+    if (code) params = params.set('code', code);
+    if (description) params = params.set('description', description);
+    if (!code && !description) params = params.set('q', query);
     if (effectiveDate) {
       params = params.set('effectiveDate', effectiveDate.toISOString());
     }
@@ -71,14 +80,14 @@ export class CodeLookupService {
   /**
    * Generic search method that dispatches to the appropriate code type endpoint.
    */
-  search(codeType: CodeType, query: string, effectiveDate?: Date): Observable<CodeLookupResult[]> {
+  search(codeType: CodeType, query: string, effectiveDate?: Date, code?: string, description?: string): Observable<CodeLookupResult[]> {
     switch (codeType) {
       case 'cpt':
-        return this.searchCpt(query);
+        return this.searchCpt(query, code, description);
       case 'icd':
-        return this.searchIcd(query);
+        return this.searchIcd(query, code, description);
       case 'nappi':
-        return this.searchNappi(query, effectiveDate);
+        return this.searchNappi(query, effectiveDate, code, description);
     }
   }
 }

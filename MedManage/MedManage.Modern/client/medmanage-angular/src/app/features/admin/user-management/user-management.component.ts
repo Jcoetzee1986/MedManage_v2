@@ -14,6 +14,7 @@ import { AdminService } from '../../../core/services/admin.service';
 import { UserDto, RoleDto, CreateUserRequest, AdminResetPasswordRequest } from '../../../core/models/admin.models';
 import { RoleAssignDialogComponent } from './role-assign-dialog.component';
 import { CreateUserDialogComponent } from './create-user-dialog.component';
+import { EditUserDialogComponent, EditUserResult } from './edit-user-dialog.component';
 
 @Component({
   selector: 'app-user-management',
@@ -210,5 +211,27 @@ export class UserManagementComponent implements OnInit {
     if (user.isLockedOut) return 'Locked';
     if (!user.isApproved) return 'Pending Approval';
     return 'Active';
+  }
+
+  onEditUser(user: UserDto): void {
+    const dialogRef = this.dialog.open(EditUserDialogComponent, {
+      width: '450px',
+      data: { user }
+    });
+
+    dialogRef.afterClosed().subscribe((result: EditUserResult | null) => {
+      if (result) {
+        this.adminService.updateUser(user.userId, result).subscribe({
+          next: () => {
+            user.userName = result.userName;
+            user.email = result.email;
+            this.snackBar.open(`User "${result.userName}" updated`, 'OK', { duration: 3000 });
+          },
+          error: () => {
+            this.snackBar.open('Failed to update user', 'Dismiss', { duration: 3000 });
+          }
+        });
+      }
+    });
   }
 }

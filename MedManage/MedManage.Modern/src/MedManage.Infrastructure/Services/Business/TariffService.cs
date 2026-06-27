@@ -58,17 +58,104 @@ public class TariffService : ITariffService
 
     // --- Base Tariff Search (simple text search for autocomplete) ---
 
-    public async Task<IEnumerable<BaseTariffDto>> SearchBaseTariffsAsync(string query)
+    public async Task<IEnumerable<BaseTariffDto>> SearchBaseTariffsAsync(string? code, string? description = null)
     {
-        var tariffs = await _context.BaseTariffs
-            .Where(bt => bt.DateDeleted == null &&
-                (bt.BaseTariffId.Contains(query) || 
-                 (bt.TariffDescription != null && bt.TariffDescription.Contains(query))))
-            .OrderBy(bt => bt.BaseTariffId)
+        var query = from t in _context.Tariffs
+                    join bt in _context.BaseTariffs on t.BaseTariffId equals bt.BaseTariffId
+                    where t.DateDeleted == null
+                    select new { t, bt };
+
+        // If code is provided, search on TariffCode (the short code on BaseTariff)
+        // BaseTariffId format: "14_0109" — TariffCode field has just "0109"
+        if (!string.IsNullOrWhiteSpace(code))
+        {
+            query = query.Where(x => x.bt.TariffCode != null && x.bt.TariffCode.Contains(code));
+        }
+
+        // If description is provided, filter on description
+        if (!string.IsNullOrWhiteSpace(description))
+        {
+            query = query.Where(x => x.bt.TariffDescription != null && x.bt.TariffDescription.Contains(description));
+        }
+
+        // If neither code nor description provided but code has value, fall back to code search
+        if (string.IsNullOrWhiteSpace(code) && string.IsNullOrWhiteSpace(description))
+        {
+            return Enumerable.Empty<BaseTariffDto>();
+        }
+
+        var results = await query
+            .OrderBy(x => x.bt.TariffCode)
             .Take(20)
+            .Select(x => new BaseTariffDto
+            {
+                BaseTariffId = x.bt.BaseTariffId,
+                TariffCode = x.bt.TariffCode,
+                TariffDescription = x.bt.TariffDescription,
+                TariffId = x.t.TariffId,
+                TariffAmount = x.t.TariffAmount
+            })
             .ToListAsync();
 
-        return tariffs.Select(t => t.ToDto());
+        return results;
+    }
+
+    // --- Tariff Lookup with case context (calls SP for rates) ---
+
+    public async Task<IEnumerable<TariffLookupResult>> LookupTariffForCaseAsync(int caseId, string tariffCode)
+    {
+        // Get the case's provider and main client
+        var caseInfo = await _context.Cases
+            .Where(c => c.CaseId == caseId)
+            .Select(c => new {
+                c.ReferToId,
+                c.AdmissionDate,
+                MainClientId = c.Member != null && c.Member.MedicalAid != null ? c.Member.MedicalAid.MainClientId : (int?)null
+            })
+            .FirstOrDefaultAsync();
+
+        if (caseInfo == null || caseInfo.ReferToId == null || caseInfo.MainClientId == null)
+            return Enumerable.Empty<TariffLookupResult>();
+
+        var treatmentDate = caseInfo.AdmissionDate ?? DateOnly.FromDateTime(DateTime.Today);
+
+        var connection = _context.Database.GetDbConnection();
+        var results = new List<TariffLookupResult>();
+
+        try
+        {
+            await connection.OpenAsync();
+            using var command = connection.CreateCommand();
+            command.CommandText = "Tariff.usp_Tariff_Select_ByTariffCode_ProviderID_TreatmentDate";
+            command.CommandType = System.Data.CommandType.StoredProcedure;
+            command.Parameters.Add(new Microsoft.Data.SqlClient.SqlParameter("@TariffCode", tariffCode));
+            command.Parameters.Add(new Microsoft.Data.SqlClient.SqlParameter("@ServiceProviderID", caseInfo.ReferToId.Value));
+            command.Parameters.Add(new Microsoft.Data.SqlClient.SqlParameter("@TreatmentDate", treatmentDate.ToDateTime(TimeOnly.MinValue)));
+            command.Parameters.Add(new Microsoft.Data.SqlClient.SqlParameter("@MainClientID", caseInfo.MainClientId.Value));
+
+            using var reader = await command.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                results.Add(new TariffLookupResult
+                {
+                    BaseTariffId = reader.IsDBNull(reader.GetOrdinal("BaseTariffID")) ? null : reader["BaseTariffID"].ToString(),
+                    TariffCode = reader.IsDBNull(reader.GetOrdinal("Code")) ? null : reader["Code"].ToString(),
+                    TariffDescription = reader.IsDBNull(reader.GetOrdinal("Description")) ? null : reader["Description"].ToString(),
+                    SpecialityId = reader.IsDBNull(reader.GetOrdinal("SpecialityID")) ? null : Convert.ToInt32(reader["SpecialityID"]),
+                    TariffAmount = reader.IsDBNull(reader.GetOrdinal("FinalRate")) ? null : Convert.ToDecimal(reader["FinalRate"]),
+                    TariffId = reader.IsDBNull(reader.GetOrdinal("TariffID")) ? null : Convert.ToInt32(reader["TariffID"]),
+                    Speciality = reader.IsDBNull(reader.GetOrdinal("Speciality")) ? null : reader["Speciality"].ToString(),
+                    Qty = reader.IsDBNull(reader.GetOrdinal("Qty")) ? null : Convert.ToDecimal(reader["Qty"]),
+                });
+            }
+        }
+        finally
+        {
+            if (connection.State == System.Data.ConnectionState.Open)
+                await connection.CloseAsync();
+        }
+
+        return results;
     }
 
     // --- Base Tariff CRUD (standard EF Core LINQ) ---

@@ -73,8 +73,8 @@ export class ProviderLookupDialogComponent implements OnInit {
     this.searching = true;
     this.providerService.search({
       practiceName: val.practiceName || undefined,
-      lastName: val.lastName || undefined,
-      providerNumber: val.providerNumber || undefined,
+      serviceProviderSurname: val.lastName || undefined,
+      practiceNr: val.providerNumber || undefined,
       pageNumber: this.pageNumber,
       pageSize: this.pageSize
     }).subscribe({

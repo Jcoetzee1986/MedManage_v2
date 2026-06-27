@@ -63,6 +63,20 @@ public class UserManagementController : ControllerBase
     }
 
     /// <summary>
+    /// Update user details (username, email)
+    /// </summary>
+    [HttpPut("{userId}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateUser(string userId, [FromBody] UpdateUserDetailsRequest request)
+    {
+        var result = await _service.UpdateUserDetailsAsync(userId, request.UserName, request.Email);
+        if (!result)
+            return NotFound(ApiResponse<bool>.ErrorResponse($"User with ID {userId} not found"));
+        return Ok(ApiResponse<bool>.SuccessResponse(true, "User updated successfully"));
+    }
+
+    /// <summary>
     /// Lock a user account
     /// </summary>
     [HttpPut("{userId}/lock")]

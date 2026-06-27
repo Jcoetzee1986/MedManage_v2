@@ -53,6 +53,12 @@ export class CaseService {
       .pipe(map(r => r.data));
   }
 
+  /** Partially update a case — only the fields provided are updated, others remain unchanged */
+  patch(id: number, fields: Record<string, any>): Observable<CaseDto> {
+    return this.http.patch<ApiResponse<CaseDto>>(`${this.baseUrl}/${id}`, fields)
+      .pipe(map(r => r.data));
+  }
+
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
@@ -130,34 +136,49 @@ export class CaseService {
   // ─── Facility Types ─────────────────────────────────────────
 
   getFacilityTypes(caseId: number): Observable<CaseFacilityTypeDto[]> {
-    return this.http.get<ApiResponse<CaseFacilityTypeDto[]>>(`${this.baseUrl}/${caseId}/facility-types`)
-      .pipe(map(r => r.data));
+    return this.http.get<ApiResponse<any[]>>(`${this.baseUrl}/${caseId}/facility-types`)
+      .pipe(map(r => (r.data || []).map((item: any) => this.mapFacilityType(item))));
   }
 
   createFacilityType(caseId: number, request: CreateCaseFacilityTypeRequest): Observable<CaseFacilityTypeDto> {
-    return this.http.post<ApiResponse<CaseFacilityTypeDto>>(`${this.baseUrl}/${caseId}/facility-types`, request)
-      .pipe(map(r => r.data));
+    return this.http.post<ApiResponse<any>>(`${this.baseUrl}/${caseId}/facility-types`, request)
+      .pipe(map(r => this.mapFacilityType(r.data)));
   }
 
   updateFacilityType(caseId: number, id: number, request: CreateCaseFacilityTypeRequest): Observable<CaseFacilityTypeDto> {
-    return this.http.put<ApiResponse<CaseFacilityTypeDto>>(`${this.baseUrl}/${caseId}/facility-types/${id}`, request)
-      .pipe(map(r => r.data));
+    return this.http.put<ApiResponse<any>>(`${this.baseUrl}/${caseId}/facility-types/${id}`, request)
+      .pipe(map(r => this.mapFacilityType(r.data)));
   }
 
   deleteFacilityType(caseId: number, id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${caseId}/facility-types/${id}`);
   }
 
+  private mapFacilityType(item: any): CaseFacilityTypeDto {
+    return {
+      id: item.caseIdFacilityTypeId ?? item.id ?? 0,
+      caseId: item.caseId,
+      facilityTypeId: item.facilityTypeId,
+      facilityTypeCode: item.facilityTypeCode,
+      facilityTypeName: item.facilityTypeName,
+      dateAdmitted: item.dateAdmitted,
+      dateDischarged: item.dateDischarged,
+      los: item.los,
+      minutesOnVentilator: item.minutesOnVentilator,
+      comments: item.comments
+    };
+  }
+
   // ─── Notes ──────────────────────────────────────────────────
 
   getNotes(caseId: number): Observable<CaseNoteDto[]> {
-    return this.http.get<ApiResponse<CaseNoteDto[]>>(`${this.baseUrl}/${caseId}/notes`)
-      .pipe(map(r => r.data));
+    return this.http.get<ApiResponse<any[]>>(`${this.baseUrl}/${caseId}/notes`)
+      .pipe(map(r => (r.data || []).map((item: any) => this.mapNote(item))));
   }
 
   createNote(caseId: number, request: CreateCaseNoteRequest): Observable<CaseNoteDto> {
-    return this.http.post<ApiResponse<CaseNoteDto>>(`${this.baseUrl}/${caseId}/notes`, request)
-      .pipe(map(r => r.data));
+    return this.http.post<ApiResponse<any>>(`${this.baseUrl}/${caseId}/notes`, request)
+      .pipe(map(r => this.mapNote(r.data)));
   }
 
   updateNote(caseId: number, id: number, request: CreateCaseNoteRequest): Observable<CaseNoteDto> {
@@ -172,12 +193,20 @@ export class CaseService {
   // ─── Comments ───────────────────────────────────────────────
 
   getComments(caseId: number): Observable<CaseCommentDto[]> {
-    return this.http.get<ApiResponse<CaseCommentDto[]>>(`${this.baseUrl}/${caseId}/comments`)
-      .pipe(map(r => r.data));
+    return this.http.get<ApiResponse<any[]>>(`${this.baseUrl}/${caseId}/comments`)
+      .pipe(map(r => (r.data || []).map((item: any) => ({
+        id: item.caseCommentId ?? item.id ?? 0,
+        caseId: item.caseId,
+        text: item.comment || item.text || '',
+        dateCreated: item.dateCreated,
+        createdBy: item.userName || item.userID || item.userId || item.createdBy || ''
+      }))));
   }
 
   createComment(caseId: number, request: CreateCaseCommentRequest): Observable<CaseCommentDto> {
-    return this.http.post<ApiResponse<CaseCommentDto>>(`${this.baseUrl}/${caseId}/comments`, request)
+    // Backend expects 'comment' not 'text'
+    const body = { comment: request.text };
+    return this.http.post<ApiResponse<any>>(`${this.baseUrl}/${caseId}/comments`, body)
       .pipe(map(r => r.data));
   }
 
@@ -193,17 +222,23 @@ export class CaseService {
   // ─── Exclusions ─────────────────────────────────────────────
 
   getExclusions(caseId: number): Observable<CaseExclusionDto[]> {
-    return this.http.get<ApiResponse<CaseExclusionDto[]>>(`${this.baseUrl}/${caseId}/exclusions`)
-      .pipe(map(r => r.data));
+    return this.http.get<ApiResponse<any[]>>(`${this.baseUrl}/${caseId}/exclusions`)
+      .pipe(map(r => (r.data || []).map((item: any) => ({
+        id: item.exclusionId ?? item.id ?? 0,
+        caseId: item.caseId,
+        exclusionId: item.exclusionId,
+        exclusionName: item.exclusionName,
+        comment: item.comment
+      }))));
   }
 
   createExclusion(caseId: number, request: CreateCaseExclusionRequest): Observable<CaseExclusionDto> {
-    return this.http.post<ApiResponse<CaseExclusionDto>>(`${this.baseUrl}/${caseId}/exclusions`, request)
+    return this.http.post<ApiResponse<any>>(`${this.baseUrl}/${caseId}/exclusions`, request)
       .pipe(map(r => r.data));
   }
 
-  updateExclusion(caseId: number, id: number, request: CreateCaseExclusionRequest): Observable<CaseExclusionDto> {
-    return this.http.put<ApiResponse<CaseExclusionDto>>(`${this.baseUrl}/${caseId}/exclusions/${id}`, request)
+  updateExclusion(caseId: number, id: number, request: { comment?: string }): Observable<CaseExclusionDto> {
+    return this.http.put<ApiResponse<any>>(`${this.baseUrl}/${caseId}/exclusions/${id}`, request)
       .pipe(map(r => r.data));
   }
 
@@ -214,17 +249,27 @@ export class CaseService {
   // ─── Checklist ──────────────────────────────────────────────
 
   getChecklist(caseId: number): Observable<CaseChecklistDto[]> {
-    return this.http.get<ApiResponse<CaseChecklistDto[]>>(`${this.baseUrl}/${caseId}/checklist`)
-      .pipe(map(r => r.data));
+    return this.http.get<ApiResponse<any[]>>(`${this.baseUrl}/${caseId}/checklist`)
+      .pipe(map(r => (r.data || []).map((item: any) => ({
+        id: item.checklistTemplateId ?? item.id ?? 0,
+        caseId: item.caseId,
+        templateId: item.checklistTemplateId,
+        templateName: item.templateName,
+        checked: item.checked ?? false,
+        notApplicable: item.notApplicable ?? false,
+        comments: item.comments || '',
+        date: item.date
+      }))));
   }
 
   createChecklistItem(caseId: number, request: CreateCaseChecklistRequest): Observable<CaseChecklistDto> {
-    return this.http.post<ApiResponse<CaseChecklistDto>>(`${this.baseUrl}/${caseId}/checklist`, request)
+    const body = { checklistTemplateId: request.templateId, ...request };
+    return this.http.post<ApiResponse<any>>(`${this.baseUrl}/${caseId}/checklist`, body)
       .pipe(map(r => r.data));
   }
 
   updateChecklistItem(caseId: number, id: number, request: CreateCaseChecklistRequest): Observable<CaseChecklistDto> {
-    return this.http.put<ApiResponse<CaseChecklistDto>>(`${this.baseUrl}/${caseId}/checklist/${id}`, request)
+    return this.http.put<ApiResponse<any>>(`${this.baseUrl}/${caseId}/checklist/${id}`, request)
       .pipe(map(r => r.data));
   }
 
@@ -235,22 +280,62 @@ export class CaseService {
   // ─── NAPPI ──────────────────────────────────────────────────
 
   getNappi(caseId: number): Observable<CaseNappiDto[]> {
-    return this.http.get<ApiResponse<CaseNappiDto[]>>(`${this.baseUrl}/${caseId}/nappi`)
-      .pipe(map(r => r.data));
+    return this.http.get<ApiResponse<any[]>>(`${this.baseUrl}/${caseId}/nappi`)
+      .pipe(map(r => (r.data || []).map((item: any) => this.mapNappi(item))));
   }
 
   createNappi(caseId: number, request: CreateCaseNappiRequest): Observable<CaseNappiDto> {
-    return this.http.post<ApiResponse<CaseNappiDto>>(`${this.baseUrl}/${caseId}/nappi`, request)
-      .pipe(map(r => r.data));
+    return this.http.post<ApiResponse<any>>(`${this.baseUrl}/${caseId}/nappi`, request)
+      .pipe(map(r => this.mapNappi(r.data)));
   }
 
   updateNappi(caseId: number, id: number, request: CreateCaseNappiRequest): Observable<CaseNappiDto> {
-    return this.http.put<ApiResponse<CaseNappiDto>>(`${this.baseUrl}/${caseId}/nappi/${id}`, request)
-      .pipe(map(r => r.data));
+    return this.http.put<ApiResponse<any>>(`${this.baseUrl}/${caseId}/nappi/${id}`, request)
+      .pipe(map(r => this.mapNappi(r.data)));
   }
 
   deleteNappi(caseId: number, id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${caseId}/nappi/${id}`);
+  }
+
+  private mapNappi(item: any): CaseNappiDto {
+    return {
+      id: item.caseIdNappiId ?? item.id ?? 0,
+      caseId: item.caseId,
+      nappiId: item.nappiId,
+      nappiCode: item.nappiCode,
+      nappiDescription: item.nappiDescription,
+      price1: item.price1,
+      value: item.value,
+      quantity: item.quantity,
+      measure: item.measure,
+      units: item.units,
+      dispensary: item.dispensary,
+      ward: item.ward,
+      theater: item.theater,
+      tto: item.tto,
+      _0201: item._0201,
+      date: item.date
+    };
+  }
+
+  private mapNote(item: any): CaseNoteDto {
+    return {
+      id: item.caseNoteId ?? item.id ?? 0,
+      caseId: item.caseId,
+      note: item.note,
+      interimAmount: item.interimAmount,
+      interimHospital: item.interimHospital,
+      interimRadiology: item.interimRadiology,
+      interimDialysis: item.interimDialysis,
+      interimSpecialist: item.interimSpecialist,
+      interimPhysio: item.interimPhysio,
+      interimTransport: item.interimTransport,
+      interimAccomodation: item.interimAccomodation,
+      interimScript: item.interimScript,
+      dateCreated: item.dateCreated,
+      createdBy: item.createdBy || item.userId
+    };
   }
 
   // ─── Linked Files ───────────────────────────────────────────

@@ -44,4 +44,19 @@ public interface ICaseLockService
     /// Called by the background cleanup service.
     /// </summary>
     Task<int> ReleaseExpiredLocksAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// [Admin] Get all active case locks with user info
+    /// </summary>
+    Task<IEnumerable<object>> GetAllLocksAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// [Admin] Force-release a specific lock regardless of owner
+    /// </summary>
+    Task<bool> AdminReleaseLockAsync(int caseId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// [Admin] Force-release all locks
+    /// </summary>
+    Task<int> AdminReleaseAllLocksAsync(CancellationToken cancellationToken = default);
 }

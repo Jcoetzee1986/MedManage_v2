@@ -11,37 +11,14 @@
     <div class="add-form">
       <form [formGroup]="addForm" (ngSubmit)="onAdd()">
         <div class="form-grid">
-          <!-- Tariff Code Autocomplete -->
+          <!-- Tariff Code Input -->
           <mat-form-field appearance="outline" class="span-2">
             <mat-label>Tariff Code</mat-label>
-            <input matInput [formControl]="codeSearchControl" [matAutocomplete]="tariffAuto"
-                   placeholder="Type at least 3 characters to search...">
+            <input matInput [formControl]="codeSearchControl" placeholder="Enter tariff code e.g. 0109">
             <button mat-icon-button matSuffix type="button" (click)="onOpenFullLookup()" matTooltip="Advanced Search">
               <mat-icon>search</mat-icon>
             </button>
-            <mat-autocomplete #tariffAuto="matAutocomplete"
-                              [displayWith]="displayTariff"
-                              (optionSelected)="onTariffSelected($event.option.value)">
-              @for (t of tariffSuggestions; track t.id) {
-                <mat-option [value]="t">
-                  <strong>{{ t.code }}</strong> — {{ t.description }}
-                  @if (t.currentRate) {
-                    <span class="tariff-rate">(R {{ t.currentRate.toFixed(2) }})</span>
-                  }
-                </mat-option>
-              }
-            </mat-autocomplete>
           </mat-form-field>
-
-          @if (selectedTariff) {
-            <div class="selected-entity span-2">
-              <mat-icon>check_circle</mat-icon>
-              <strong>{{ selectedTariff.code }}</strong> — {{ selectedTariff.description }}
-              @if (selectedTariff.category) {
-                <span>({{ selectedTariff.category }})</span>
-              }
-            </div>
-          }
 
           <mat-form-field appearance="outline">
             <mat-label>Value</mat-label>
@@ -72,7 +49,7 @@
         </div>
 
         <div class="form-actions">
-          <button mat-raised-button color="primary" type="submit" [disabled]="!selectedTariff">Save</button>
+          <button mat-raised-button color="primary" type="submit">Save</button>
           <button mat-stroked-button type="button" (click)="showAddForm = false">Cancel</button>
         </div>
       </form>

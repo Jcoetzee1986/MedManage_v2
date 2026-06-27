@@ -38,6 +38,7 @@ export class CaseExclusionsTabComponent implements OnInit {
   items: CaseExclusionDto[] = [];
   displayedColumns = ['exclusionName', 'comment', 'actions'];
   showAddForm = false;
+  editingItem: CaseExclusionDto | null = null;
 
   addForm = this.fb.group({
     exclusionId: [null as number | null],
@@ -55,22 +56,59 @@ export class CaseExclusionsTabComponent implements OnInit {
     });
   }
 
-  onAdd(): void {
-    const val = this.addForm.value;
-    const request: CreateCaseExclusionRequest = {
-      exclusionId: val.exclusionId || undefined,
-      comment: val.comment || undefined
-    };
+  onShowAddForm(): void {
+    this.showAddForm = true;
+    this.editingItem = null;
+    this.addForm.reset();
+  }
 
-    this.caseService.createExclusion(this.caseId, request).subscribe({
-      next: () => {
-        this.loadItems();
-        this.addForm.reset();
-        this.showAddForm = false;
-        this.snackBar.open('Exclusion added', 'Close', { duration: 3000 });
-      },
-      error: () => this.snackBar.open('Failed to add exclusion', 'Close', { duration: 3000 })
+  onEdit(item: CaseExclusionDto): void {
+    this.showAddForm = true;
+    this.editingItem = item;
+    this.addForm.patchValue({
+      exclusionId: item.exclusionId,
+      comment: item.comment || ''
     });
+  }
+
+  onCancel(): void {
+    this.showAddForm = false;
+    this.editingItem = null;
+    this.addForm.reset();
+  }
+
+  onSave(): void {
+    if (this.editingItem) {
+      // Update existing
+      const comment = this.addForm.value.comment || '';
+      this.caseService.updateExclusion(this.caseId, this.editingItem.id, { comment }).subscribe({
+        next: () => {
+          this.loadItems();
+          this.addForm.reset();
+          this.showAddForm = false;
+          this.editingItem = null;
+          this.snackBar.open('Exclusion updated', 'Close', { duration: 3000 });
+        },
+        error: () => this.snackBar.open('Failed to update exclusion', 'Close', { duration: 3000 })
+      });
+    } else {
+      // Create new
+      const val = this.addForm.value;
+      const request: CreateCaseExclusionRequest = {
+        exclusionId: val.exclusionId || undefined,
+        comment: val.comment || undefined
+      };
+
+      this.caseService.createExclusion(this.caseId, request).subscribe({
+        next: () => {
+          this.loadItems();
+          this.addForm.reset();
+          this.showAddForm = false;
+          this.snackBar.open('Exclusion added', 'Close', { duration: 3000 });
+        },
+        error: () => this.snackBar.open('Failed to add exclusion', 'Close', { duration: 3000 })
+      });
+    }
   }
 
   onDelete(item: CaseExclusionDto): void {

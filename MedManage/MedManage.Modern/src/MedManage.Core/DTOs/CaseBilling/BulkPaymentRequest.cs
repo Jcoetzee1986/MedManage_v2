@@ -68,3 +68,18 @@ public class BulkPaymentResult
     /// </summary>
     public string? Message { get; set; }
 }
+
+/// <summary>
+/// A single item in a billing status import (from CSV).
+/// </summary>
+public class BillingStatusImportItem
+{
+    public int Id { get; set; }
+    public bool Paid { get; set; }
+    public string? DatePaid { get; set; }
+    public string? RemittanceNumber { get; set; }
+    public decimal? Discount { get; set; }
+    public decimal? Penalty { get; set; }
+    public decimal? RejectedAmount { get; set; }
+    public decimal? FinalInvoiceAmount { get; set; }
+}

@@ -369,4 +369,32 @@ public class UserManagementService : IUserManagementService
 
         return new string(password);
     }
+
+    public async Task<bool> UpdateUserDetailsAsync(string userId, string? userName, string? email, CancellationToken cancellationToken = default)
+    {
+        if (!Guid.TryParse(userId, out var guidId)) return false;
+
+        var user = await _context.AspnetUsers
+            .FirstOrDefaultAsync(u => u.UserId == guidId, cancellationToken);
+        if (user == null) return false;
+
+        if (!string.IsNullOrWhiteSpace(userName))
+        {
+            user.UserName = userName;
+            user.LoweredUserName = userName.ToLowerInvariant();
+        }
+
+        var membership = await _context.AspnetMemberships
+            .FirstOrDefaultAsync(m => m.UserId == guidId, cancellationToken);
+        if (membership != null && email != null)
+        {
+            membership.Email = email;
+            membership.LoweredEmail = email.ToLowerInvariant();
+            membership.DateUpdated = DateTime.UtcNow;
+        }
+
+        await _context.SaveChangesAsync(cancellationToken);
+        _logger.LogInformation("Admin updated details for user {UserId}", userId);
+        return true;
+    }
 }

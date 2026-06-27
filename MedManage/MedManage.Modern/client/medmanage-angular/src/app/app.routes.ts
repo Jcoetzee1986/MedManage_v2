@@ -39,7 +39,7 @@ export const routes: Routes = [
   {
     path: 'finance',
     loadChildren: () => import('./features/finance/finance.routes').then(m => m.FINANCE_ROUTES),
-    canActivate: [roleGuard('Admin', 'BillingOfficer', 'CaseManager')]
+    canActivate: [roleGuard('System Administrator', 'Billing Auditing', 'Case Manager')]
   },
   {
     path: 'members',
@@ -64,7 +64,7 @@ export const routes: Routes = [
   {
     path: 'admin',
     loadChildren: () => import('./features/admin/admin.routes').then(m => m.ADMIN_ROUTES),
-    canActivate: [roleGuard('Admin')]
+    canActivate: [roleGuard('System Administrator')]
   },
   {
     path: 'medical-aids',

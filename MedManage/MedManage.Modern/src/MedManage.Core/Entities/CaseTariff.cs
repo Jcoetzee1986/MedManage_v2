@@ -7,12 +7,12 @@ using MedManage.Core.Entities;
 
 namespace MedManage.Core.Entities;
 
-[Keyless]
 [Table("Case_Tariff", Schema = "Tariff")]
 [Index("CaseIdTariffId", Name = "_dta_index_Case_Tariff_CaseID_TariffID")]
 [Index("CaseId", Name = "idx_Case_Tariff__CaseID")]
 public partial class CaseTariff : BaseEntity
 {
+    [Key]
     [Column("CaseID_TariffID")]
     public long CaseIdTariffId { get; set; }
 

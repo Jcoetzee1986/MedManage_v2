@@ -111,6 +111,7 @@ public static class CaseChecklistMappers
     {
         CaseId = entity.CaseId,
         ChecklistTemplateId = entity.ChecklistTemplateId,
+        TemplateName = entity.ChecklistTemplate?.ChecklistPrompt,
         Checked = entity.Checked,
         Date = entity.Date,
         Comments = entity.Comments,
@@ -148,6 +149,7 @@ public static class CaseCommentMappers
         CaseId = entity.CaseId,
         Comment = entity.CaseComment1,
         DateCreated = entity.DateCreated,
+        UserID = entity.UserID,
     };
 
     public static CaseComment ToEntity(this CreateCaseCommentDto dto) => new()
@@ -210,6 +212,7 @@ public static class CaseExclusionMappers
     {
         CaseId = entity.CaseId,
         ExclusionId = entity.ExclusionId,
+        ExclusionName = entity.Exclusion?.Exclusion1,
         Comment = entity.Comment,
     };
 

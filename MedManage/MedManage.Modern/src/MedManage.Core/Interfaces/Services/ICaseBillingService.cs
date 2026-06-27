@@ -21,4 +21,5 @@ public interface ICaseBillingService
     Task<BulkPaymentResult> BulkMarkAsPaidAsync(BulkPaymentRequest request, CancellationToken cancellationToken = default);
     Task<RemittanceUpdateResult> UpdateRemittanceAsync(RemittanceUpdateRequest request, CancellationToken cancellationToken = default);
     Task<IEnumerable<CaseBillingDto>> GetByRemittanceAsync(string remittanceNumber, CancellationToken cancellationToken = default);
+    Task<BulkPaymentResult> ImportStatusUpdatesAsync(List<BillingStatusImportItem> items, CancellationToken cancellationToken = default);
 }

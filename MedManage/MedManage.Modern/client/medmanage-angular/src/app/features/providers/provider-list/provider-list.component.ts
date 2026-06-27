@@ -67,10 +67,10 @@ export class ProviderListComponent implements OnInit {
     const formValue = this.searchForm.value;
 
     const request: ProviderSearchRequest = {
-      providerNumber: formValue.providerNumber || undefined,
+      practiceNr: formValue.providerNumber || undefined,
       practiceName: formValue.practiceName || undefined,
-      firstName: formValue.firstName || undefined,
-      lastName: formValue.lastName || undefined,
+      serviceProviderName: formValue.firstName || undefined,
+      serviceProviderSurname: formValue.lastName || undefined,
       specialityName: formValue.speciality || undefined,
       pageNumber: this.pageIndex + 1,
       pageSize: this.pageSize,

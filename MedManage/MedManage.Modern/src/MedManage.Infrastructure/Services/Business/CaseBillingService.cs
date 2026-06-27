@@ -1,4 +1,5 @@
 using MedManage.Infrastructure.Mapping.Manual;
+using MedManage.Infrastructure.Persistence;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,10 +17,12 @@ namespace MedManage.Infrastructure.Services.Business;
 public class CaseBillingService : ICaseBillingService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly MedManageDbContext _dbContext;
 
-    public CaseBillingService(IUnitOfWork unitOfWork)
+    public CaseBillingService(IUnitOfWork unitOfWork, MedManageDbContext dbContext)
     {
         _unitOfWork = unitOfWork;
+        _dbContext = dbContext;
     }
 
     public async Task<IEnumerable<CaseBillingDto>> GetAllAsync()
@@ -86,46 +89,95 @@ public class CaseBillingService : ICaseBillingService
 
     public async Task<PagedResult<CaseBillingDto>> SearchAsync(BillingSearchRequest request, CancellationToken cancellationToken = default)
     {
-        // Build up predicate filters
-        var billings = await _unitOfWork.CaseBillings.FindAsync(cb =>
-            cb.DateDeleted == null
-            && (!request.ServiceProviderId.HasValue || cb.ServiceProviderId == request.ServiceProviderId.Value)
-            && (string.IsNullOrEmpty(request.AccountNumber) || (cb.AccountNumber != null && cb.AccountNumber.Contains(request.AccountNumber)))
-            && (string.IsNullOrEmpty(request.InvoiceNumber) || (cb.InvoiceNumber != null && cb.InvoiceNumber.Contains(request.InvoiceNumber)))
-            && (string.IsNullOrEmpty(request.Remittance) || (cb.Remittance != null && cb.Remittance.Contains(request.Remittance)))
-            && (!request.CaseId.HasValue || cb.CaseId == request.CaseId.Value)
-            && (!request.BillingStatusId.HasValue || cb.BillingStatusId == request.BillingStatusId.Value)
-            && (!request.Paid.HasValue || cb.Paid == request.Paid.Value)
-            && (!request.Submitted.HasValue || cb.Submitted == request.Submitted.Value)
-            && (!request.DateReceivedFrom.HasValue || cb.DateReceived >= request.DateReceivedFrom.Value)
-            && (!request.DateReceivedTo.HasValue || cb.DateReceived <= request.DateReceivedTo.Value)
-            && (!request.DateSubmittedFrom.HasValue || cb.DateSubmitted >= request.DateSubmittedFrom.Value)
-            && (!request.DateSubmittedTo.HasValue || cb.DateSubmitted <= request.DateSubmittedTo.Value)
-            && (!request.DatePaidFrom.HasValue || cb.DatePaid >= request.DatePaidFrom.Value)
-            && (!request.DatePaidTo.HasValue || cb.DatePaid <= request.DatePaidTo.Value)
-        );
+        var query = from cb in _dbContext.CaseBillings
+                    where cb.DateDeleted == null
+                    join c in _dbContext.Cases on cb.CaseId equals c.CaseId into caseJoin
+                    from c in caseJoin.DefaultIfEmpty()
+                    join sp in _dbContext.ServiceProviders on cb.ServiceProviderId equals sp.ServiceProviderId into spJoin
+                    from sp in spJoin.DefaultIfEmpty()
+                    join bs in _dbContext.BillingStatuses on cb.BillingStatusId equals bs.BillingStatusId into bsJoin
+                    from bs in bsJoin.DefaultIfEmpty()
+                    select new { cb, c, sp, bs };
 
-        var query = billings.AsQueryable();
+        // Apply filters
+        if (request.ServiceProviderId.HasValue)
+            query = query.Where(x => x.cb.ServiceProviderId == request.ServiceProviderId.Value);
 
-        // Sort
-        query = request.SortBy?.ToLowerInvariant() switch
-        {
-            "accountnumber" => request.SortDescending ? query.OrderByDescending(b => b.AccountNumber) : query.OrderBy(b => b.AccountNumber),
-            "datereceived" => request.SortDescending ? query.OrderByDescending(b => b.DateReceived) : query.OrderBy(b => b.DateReceived),
-            "datepaid" => request.SortDescending ? query.OrderByDescending(b => b.DatePaid) : query.OrderBy(b => b.DatePaid),
-            "amountdue" => request.SortDescending ? query.OrderByDescending(b => b.AmountDue) : query.OrderBy(b => b.AmountDue),
-            _ => request.SortDescending ? query.OrderByDescending(b => b.DateInserted) : query.OrderBy(b => b.DateInserted),
-        };
+        if (!string.IsNullOrEmpty(request.AccountNumber))
+            query = query.Where(x => x.cb.AccountNumber != null && x.cb.AccountNumber.Contains(request.AccountNumber));
 
-        var totalCount = query.Count();
-        var items = query
+        if (!string.IsNullOrEmpty(request.InvoiceNumber))
+            query = query.Where(x => x.cb.InvoiceNumber != null && x.cb.InvoiceNumber.Contains(request.InvoiceNumber));
+
+        if (!string.IsNullOrEmpty(request.Remittance))
+            query = query.Where(x => x.cb.Remittance != null && x.cb.Remittance.Contains(request.Remittance));
+
+        if (request.CaseId.HasValue)
+            query = query.Where(x => x.cb.CaseId == request.CaseId.Value);
+
+        if (request.BillingStatusId.HasValue)
+            query = query.Where(x => x.cb.BillingStatusId == request.BillingStatusId.Value);
+
+        if (request.Paid.HasValue)
+            query = query.Where(x => x.cb.Paid == request.Paid.Value);
+
+        if (request.DateReceivedFrom.HasValue)
+            query = query.Where(x => x.cb.DateReceived >= request.DateReceivedFrom.Value);
+
+        if (request.DateReceivedTo.HasValue)
+            query = query.Where(x => x.cb.DateReceived <= request.DateReceivedTo.Value);
+
+        if (!string.IsNullOrEmpty(request.ProviderName))
+            query = query.Where(x => x.sp != null && x.sp.PracticeName != null && x.sp.PracticeName.Contains(request.ProviderName));
+
+        if (!string.IsNullOrEmpty(request.MemberName))
+            query = query.Where(x =>
+                (x.cb.PatientSurname != null && x.cb.PatientSurname.Contains(request.MemberName)) ||
+                (x.cb.PatientName != null && x.cb.PatientName.Contains(request.MemberName)));
+
+        if (!string.IsNullOrEmpty(request.MemberNumber))
+            query = query.Where(x => x.c != null && x.c.Member != null && x.c.Member.MemberNumber != null && x.c.Member.MemberNumber.Contains(request.MemberNumber));
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var items = await query
+            .OrderByDescending(x => x.cb.DateReceived ?? DateOnly.MinValue)
             .Skip((request.PageNumber - 1) * request.PageSize)
             .Take(request.PageSize)
-            .ToList();
+            .Select(x => new CaseBillingDto
+            {
+                CaseBillingId = x.cb.CaseBillingId,
+                CaseId = x.cb.CaseId,
+                CaseNumber = x.c != null ? x.c.AuthNumber : null,
+                ServiceProviderId = x.cb.ServiceProviderId,
+                ProviderName = x.sp != null ? x.sp.PracticeName : null,
+                MemberName = x.cb.PatientSurname != null ? (x.cb.PatientSurname + ", " + (x.cb.PatientName ?? "")) : null,
+                BillingStatusName = x.bs != null ? x.bs.BillingStatus1 : null,
+                AccountDate = x.cb.AccountDate,
+                AccountToDate = x.cb.AccountToDate,
+                AccountNumber = x.cb.AccountNumber,
+                InvoiceNumber = x.cb.InvoiceNumber,
+                DateReceived = x.cb.DateReceived,
+                Submitted = x.cb.Submitted,
+                DateSubmitted = x.cb.DateSubmitted,
+                AmountDue = x.cb.AmountDue,
+                Discount = x.cb.Discount,
+                Penalty = x.cb.Penalty,
+                Paid = x.cb.Paid,
+                DatePaid = x.cb.DatePaid,
+                Remittance = x.cb.Remittance,
+                FinalInvoiceAmountDue = x.cb.FinalInvoiceAmountDue,
+                BillingStatusId = x.cb.BillingStatusId,
+                PatientName = x.cb.PatientName,
+                PatientSurname = x.cb.PatientSurname,
+                Comment = x.cb.Comment,
+                DateInserted = x.cb.DateInserted,
+            })
+            .ToListAsync(cancellationToken);
 
         return new PagedResult<CaseBillingDto>
         {
-            Items = items.Select(e => e.ToDto()),
+            Items = items,
             TotalCount = totalCount,
             PageNumber = request.PageNumber,
             PageSize = request.PageSize
@@ -230,6 +282,7 @@ public class CaseBillingService : ICaseBillingService
             }
 
             billing.Remittance = request.RemittanceNumber;
+            billing.BillingStatusId = 2; // Submitted — auto-set when remittance is created
             billing.DateUpdated = DateTime.Now;
 
             await _unitOfWork.CaseBillings.UpdateAsync(billing);
@@ -251,5 +304,69 @@ public class CaseBillingService : ICaseBillingService
             .FindAsync(cb => cb.DateDeleted == null && cb.Remittance != null && cb.Remittance == remittanceNumber);
 
         return billings.OrderByDescending(c => c.DateInserted).Select(e => e.ToDto());
+    }
+
+    public async Task<BulkPaymentResult> ImportStatusUpdatesAsync(List<BillingStatusImportItem> items, CancellationToken cancellationToken = default)
+    {
+        var result = new BulkPaymentResult();
+        var ids = items.Select(i => i.Id).ToList();
+
+        var billings = await _dbContext.CaseBillings
+            .Where(cb => ids.Contains(cb.CaseBillingId) && cb.DateDeleted == null)
+            .ToListAsync(cancellationToken);
+
+        foreach (var item in items)
+        {
+            var billing = billings.FirstOrDefault(b => b.CaseBillingId == item.Id);
+            if (billing == null)
+            {
+                result.FailedCount++;
+                result.FailedIds.Add(item.Id);
+                continue;
+            }
+
+            // Update paid status and infer BillingStatusId
+            billing.Paid = item.Paid;
+            if (item.Paid)
+            {
+                billing.BillingStatusId = 3; // Paid
+            }
+            else if (!string.IsNullOrWhiteSpace(item.RemittanceNumber) && string.IsNullOrWhiteSpace(billing.Remittance))
+            {
+                // New remittance number added where there wasn't one — set to Submitted
+                billing.BillingStatusId = 2; // Submitted
+            }
+
+            if (!string.IsNullOrWhiteSpace(item.DatePaid) && DateOnly.TryParse(item.DatePaid, out var datePaid))
+            {
+                billing.DatePaid = datePaid;
+            }
+
+            if (!string.IsNullOrWhiteSpace(item.RemittanceNumber))
+            {
+                billing.Remittance = item.RemittanceNumber;
+            }
+
+            // Update financial fields (but NOT AmountDue)
+            if (item.Discount.HasValue)
+                billing.Discount = item.Discount.Value;
+
+            if (item.Penalty.HasValue)
+                billing.Penalty = item.Penalty.Value;
+
+            if (item.RejectedAmount.HasValue)
+                billing.Rejected = item.RejectedAmount.Value;
+
+            if (item.FinalInvoiceAmount.HasValue)
+                billing.FinalInvoiceAmountDue = item.FinalInvoiceAmount.Value;
+
+            billing.DateUpdated = DateTime.UtcNow;
+            result.SuccessCount++;
+            result.SuccessIds.Add(item.Id);
+        }
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+        result.Message = $"Successfully updated {result.SuccessCount} record(s). {result.FailedCount} failed.";
+        return result;
     }
 }

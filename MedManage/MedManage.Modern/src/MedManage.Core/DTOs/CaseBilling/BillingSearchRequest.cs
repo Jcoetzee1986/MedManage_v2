@@ -7,6 +7,11 @@ public class BillingSearchRequest
 {
     // Provider filter
     public int? ServiceProviderId { get; set; }
+    public string? ProviderName { get; set; }
+
+    // Member filter
+    public string? MemberName { get; set; }
+    public string? MemberNumber { get; set; }
 
     // Account/Invoice filters
     public string? AccountNumber { get; set; }
@@ -31,7 +36,7 @@ public class BillingSearchRequest
 
     // Pagination
     public int PageNumber { get; set; } = 1;
-    public int PageSize { get; set; } = 20;
+    public int PageSize { get; set; } = 30;
 
     // Sort
     public string? SortBy { get; set; }

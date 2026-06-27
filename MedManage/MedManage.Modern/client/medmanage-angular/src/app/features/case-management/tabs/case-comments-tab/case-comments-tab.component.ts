@@ -1,4 +1,4 @@
-import { Component, Input, inject, OnInit } from '@angular/core';
+import { Component, Input, inject, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -7,6 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatCardModule } from '@angular/material/card';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { CaseService } from '../../services/case.service';
 import { CaseCommentDto, CreateCaseCommentRequest } from '../../models/case.models';
 
@@ -21,19 +22,22 @@ import { CaseCommentDto, CreateCaseCommentRequest } from '../../models/case.mode
     MatFormFieldModule,
     MatInputModule,
     MatCardModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatTooltipModule
   ],
   templateUrl: './case-comments-tab.component.html',
   styleUrls: ['./case-comments-tab.component.scss']
 })
 export class CaseCommentsTabComponent implements OnInit {
   @Input({ required: true }) caseId!: number;
+  @ViewChild('editorEl') editorEl!: ElementRef<HTMLDivElement>;
 
   private readonly caseService = inject(CaseService);
   private readonly fb = inject(FormBuilder);
   private readonly snackBar = inject(MatSnackBar);
 
   items: CaseCommentDto[] = [];
+  editorContent = '';
 
   addForm = this.fb.group({
     text: ['']
@@ -50,16 +54,26 @@ export class CaseCommentsTabComponent implements OnInit {
     });
   }
 
-  onAdd(): void {
-    const text = this.addForm.value.text;
-    if (!text?.trim()) return;
+  onEditorInput(): void {
+    this.editorContent = this.editorEl?.nativeElement?.innerHTML || '';
+  }
 
-    const request: CreateCaseCommentRequest = { text };
+  execCmd(command: string): void {
+    document.execCommand(command, false);
+    this.editorEl?.nativeElement?.focus();
+  }
+
+  onAdd(): void {
+    const html = this.editorEl?.nativeElement?.innerHTML?.trim();
+    if (!html || html === '<br>') return;
+
+    const request: CreateCaseCommentRequest = { text: html };
 
     this.caseService.createComment(this.caseId, request).subscribe({
       next: () => {
         this.loadItems();
-        this.addForm.reset();
+        this.editorEl.nativeElement.innerHTML = '';
+        this.editorContent = '';
         this.snackBar.open('Comment added', 'Close', { duration: 3000 });
       },
       error: () => this.snackBar.open('Failed to add comment', 'Close', { duration: 3000 })

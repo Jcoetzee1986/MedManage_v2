@@ -70,6 +70,7 @@ export interface BillingSearchRequest {
   memberNumber?: string;
   billingStatusId?: number;
   isPaid?: boolean;
+  remittance?: string;
   remittanceNumber?: string;
   dateFrom?: string;
   dateTo?: string;

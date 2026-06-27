@@ -35,4 +35,13 @@ public class CaseCopyRequest
 
     /// <summary>Copy letter notes. Defaults to true.</summary>
     public bool IncludeLetterNotes { get; set; } = true;
+
+    /// <summary>Use same auth number as the source case. Defaults to false (generates new).</summary>
+    public bool UseSameAuthNumber { get; set; } = false;
+
+    /// <summary>Link the new case to the parent (source) case. Defaults to true.</summary>
+    public bool LinkToParentCase { get; set; } = true;
+
+    /// <summary>New admission date for the copied case. If provided, dates are shifted accordingly.</summary>
+    public DateOnly? NewAdmissionDate { get; set; }
 }

@@ -130,4 +130,43 @@ public class CaseLockController : ControllerBase
         var released = await _caseLockService.ReleaseAllUserLocksAsync(userId, cancellationToken);
         return Ok(ApiResponse<int>.SuccessResponse(released, $"Released {released} lock(s)"));
     }
+
+    /// <summary>
+    /// [Admin] Get all active case locks
+    /// </summary>
+    [HttpGet("/api/admin/locks")]
+    [Authorize(Roles = "System Administrator")]
+    [ProducesResponseType(typeof(ApiResponse<IEnumerable<object>>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAllLocks(CancellationToken cancellationToken)
+    {
+        var locks = await _caseLockService.GetAllLocksAsync(cancellationToken);
+        return Ok(ApiResponse<IEnumerable<object>>.SuccessResponse(locks));
+    }
+
+    /// <summary>
+    /// [Admin] Force-release a specific case lock
+    /// </summary>
+    [HttpDelete("/api/admin/locks/{caseId}")]
+    [Authorize(Roles = "System Administrator")]
+    [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> AdminReleaseLock(int caseId, CancellationToken cancellationToken)
+    {
+        var released = await _caseLockService.AdminReleaseLockAsync(caseId, cancellationToken);
+        if (!released)
+            return NotFound(ApiResponse<bool>.ErrorResponse("No lock found for this case"));
+
+        return Ok(ApiResponse<bool>.SuccessResponse(true, "Lock force-released"));
+    }
+
+    /// <summary>
+    /// [Admin] Force-release ALL case locks
+    /// </summary>
+    [HttpDelete("/api/admin/locks")]
+    [Authorize(Roles = "System Administrator")]
+    [ProducesResponseType(typeof(ApiResponse<int>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> AdminReleaseAllLocks(CancellationToken cancellationToken)
+    {
+        var count = await _caseLockService.AdminReleaseAllLocksAsync(cancellationToken);
+        return Ok(ApiResponse<int>.SuccessResponse(count, $"Released {count} lock(s)"));
+    }
 }

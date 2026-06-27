@@ -8,7 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { Subject, debounceTime, distinctUntilChanged, switchMap, takeUntil, of } from 'rxjs';
+import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 import { CodeLookupService, CodeLookupResult, CodeType } from '../../../core/services/code-lookup.service';
 
 /** Data passed to the dialog when opening */
@@ -57,8 +57,11 @@ export class CodeLookupDialogComponent implements OnInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
 
   searchControl = new FormControl('');
+  codeControl = new FormControl('');
+  descriptionControl = new FormControl('');
   results: CodeLookupResult[] = [];
   loading = false;
+  searched = false;
   selectedItem: CodeLookupResult | null = null;
   displayedColumns = ['code', 'description'];
 
@@ -81,22 +84,41 @@ export class CodeLookupDialogComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.searchControl.valueChanges.pipe(
+    // Auto-search when either field has 2+ characters (with debounce)
+    this.codeControl.valueChanges.pipe(
       takeUntil(this.destroy$),
-      debounceTime(300),
-      distinctUntilChanged(),
-      switchMap(query => {
-        const trimmed = (query || '').trim();
-        if (trimmed.length < 2) {
-          return of([]);
-        }
-        this.loading = true;
-        return this.codeLookupService.search(
-          this.data.codeType,
-          trimmed,
-          this.data.effectiveDate
-        );
-      })
+      debounceTime(400),
+      distinctUntilChanged()
+    ).subscribe(() => this.doSearch());
+
+    this.descriptionControl.valueChanges.pipe(
+      takeUntil(this.destroy$),
+      debounceTime(400),
+      distinctUntilChanged()
+    ).subscribe(() => this.doSearch());
+  }
+
+  onManualSearch(): void {
+    this.doSearch();
+  }
+
+  private doSearch(): void {
+    const code = (this.codeControl.value || '').trim();
+    const desc = (this.descriptionControl.value || '').trim();
+
+    if (code.length < 2 && desc.length < 2) {
+      this.results = [];
+      return;
+    }
+
+    this.loading = true;
+    this.searched = true;
+    this.codeLookupService.search(
+      this.data.codeType,
+      '',
+      this.data.effectiveDate,
+      code.length >= 2 ? code : undefined,
+      desc.length >= 2 ? desc : undefined
     ).subscribe({
       next: (results) => {
         this.results = results;

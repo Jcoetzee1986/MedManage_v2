@@ -14,11 +14,13 @@ public class ServiceProviderService : IServiceProviderService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICurrentUserService _currentUserService;
+    private readonly MedManageDbContext _dbContext;
 
-    public ServiceProviderService(IUnitOfWork unitOfWork, ICurrentUserService currentUserService)
+    public ServiceProviderService(IUnitOfWork unitOfWork, ICurrentUserService currentUserService, MedManageDbContext dbContext)
     {
         _unitOfWork = unitOfWork;
         _currentUserService = currentUserService;
+        _dbContext = dbContext;
     }
 
     #region Core CRUD
@@ -31,28 +33,29 @@ public class ServiceProviderService : IServiceProviderService
 
     public async Task<PagedResult<ServiceProviderDto>> SearchAsync(ServiceProviderSearchRequest request, CancellationToken cancellationToken = default)
     {
-        var allServiceProviders = await _unitOfWork.ServiceProviders.GetAllAsync();
-        var query = allServiceProviders.AsQueryable();
+        var query = _dbContext.ServiceProviders
+            .Where(sp => sp.DateDeleted == null)
+            .AsQueryable();
 
-        // Apply filters
+        // Apply filters at database level
         if (!string.IsNullOrWhiteSpace(request.ServiceProviderName))
         {
-            query = query.Where(sp => sp.ServiceProviderName != null && sp.ServiceProviderName.Contains(request.ServiceProviderName, StringComparison.OrdinalIgnoreCase));
+            query = query.Where(sp => sp.ServiceProviderName != null && sp.ServiceProviderName.Contains(request.ServiceProviderName));
         }
 
         if (!string.IsNullOrWhiteSpace(request.ServiceProviderSurname))
         {
-            query = query.Where(sp => sp.ServiceProviderSurname != null && sp.ServiceProviderSurname.Contains(request.ServiceProviderSurname, StringComparison.OrdinalIgnoreCase));
+            query = query.Where(sp => sp.ServiceProviderSurname != null && sp.ServiceProviderSurname.Contains(request.ServiceProviderSurname));
         }
 
         if (!string.IsNullOrWhiteSpace(request.PracticeName))
         {
-            query = query.Where(sp => sp.PracticeName != null && sp.PracticeName.Contains(request.PracticeName, StringComparison.OrdinalIgnoreCase));
+            query = query.Where(sp => sp.PracticeName != null && sp.PracticeName.Contains(request.PracticeName));
         }
 
         if (!string.IsNullOrWhiteSpace(request.PracticeNr))
         {
-            query = query.Where(sp => sp.PracticeNr != null && sp.PracticeNr.Contains(request.PracticeNr, StringComparison.OrdinalIgnoreCase));
+            query = query.Where(sp => sp.PracticeNr != null && sp.PracticeNr.StartsWith(request.PracticeNr));
         }
 
         if (request.SpecialityId.HasValue)
@@ -70,19 +73,16 @@ public class ServiceProviderService : IServiceProviderService
             query = query.Where(sp => sp.Visible == request.Visible.Value);
         }
 
-        // Apply soft delete filter
-        query = query.Where(sp => sp.DateDeleted == null);
-
         // Get total count
-        var totalCount = query.Count();
+        var totalCount = await query.CountAsync(cancellationToken);
 
-        // Apply pagination
-        var serviceProviders = query
+        // Apply sorting and pagination
+        var serviceProviders = await query
             .OrderBy(sp => sp.ServiceProviderSurname)
             .ThenBy(sp => sp.ServiceProviderName)
             .Skip((request.PageNumber - 1) * request.PageSize)
             .Take(request.PageSize)
-            .ToList();
+            .ToListAsync(cancellationToken);
 
         return new PagedResult<ServiceProviderDto>
         {
@@ -157,8 +157,27 @@ public class ServiceProviderService : IServiceProviderService
 
     public async Task<IEnumerable<ServiceProviderTariffDto>> GetTariffsAsync(int serviceProviderId, CancellationToken cancellationToken = default)
     {
-        var tariffs = await _unitOfWork.ServiceProviderTariffs.GetByServiceProviderIdAsync(serviceProviderId);
-        return tariffs.Select(e => e.ToDto());
+        var tariffs = await _dbContext.ServiceProviderTariffs
+            .Where(t => t.ServiceProviderId == serviceProviderId && t.DateDeleted == null)
+            .Join(_dbContext.TariffNames.Where(tn => tn.DateDeleted == null),
+                t => t.TariffNameId,
+                tn => tn.TariffNameId,
+                (t, tn) => new ServiceProviderTariffDto
+                {
+                    ServiceProviderTariffId = t.ServiceProviderTariffId,
+                    ServiceProviderId = t.ServiceProviderId,
+                    TariffNameId = t.TariffNameId,
+                    TariffName = tn.TariffName1,
+                    MainClientId = t.MainClientId,
+                    StartActiveDate = t.StartActiveDate,
+                    EndActiveDate = t.EndActiveDate,
+                    TariffPeriodName = t.TariffPeriodName,
+                    PercentageAdded = t.PercentageAdded
+                })
+            .OrderBy(t => t.TariffName)
+            .ToListAsync(cancellationToken);
+
+        return tariffs;
     }
 
     public async Task<ServiceProviderTariffDto?> GetTariffByIdAsync(int serviceProviderId, long tariffId, CancellationToken cancellationToken = default)

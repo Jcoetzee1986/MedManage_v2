@@ -22,18 +22,21 @@ export class ProviderService {
   // ─── Provider CRUD ───────────────────────────────────────────
 
   search(request: ProviderSearchRequest): Observable<PagedResult<ProviderDto>> {
-    return this.http.post<ApiResponse<PagedResult<ProviderDto>>>(`${this.baseUrl}/search`, request)
-      .pipe(map(r => r.data));
+    return this.http.post<ApiResponse<PagedResult<any>>>(`${this.baseUrl}/search`, request)
+      .pipe(map(r => ({
+        ...r.data,
+        items: (r.data.items || []).map((item: any) => this.mapProvider(item))
+      })));
   }
 
   getAll(): Observable<ProviderDto[]> {
-    return this.http.get<ApiResponse<ProviderDto[]>>(this.baseUrl)
-      .pipe(map(r => r.data));
+    return this.http.get<ApiResponse<any[]>>(this.baseUrl)
+      .pipe(map(r => (r.data || []).map((item: any) => this.mapProvider(item))));
   }
 
   getById(id: number): Observable<ProviderDto> {
-    return this.http.get<ApiResponse<ProviderDto>>(`${this.baseUrl}/${id}`)
-      .pipe(map(r => r.data));
+    return this.http.get<ApiResponse<any>>(`${this.baseUrl}/${id}`)
+      .pipe(map(r => this.mapProvider(r.data)));
   }
 
   create(request: CreateProviderRequest): Observable<ProviderDto> {
@@ -59,8 +62,18 @@ export class ProviderService {
   // ─── Tariff Assignments ──────────────────────────────────────
 
   getTariffs(providerId: number): Observable<ProviderTariffDto[]> {
-    return this.http.get<ApiResponse<ProviderTariffDto[]>>(`${this.baseUrl}/${providerId}/tariffs`)
-      .pipe(map(r => r.data));
+    return this.http.get<ApiResponse<any[]>>(`${this.baseUrl}/${providerId}/tariffs`)
+      .pipe(map(r => (r.data || []).map((item: any) => ({
+        id: item.serviceProviderTariffId ?? item.id ?? 0,
+        serviceProviderId: item.serviceProviderId,
+        tariffId: item.tariffNameId ?? item.tariffId,
+        tariffName: item.tariffName ?? '',
+        tariffCode: item.tariffCode ?? '',
+        dateFrom: item.startActiveDate ?? item.dateFrom,
+        dateTo: item.endActiveDate ?? item.dateTo,
+        percentageAdded: item.percentageAdded,
+        mainClientId: item.mainClientId
+      }))));
   }
 
   createTariff(providerId: number, request: CreateProviderTariffRequest): Observable<ProviderTariffDto> {
@@ -113,6 +126,31 @@ export class ProviderService {
   updateDiscount(providerId: number, id: number, request: CreateProviderDiscountRequest): Observable<ProviderDiscountDto> {
     return this.http.put<ApiResponse<ProviderDiscountDto>>(`${this.baseUrl}/${providerId}/discounts/${id}`, request)
       .pipe(map(r => r.data));
+  }
+
+  private mapProvider(data: any): ProviderDto {
+    if (!data) return data;
+    return {
+      id: data.serviceProviderId ?? data.id ?? 0,
+      providerNumber: data.practiceNr ?? data.providerNumber ?? '',
+      practiceName: data.practiceName ?? '',
+      firstName: data.serviceProviderName ?? data.firstName ?? '',
+      lastName: data.serviceProviderSurname ?? data.lastName ?? '',
+      specialityId: data.specialityId,
+      specialityName: data.specialityName ?? data.speciality ?? null,
+      practiceGroupNumber: data.groupPracticeNr ?? data.practiceGroupNumber ?? null,
+      numberOfPartners: data.noOfPartners ?? data.numberOfPartners ?? null,
+      serviceArea: data.serviceArea ?? null,
+      isHospital: data.isHospital ?? false,
+      contactNumber: data.practicePhoneNumber ?? data.contactNumber ?? null,
+      cellNumber: data.practiceCellNumber ?? data.cellNumber ?? null,
+      fax: data.practiceFaxNumber ?? data.fax ?? null,
+      email: data.practiceEmail ?? data.email ?? null,
+      countryId: data.countryId ?? null,
+      countryName: data.countryName ?? null,
+      languageId: data.languageId ?? null,
+      languageName: data.languageName ?? null
+    };
   }
 
   deleteDiscount(providerId: number, id: number): Observable<void> {

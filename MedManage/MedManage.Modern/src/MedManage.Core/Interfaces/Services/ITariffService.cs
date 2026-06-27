@@ -8,7 +8,10 @@ public interface ITariffService
     Task<TariffLookupResult?> LookupTariffAsync(TariffLookupRequest request);
 
     // Simple text search on base tariffs (for autocomplete)
-    Task<IEnumerable<BaseTariffDto>> SearchBaseTariffsAsync(string query);
+    Task<IEnumerable<BaseTariffDto>> SearchBaseTariffsAsync(string? code, string? description = null);
+
+    // Search tariffs with case context (uses SP to calculate rates)
+    Task<IEnumerable<TariffLookupResult>> LookupTariffForCaseAsync(int caseId, string tariffCode);
 
     // SP-wrapped case tariff calculation (fn_sc_TotalTariffPerCase)
     Task<IEnumerable<CaseTariffCalculationResult>> CalculateCaseTariffAsync(int caseId);

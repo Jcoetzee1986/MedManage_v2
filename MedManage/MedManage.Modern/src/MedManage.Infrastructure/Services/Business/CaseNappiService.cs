@@ -3,22 +3,53 @@ using MedManage.Core.DTOs.CaseNappi;
 using MedManage.Core.Entities;
 using MedManage.Core.Interfaces;
 using MedManage.Core.Interfaces.Services;
+using MedManage.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 namespace MedManage.Infrastructure.Services.Business;
 
 public class CaseNappiService : ICaseNappiService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly MedManageDbContext _dbContext;
 
-    public CaseNappiService(IUnitOfWork unitOfWork)
+    public CaseNappiService(IUnitOfWork unitOfWork, MedManageDbContext dbContext)
     {
         _unitOfWork = unitOfWork;
+        _dbContext = dbContext;
     }
 
     public async Task<IEnumerable<CaseNappiDto>> GetByCaseIdAsync(int caseId, CancellationToken cancellationToken = default)
     {
-        var items = await _unitOfWork.CaseNappiCodes.GetByCaseIdAsync(caseId);
-        return items.Select(e => e.ToDto());
+        var items = await _dbContext.CaseNappiCodes
+            .Where(cn => cn.CaseId == caseId && cn.DateDeleted == null)
+            .Join(_dbContext.NappiCodes,
+                cn => cn.NappiId,
+                n => n.NappiId,
+                (cn, n) => new CaseNappiDto
+                {
+                    CaseIdNappiId = cn.CaseIdNappiId,
+                    CaseId = cn.CaseId,
+                    NappiId = cn.NappiId,
+                    NappiCode = n.Code,
+                    NappiDescription = n.Description,
+                    Price1 = n.Price1,
+                    Value = cn.Value,
+                    Quantity = cn.Quantity,
+                    Measure = n.Measure,
+                    Units = n.Units,
+                    Dispensary = cn.Dispensary,
+                    Ward = cn.Ward,
+                    Theater = cn.Theater,
+                    Tto = cn.Tto,
+                    _0201 = cn._0201,
+                    Date = cn.Date,
+                    DateInserted = cn.DateInserted,
+                    DateModified = cn.DateUpdated
+                })
+            .ToListAsync(cancellationToken);
+
+        return items;
     }
 
     public async Task<CaseNappiDto?> GetByIdAsync(int caseId, int id, CancellationToken cancellationToken = default)

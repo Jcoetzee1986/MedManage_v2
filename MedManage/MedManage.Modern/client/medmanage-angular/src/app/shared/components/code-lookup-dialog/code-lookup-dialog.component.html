@@ -1,16 +1,29 @@
 <h2 mat-dialog-title>{{ title }}</h2>
 
 <mat-dialog-content>
-  <div class="search-field">
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>{{ searchPlaceholder }}</mat-label>
+  <div class="search-row">
+    <mat-form-field appearance="outline">
+      <mat-label>Code</mat-label>
       <input matInput
-             [formControl]="searchControl"
-             placeholder="Type at least 2 characters..."
+             [formControl]="codeControl"
+             placeholder="Code..."
              autocomplete="off"
-             aria-label="Search codes">
+             (keyup.enter)="onManualSearch()">
       <mat-icon matPrefix>search</mat-icon>
     </mat-form-field>
+
+    <mat-form-field appearance="outline" style="flex: 2">
+      <mat-label>Description</mat-label>
+      <input matInput
+             [formControl]="descriptionControl"
+             placeholder="Description..."
+             autocomplete="off"
+             (keyup.enter)="onManualSearch()">
+    </mat-form-field>
+
+    <button mat-raised-button color="primary" (click)="onManualSearch()" [disabled]="loading">
+      Search
+    </button>
   </div>
 
   <div class="results-container">
@@ -39,7 +52,7 @@
       </tr>
     </table>
 
-    <p *ngIf="!loading && results.length === 0 && searchControl.value && searchControl.value.length >= 2" class="no-results">
+    <p *ngIf="!loading && results.length === 0 && searched" class="no-results">
       No codes found matching your search.
     </p>
   </div>

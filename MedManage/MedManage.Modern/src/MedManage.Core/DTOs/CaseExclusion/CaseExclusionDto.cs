@@ -18,6 +18,7 @@ public class CaseExclusionDto
 {
     public int CaseId { get; set; }
     public int ExclusionId { get; set; }
+    public string? ExclusionName { get; set; }
     public string? Comment { get; set; }
     public DateTime? DateInserted { get; set; }
     public DateTime? DateUpdated { get; set; }

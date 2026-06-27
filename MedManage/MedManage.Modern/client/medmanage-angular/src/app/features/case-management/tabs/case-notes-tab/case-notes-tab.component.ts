@@ -34,20 +34,28 @@ export class CaseNotesTabComponent implements OnInit {
   private readonly snackBar = inject(MatSnackBar);
 
   items: CaseNoteDto[] = [];
-  displayedColumns = ['note', 'interimAmount1', 'interimAmount2', 'dateCreated', 'createdBy', 'actions'];
+  displayedColumns = ['note', 'interimAmount', 'interimHospital', 'interimRadiology', 'interimDialysis', 'interimSpecialist', 'interimPhysio', 'interimTransport', 'interimAccomodation', 'interimScript', 'dateCreated', 'actions'];
   showAddForm = false;
+  editingItem: CaseNoteDto | null = null;
 
   addForm = this.fb.group({
     note: [''],
-    interimAmount1: [null as number | null],
-    interimAmount2: [null as number | null],
-    interimAmount3: [null as number | null],
-    interimAmount4: [null as number | null],
-    interimAmount5: [null as number | null],
-    interimAmount6: [null as number | null],
-    interimAmount7: [null as number | null],
-    interimAmount8: [null as number | null]
+    interimHospital: [0],
+    interimRadiology: [0],
+    interimDialysis: [0],
+    interimSpecialist: [0],
+    interimPhysio: [0],
+    interimTransport: [0],
+    interimAccomodation: [0],
+    interimScript: [0]
   });
+
+  get interimTotal(): number {
+    const v = this.addForm.value;
+    return (v.interimHospital || 0) + (v.interimRadiology || 0) + (v.interimDialysis || 0)
+      + (v.interimSpecialist || 0) + (v.interimPhysio || 0) + (v.interimTransport || 0)
+      + (v.interimAccomodation || 0) + (v.interimScript || 0);
+  }
 
   ngOnInit(): void {
     this.loadItems();
@@ -60,28 +68,66 @@ export class CaseNotesTabComponent implements OnInit {
     });
   }
 
-  onAdd(): void {
+  onShowAddForm(): void {
+    this.showAddForm = true;
+    this.editingItem = null;
+    this.addForm.reset({
+      interimHospital: 0, interimRadiology: 0, interimDialysis: 0,
+      interimSpecialist: 0, interimPhysio: 0, interimTransport: 0,
+      interimAccomodation: 0, interimScript: 0
+    });
+  }
+
+  onEdit(item: CaseNoteDto): void {
+    this.showAddForm = true;
+    this.editingItem = item;
+    this.addForm.patchValue({
+      note: item.note || '',
+      interimHospital: item.interimHospital || 0,
+      interimRadiology: item.interimRadiology || 0,
+      interimDialysis: item.interimDialysis || 0,
+      interimSpecialist: item.interimSpecialist || 0,
+      interimPhysio: item.interimPhysio || 0,
+      interimTransport: item.interimTransport || 0,
+      interimAccomodation: item.interimAccomodation || 0,
+      interimScript: item.interimScript || 0
+    });
+  }
+
+  onCancel(): void {
+    this.showAddForm = false;
+    this.editingItem = null;
+    this.addForm.reset();
+  }
+
+  onSave(): void {
     const val = this.addForm.value;
     const request: CreateCaseNoteRequest = {
       note: val.note || undefined,
-      interimAmount1: val.interimAmount1 || undefined,
-      interimAmount2: val.interimAmount2 || undefined,
-      interimAmount3: val.interimAmount3 || undefined,
-      interimAmount4: val.interimAmount4 || undefined,
-      interimAmount5: val.interimAmount5 || undefined,
-      interimAmount6: val.interimAmount6 || undefined,
-      interimAmount7: val.interimAmount7 || undefined,
-      interimAmount8: val.interimAmount8 || undefined
+      interimAmount: this.interimTotal,
+      interimHospital: val.interimHospital || 0,
+      interimRadiology: val.interimRadiology || 0,
+      interimDialysis: val.interimDialysis || 0,
+      interimSpecialist: val.interimSpecialist || 0,
+      interimPhysio: val.interimPhysio || 0,
+      interimTransport: val.interimTransport || 0,
+      interimAccomodation: val.interimAccomodation || 0,
+      interimScript: val.interimScript || 0
     };
 
-    this.caseService.createNote(this.caseId, request).subscribe({
+    const obs = this.editingItem
+      ? this.caseService.updateNote(this.caseId, this.editingItem.id, request)
+      : this.caseService.createNote(this.caseId, request);
+
+    obs.subscribe({
       next: () => {
         this.loadItems();
         this.addForm.reset();
         this.showAddForm = false;
-        this.snackBar.open('Note added', 'Close', { duration: 3000 });
+        this.editingItem = null;
+        this.snackBar.open(this.editingItem ? 'Note updated' : 'Note added', 'Close', { duration: 3000 });
       },
-      error: () => this.snackBar.open('Failed to add note', 'Close', { duration: 3000 })
+      error: () => this.snackBar.open('Failed to save note', 'Close', { duration: 3000 })
     });
   }
 

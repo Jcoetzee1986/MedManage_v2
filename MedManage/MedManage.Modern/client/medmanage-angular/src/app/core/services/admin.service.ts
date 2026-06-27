@@ -121,6 +121,12 @@ export class AdminService {
       .pipe(map(r => r.data));
   }
 
+  /** Update user details (admin) */
+  updateUser(userId: string, data: { userName: string; email: string }): Observable<any> {
+    return this.http.put<ApiResponse<any>>(`${this.usersUrl}/${userId}`, data)
+      .pipe(map(r => r.data));
+  }
+
   /** Reset a user's password (admin) */
   adminResetPassword(userId: string, request: AdminResetPasswordRequest): Observable<boolean> {
     return this.http.post<ApiResponse<boolean>>(`${this.usersUrl}/${userId}/reset-password`, request)

@@ -1,17 +1,34 @@
 <h2 mat-dialog-title>Copy Case #{{ data.caseNumber }}</h2>
 
 <mat-dialog-content>
-  <p>Select which items to include in the copy:</p>
-  <form [formGroup]="form" class="copy-options">
-    <mat-checkbox formControlName="includeCpt">CPT Codes</mat-checkbox>
-    <mat-checkbox formControlName="includeIcd">ICD Codes</mat-checkbox>
-    <mat-checkbox formControlName="includeTariffs">Tariffs</mat-checkbox>
-    <mat-checkbox formControlName="includeFacilityTypes">Facility Types</mat-checkbox>
-    <mat-checkbox formControlName="includeNotes">Notes</mat-checkbox>
-    <mat-checkbox formControlName="includeComments">Comments</mat-checkbox>
-    <mat-checkbox formControlName="includeExclusions">Exclusions</mat-checkbox>
-    <mat-checkbox formControlName="includeNappi">NAPPI Codes</mat-checkbox>
-    <mat-checkbox formControlName="includeChecklist">Checklist</mat-checkbox>
+  <form [formGroup]="form">
+    <p class="section-label">New admission date:</p>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Admission Date</mat-label>
+      <input matInput [matDatepicker]="admPicker" formControlName="newAdmissionDate">
+      <mat-datepicker-toggle matIconSuffix [for]="admPicker"></mat-datepicker-toggle>
+      <mat-datepicker #admPicker></mat-datepicker>
+    </mat-form-field>
+
+    <p class="section-label">Options:</p>
+    <div class="copy-options">
+      <mat-checkbox formControlName="useSameAuthNumber">Use same auth number</mat-checkbox>
+      <mat-checkbox formControlName="linkToParentCase">Link to parent case</mat-checkbox>
+    </div>
+
+    <p class="section-label">Include in copy:</p>
+    <div class="copy-options">
+      <mat-checkbox formControlName="includeCptCodes">CPT Codes</mat-checkbox>
+      <mat-checkbox formControlName="includeIcdCodes">ICD Codes</mat-checkbox>
+      <mat-checkbox formControlName="includeTariffs">Tariffs</mat-checkbox>
+      <mat-checkbox formControlName="includeFacilityTypes">Facility Types / Days in Care</mat-checkbox>
+      <mat-checkbox formControlName="includeExclusions">Exclusions</mat-checkbox>
+      <mat-checkbox formControlName="includeNotes">Notes</mat-checkbox>
+      <mat-checkbox formControlName="includeComments">Comments</mat-checkbox>
+      <mat-checkbox formControlName="includeNappiCodes">NAPPI Codes</mat-checkbox>
+      <mat-checkbox formControlName="includeChecklist">Checklist</mat-checkbox>
+      <mat-checkbox formControlName="includeLetterNotes">Letter Notes</mat-checkbox>
+    </div>
   </form>
 </mat-dialog-content>
 

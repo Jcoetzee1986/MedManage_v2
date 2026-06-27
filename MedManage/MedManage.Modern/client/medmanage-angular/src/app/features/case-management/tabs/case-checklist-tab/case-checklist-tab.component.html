@@ -1,70 +1,51 @@
 <div class="tab-content">
   <div class="tab-header">
     <h3>Checklist</h3>
-    <button mat-raised-button color="primary" (click)="showAddForm = !showAddForm">
-      <mat-icon>add</mat-icon> Add Item
+    <button mat-raised-button color="primary" (click)="saveAll()">
+      <mat-icon>save</mat-icon> Save All
     </button>
   </div>
 
-  <div class="add-form" *ngIf="showAddForm">
-    <form [formGroup]="addForm" (ngSubmit)="onAdd()">
-      <div class="form-row">
-        <app-reference-data-dropdown
-          resource="checklist-template"
-          label="Template"
-          formControlName="templateId">
-        </app-reference-data-dropdown>
+  @if (items.length > 0) {
+    <table mat-table [dataSource]="items" class="full-width-table">
+      <ng-container matColumnDef="templateName">
+        <th mat-header-cell *matHeaderCellDef>Item</th>
+        <td mat-cell *matCellDef="let item">{{ item.templateName }}</td>
+      </ng-container>
 
-        <mat-form-field appearance="outline">
-          <mat-label>Comments</mat-label>
-          <input matInput formControlName="comments">
-        </mat-form-field>
+      <ng-container matColumnDef="checked">
+        <th mat-header-cell *matHeaderCellDef>Checked</th>
+        <td mat-cell *matCellDef="let item">
+          <mat-checkbox [checked]="item.checked" (change)="onCheckChanged(item)"></mat-checkbox>
+        </td>
+      </ng-container>
 
-        <mat-checkbox formControlName="checked">Checked</mat-checkbox>
-        <mat-checkbox formControlName="notApplicable">N/A</mat-checkbox>
-      </div>
-      <div class="form-actions">
-        <button mat-raised-button color="primary" type="submit">Save</button>
-        <button mat-stroked-button type="button" (click)="showAddForm = false">Cancel</button>
-      </div>
-    </form>
-  </div>
+      <ng-container matColumnDef="notApplicable">
+        <th mat-header-cell *matHeaderCellDef>N/A</th>
+        <td mat-cell *matCellDef="let item">
+          <mat-checkbox [checked]="item.notApplicable" (change)="onNaChanged(item)"></mat-checkbox>
+        </td>
+      </ng-container>
 
-  <table mat-table [dataSource]="items" class="full-width">
-    <ng-container matColumnDef="templateName">
-      <th mat-header-cell *matHeaderCellDef>Item</th>
-      <td mat-cell *matCellDef="let item">{{ item.templateName }}</td>
-    </ng-container>
-    <ng-container matColumnDef="checked">
-      <th mat-header-cell *matHeaderCellDef>Checked</th>
-      <td mat-cell *matCellDef="let item">
-        <mat-checkbox [checked]="item.checked" (change)="onToggleChecked(item)"></mat-checkbox>
-      </td>
-    </ng-container>
-    <ng-container matColumnDef="notApplicable">
-      <th mat-header-cell *matHeaderCellDef>N/A</th>
-      <td mat-cell *matCellDef="let item">{{ item.notApplicable ? 'Yes' : '' }}</td>
-    </ng-container>
-    <ng-container matColumnDef="comments">
-      <th mat-header-cell *matHeaderCellDef>Comments</th>
-      <td mat-cell *matCellDef="let item">{{ item.comments }}</td>
-    </ng-container>
-    <ng-container matColumnDef="date">
-      <th mat-header-cell *matHeaderCellDef>Date</th>
-      <td mat-cell *matCellDef="let item">{{ item.date | date:'shortDate' }}</td>
-    </ng-container>
-    <ng-container matColumnDef="actions">
-      <th mat-header-cell *matHeaderCellDef>Actions</th>
-      <td mat-cell *matCellDef="let item">
-        <button mat-icon-button color="warn" (click)="onDelete(item)" aria-label="Delete">
-          <mat-icon>delete</mat-icon>
-        </button>
-      </td>
-    </ng-container>
+      <ng-container matColumnDef="comments">
+        <th mat-header-cell *matHeaderCellDef>Comments</th>
+        <td mat-cell *matCellDef="let item">
+          <input class="inline-input" [(ngModel)]="item.comments" (blur)="onCommentBlur(item)"
+                 placeholder="Add comment...">
+        </td>
+      </ng-container>
 
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-  </table>
+      <ng-container matColumnDef="date">
+        <th mat-header-cell *matHeaderCellDef>Date</th>
+        <td mat-cell *matCellDef="let item">{{ item.date | date:'shortDate' }}</td>
+      </ng-container>
 
-  <p *ngIf="items.length === 0" class="empty-message">No checklist items.</p>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  }
+
+  @if (items.length === 0) {
+    <p class="empty-message">No checklist items for this case.</p>
+  }
 </div>

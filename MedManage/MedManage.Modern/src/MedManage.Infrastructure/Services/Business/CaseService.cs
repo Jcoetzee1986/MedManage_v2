@@ -224,6 +224,48 @@ public class CaseService : ICaseService
         return existingCase.ToDto();
     }
 
+    public async Task<CaseDto> PatchAsync(int caseId, Dictionary<string, object?> fields, CancellationToken cancellationToken = default)
+    {
+        var entity = await _unitOfWork.Cases.GetByIdAsync(caseId);
+        if (entity == null)
+            throw new KeyNotFoundException($"Case with ID {caseId} not found");
+
+        foreach (var (key, value) in fields)
+        {
+            switch (key.ToLowerInvariant())
+            {
+                case "admissiondate":
+                    entity.AdmissionDate = value == null ? null : DateOnly.Parse(value.ToString()!);
+                    break;
+                case "dischargedate":
+                    entity.DischargeDate = value == null ? null : DateOnly.Parse(value.ToString()!);
+                    break;
+                case "interimamount":
+                case "totalamount":
+                    entity.TotalAmount = value == null ? null : Convert.ToDecimal(value);
+                    break;
+                case "totallengthofstay":
+                    entity.TotalLengthOfStay = value == null ? null : Convert.ToDecimal(value);
+                    break;
+                case "penaltypercentage":
+                    entity.PenaltyPercentage = value == null ? null : Convert.ToDecimal(value);
+                    break;
+                case "statusid":
+                    entity.StatusId = value == null ? null : Convert.ToInt32(value);
+                    break;
+                case "casedescription":
+                    entity.CaseDescription = value?.ToString();
+                    break;
+            }
+        }
+
+        entity.DateUpdated = DateTime.UtcNow;
+        await _unitOfWork.Cases.UpdateAsync(entity);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return entity.ToDto();
+    }
+
     public async Task<bool> DeleteAsync(int caseId, CancellationToken cancellationToken = default)
     {
         var caseEntity = await _unitOfWork.Cases.GetByIdAsync(caseId);

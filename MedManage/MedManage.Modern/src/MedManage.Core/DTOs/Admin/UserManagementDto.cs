@@ -103,3 +103,12 @@ public class AdminResetPasswordRequest
     public string? NewPassword { get; set; }
     public bool SendEmail { get; set; } = true;
 }
+
+/// <summary>
+/// Request to update user details (admin)
+/// </summary>
+public class UpdateUserDetailsRequest
+{
+    public string? UserName { get; set; }
+    public string? Email { get; set; }
+}

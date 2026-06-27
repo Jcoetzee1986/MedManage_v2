@@ -8,7 +8,9 @@ public class ServiceProviderTariffDto
     public long ServiceProviderTariffId { get; set; }
     public int ServiceProviderId { get; set; }
     public int? TariffNameId { get; set; }
+    public string? TariffName { get; set; }
     public int? MainClientId { get; set; }
+    public string? MainClientName { get; set; }
     public DateOnly? StartActiveDate { get; set; }
     public DateOnly? EndActiveDate { get; set; }
     public int? TariffPeriodName { get; set; }

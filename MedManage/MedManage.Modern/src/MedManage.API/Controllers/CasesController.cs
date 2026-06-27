@@ -18,6 +18,7 @@ public class CasesController : ControllerBase
     private readonly ICaseBusinessRuleService _businessRuleService;
     private readonly IValidator<CreateCaseRequest> _createValidator;
     private readonly IValidator<UpdateCaseRequest> _updateValidator;
+    private readonly ILogger<CasesController> _logger;
 
     public CasesController(
         ICaseService caseService,
@@ -25,7 +26,8 @@ public class CasesController : ControllerBase
         ICaseWorkflowService caseWorkflowService,
         ICaseBusinessRuleService businessRuleService,
         IValidator<CreateCaseRequest> createValidator,
-        IValidator<UpdateCaseRequest> updateValidator)
+        IValidator<UpdateCaseRequest> updateValidator,
+        ILogger<CasesController> logger)
     {
         _caseService = caseService;
         _caseCopyService = caseCopyService;
@@ -33,6 +35,7 @@ public class CasesController : ControllerBase
         _businessRuleService = businessRuleService;
         _createValidator = createValidator;
         _updateValidator = updateValidator;
+        _logger = logger;
     }
 
     /// <summary>
@@ -166,6 +169,30 @@ public class CasesController : ControllerBase
         catch (KeyNotFoundException ex)
         {
             return NotFound(ApiResponse<CaseDto>.ErrorResponse(ex.Message));
+        }
+    }
+
+    /// <summary>
+    /// Partially update a case — only non-null fields in the body are applied
+    /// </summary>
+    [HttpPatch("{id}")]
+    [ProducesResponseType(typeof(ApiResponse<CaseDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<CaseDto>), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Patch(int id, [FromBody] Dictionary<string, object?> fields, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var caseDto = await _caseService.PatchAsync(id, fields, cancellationToken);
+            return Ok(ApiResponse<CaseDto>.SuccessResponse(caseDto, "Case patched successfully"));
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ApiResponse<CaseDto>.ErrorResponse(ex.Message));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error patching case {CaseId}", id);
+            return StatusCode(500, ApiResponse<CaseDto>.ErrorResponse("An error occurred while patching the case"));
         }
     }
 

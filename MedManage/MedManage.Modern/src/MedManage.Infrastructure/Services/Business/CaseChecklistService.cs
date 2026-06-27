@@ -7,16 +7,20 @@ using MedManage.Core.DTOs.CaseChecklist;
 using MedManage.Core.Entities;
 using MedManage.Core.Interfaces;
 using MedManage.Core.Interfaces.Services;
+using MedManage.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 namespace MedManage.Infrastructure.Services.Business;
 
 public class CaseChecklistService : ICaseChecklistService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly MedManageDbContext _dbContext;
 
-    public CaseChecklistService(IUnitOfWork unitOfWork)
+    public CaseChecklistService(IUnitOfWork unitOfWork, MedManageDbContext dbContext)
     {
         _unitOfWork = unitOfWork;
+        _dbContext = dbContext;
     }
 
     public async Task<IEnumerable<CaseChecklistDto>> GetAllAsync()
@@ -28,18 +32,22 @@ public class CaseChecklistService : ICaseChecklistService
 
     public async Task<CaseChecklistDto?> GetByIdAsync(int caseId, int checklistTemplateId)
     {
-        var checklist = (await _unitOfWork.CaseChecklists
-            .FindAsync(c => c.CaseId == caseId && c.ChecklistTemplateId == checklistTemplateId && c.DateDeleted == null))
-            .FirstOrDefault();
+        var checklist = await _dbContext.CaseChecklists
+            .Include(c => c.ChecklistTemplate)
+            .FirstOrDefaultAsync(c => c.CaseId == caseId && c.ChecklistTemplateId == checklistTemplateId && c.DateDeleted == null);
 
         return checklist == null ? null : checklist.ToDto();
     }
 
     public async Task<IEnumerable<CaseChecklistDto>> GetByCaseIdAsync(int caseId)
     {
-        var checklists = await _unitOfWork.CaseChecklists
-            .FindAsync(c => c.CaseId == caseId && c.DateDeleted == null);
-        return checklists.OrderByDescending(c => c.DateInserted).Select(e => e.ToDto());
+        var checklists = await _dbContext.CaseChecklists
+            .Include(c => c.ChecklistTemplate)
+            .Where(c => c.CaseId == caseId && c.DateDeleted == null)
+            .OrderBy(c => c.ChecklistTemplate!.ChecklistPrompt)
+            .ToListAsync();
+
+        return checklists.Select(e => e.ToDto());
     }
 
     public async Task<CaseChecklistDto> CreateAsync(CreateCaseChecklistDto dto)

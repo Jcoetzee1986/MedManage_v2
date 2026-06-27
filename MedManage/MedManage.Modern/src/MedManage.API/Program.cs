@@ -113,51 +113,6 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = jwtSettings["Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
     };
-
-    // In Development, accept requests without a valid token by creating a dev identity
-    if (builder.Environment.IsDevelopment())
-    {
-        options.Events = new Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents
-        {
-            OnMessageReceived = context =>
-            {
-                // If no Authorization header, create a dev identity
-                if (string.IsNullOrEmpty(context.Request.Headers.Authorization.FirstOrDefault()))
-                {
-                    var claims = new[]
-                    {
-                        new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.NameIdentifier, "dev-user"),
-                        new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, "SystemAdmin"),
-                        new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, "System Administrator"),
-                        new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, "Case Manager"),
-                        new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, "Billing Auditing"),
-                        new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, "Imports"),
-                        new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, "Metadata Administrator"),
-                    };
-                    var identity = new System.Security.Claims.ClaimsIdentity(claims, "DevAuth");
-                    context.Principal = new System.Security.Claims.ClaimsPrincipal(identity);
-                    context.Success();
-                }
-                return Task.CompletedTask;
-            },
-            OnAuthenticationFailed = context =>
-            {
-                // In dev, don't fail — create dev identity instead
-                var claims = new[]
-                {
-                    new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.NameIdentifier, "dev-user"),
-                    new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, "SystemAdmin"),
-                    new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, "System Administrator"),
-                    new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, "Case Manager"),
-                };
-                var identity = new System.Security.Claims.ClaimsIdentity(claims, "DevAuth");
-                context.Principal = new System.Security.Claims.ClaimsPrincipal(identity);
-                context.Success();
-                return Task.CompletedTask;
-            }
-        };
-        options.TokenValidationParameters.ValidateLifetime = false;
-    }
 });
 
 // Configure CORS

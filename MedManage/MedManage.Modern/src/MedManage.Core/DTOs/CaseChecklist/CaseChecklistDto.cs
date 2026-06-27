@@ -24,6 +24,7 @@ public class CaseChecklistDto
 {
     public int CaseId { get; set; }
     public int ChecklistTemplateId { get; set; }
+    public string? TemplateName { get; set; }
     public bool? Checked { get; set; }
     public DateTime? Date { get; set; }
     public string? Comments { get; set; }

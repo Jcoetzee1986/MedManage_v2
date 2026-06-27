@@ -28,13 +28,71 @@ export class BillingService {
   // ─── CRUD ───────────────────────────────────────────────────
 
   search(request: BillingSearchRequest): Observable<PagedResult<CaseBillingDto>> {
-    return this.http.post<ApiResponse<PagedResult<CaseBillingDto>>>(`${this.baseUrl}/search`, request)
-      .pipe(map(r => r.data));
+    return this.http.post<ApiResponse<PagedResult<any>>>(`${this.baseUrl}/search`, request)
+      .pipe(map(r => ({
+        ...r.data,
+        items: (r.data.items || []).map((item: any) => this.mapBilling(item))
+      })));
+  }
+
+  private mapBilling(item: any): any {
+    return {
+      id: item.caseBillingId ?? item.id ?? 0,
+      caseId: item.caseId,
+      accountNumber: item.accountNumber || '',
+      invoiceNumber: item.invoiceNumber || '',
+      caseNumber: item.caseNumber || '',
+      memberName: item.memberName || [item.patientSurname, item.patientName].filter(Boolean).join(', ') || '',
+      providerName: item.providerName || '',
+      billingStatusName: item.billingStatusName || '',
+      billingStatusId: item.billingStatusId,
+      amount: item.amountDue ?? item.amount ?? 0,
+      discount: item.discount ?? 0,
+      penalty: item.penalty ?? 0,
+      rejectedAmount: item.rejected ?? item.rejectedAmount ?? 0,
+      finalInvoiceAmount: item.finalInvoiceAmountDue ?? item.finalInvoiceAmount ?? 0,
+      amountPaid: item.amountPaid ?? 0,
+      remittanceNumber: item.remittance ?? item.remittanceNumber ?? '',
+      dateReceived: item.dateReceived,
+      datePaid: item.datePaid,
+      paid: item.paid ?? false
+    };
   }
 
   getById(id: number): Observable<CaseBillingDto> {
-    return this.http.get<ApiResponse<CaseBillingDto>>(`${this.baseUrl}/${id}`)
-      .pipe(map(r => r.data));
+    return this.http.get<ApiResponse<any>>(`${this.baseUrl}/${id}`)
+      .pipe(map(r => {
+        const item = r.data;
+        return {
+          id: item.caseBillingId ?? item.id ?? 0,
+          caseId: item.caseId,
+          caseNumber: item.caseNumber,
+          accountNumber: item.accountNumber,
+          invoiceNumber: item.invoiceNumber,
+          billingStatusId: item.billingStatusId,
+          billingStatusName: item.billingStatusName,
+          memberName: item.memberName || [item.patientSurname, item.patientName].filter(Boolean).join(', '),
+          providerName: item.providerName,
+          dateReceived: item.dateReceived,
+          dateSubmitted: item.dateSubmitted,
+          datePaid: item.datePaid,
+          accountDateFrom: item.accountDate,
+          accountDateTo: item.accountToDate,
+          amount: item.amountDue ?? item.amount,
+          finalInvoiceAmount: item.finalInvoiceAmountDue ?? item.finalInvoiceAmount,
+          discount: item.discount,
+          penalty: item.penalty,
+          rejectedAmount: item.rejected,
+          remittanceNumber: item.remittance ?? item.remittanceNumber,
+          submitted: item.submitted,
+          reported: item.reported,
+          reportedDate: item.dateReported,
+          patientName: item.patientName,
+          patientSurname: item.patientSurname,
+          patientInitials: item.patientInitials,
+          comments: item.comment ?? item.comments
+        } as any;
+      }));
   }
 
   create(request: CreateBillingRequest): Observable<CaseBillingDto> {
@@ -73,6 +131,13 @@ export class BillingService {
 
   getSummary(caseId: number): Observable<BillingSummary> {
     return this.http.get<ApiResponse<BillingSummary>>(`${this.baseUrl}/summary/${caseId}`)
+      .pipe(map(r => r.data));
+  }
+
+  // ─── Import Status Updates ──────────────────────────────────
+
+  importStatusUpdates(updates: any[]): Observable<any> {
+    return this.http.post<ApiResponse<any>>(`${this.baseUrl}/import-status`, updates)
       .pipe(map(r => r.data));
   }
 

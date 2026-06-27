@@ -64,7 +64,11 @@ public class CaseBillingDto
 {
     public int CaseBillingId { get; set; }
     public int? CaseId { get; set; }
+    public string? CaseNumber { get; set; }
     public int? ServiceProviderId { get; set; }
+    public string? ProviderName { get; set; }
+    public string? MemberName { get; set; }
+    public string? BillingStatusName { get; set; }
     public DateOnly? AccountDate { get; set; }
     public DateOnly? AccountToDate { get; set; }
     public string? AccountNumber { get; set; }

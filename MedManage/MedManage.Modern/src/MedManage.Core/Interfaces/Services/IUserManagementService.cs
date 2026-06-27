@@ -61,4 +61,9 @@ public interface IUserManagementService
     /// Permanently blocks/deactivates a user account
     /// </summary>
     Task<bool> PermanentlyBlockUserAsync(Guid userId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Updates user details (username, email)
+    /// </summary>
+    Task<bool> UpdateUserDetailsAsync(string userId, string? userName, string? email, CancellationToken cancellationToken = default);
 }

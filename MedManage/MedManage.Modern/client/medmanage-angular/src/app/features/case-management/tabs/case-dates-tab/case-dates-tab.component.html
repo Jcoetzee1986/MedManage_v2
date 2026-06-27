@@ -4,11 +4,11 @@
   <div class="info-grid">
     <div class="info-item">
       <span class="info-label">Admission Date</span>
-      <span class="info-value">{{ overallAdmissionDate || '—' }}</span>
+      <span class="info-value">{{ overallAdmissionDate ? (overallAdmissionDate | date:'yyyy/MM/dd HH:mm') : '—' }}</span>
     </div>
     <div class="info-item">
       <span class="info-label">Discharge Date</span>
-      <span class="info-value">{{ overallDischargeDate || '—' }}</span>
+      <span class="info-value">{{ overallDischargeDate ? (overallDischargeDate | date:'yyyy/MM/dd HH:mm') : '—' }}</span>
     </div>
     <div class="info-item">
       <span class="info-label">Total LOS</span>
@@ -42,26 +42,28 @@
 
           <mat-form-field appearance="outline">
             <mat-label>Admitted</mat-label>
-            <input matInput [matDatepicker]="admPicker" formControlName="dateAdmitted">
+            <input matInput [matDatepicker]="admPicker" formControlName="dateAdmitted"
+                   (dateChange)="onDateChange()">
             <mat-datepicker-toggle matIconSuffix [for]="admPicker"></mat-datepicker-toggle>
             <mat-datepicker #admPicker></mat-datepicker>
           </mat-form-field>
 
           <mat-form-field appearance="outline">
             <mat-label>Time Admitted</mat-label>
-            <input matInput type="time" formControlName="timeAdmitted">
+            <input matInput type="time" formControlName="timeAdmitted" (change)="onDateChange()">
           </mat-form-field>
 
           <mat-form-field appearance="outline">
             <mat-label>Discharged</mat-label>
-            <input matInput [matDatepicker]="disPicker" formControlName="dateDischarged">
+            <input matInput [matDatepicker]="disPicker" formControlName="dateDischarged"
+                   (dateChange)="onDateChange()">
             <mat-datepicker-toggle matIconSuffix [for]="disPicker"></mat-datepicker-toggle>
             <mat-datepicker #disPicker></mat-datepicker>
           </mat-form-field>
 
           <mat-form-field appearance="outline">
             <mat-label>Time Discharged</mat-label>
-            <input matInput type="time" formControlName="timeDischarged">
+            <input matInput type="time" formControlName="timeDischarged" (change)="onDateChange()">
           </mat-form-field>
 
           <mat-form-field appearance="outline">

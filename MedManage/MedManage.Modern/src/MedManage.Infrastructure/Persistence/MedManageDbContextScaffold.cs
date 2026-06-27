@@ -564,6 +564,7 @@ public partial class MedManageDbContextScaffold : DbContext
 
         modelBuilder.Entity<CaseTariff>(entity =>
         {
+            entity.HasKey(e => e.CaseIdTariffId);
             entity.Property(e => e.CaseIdTariffId).ValueGeneratedOnAdd();
         });
 

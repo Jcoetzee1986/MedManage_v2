@@ -5,7 +5,6 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -37,7 +36,7 @@ import { CaseDatesTabComponent } from '../tabs/case-dates-tab/case-dates-tab.com
 import { CaseCptTabComponent } from '../tabs/case-cpt-tab/case-cpt-tab.component';
 import { CaseIcdTabComponent } from '../tabs/case-icd-tab/case-icd-tab.component';
 import { CaseTariffsTabComponent } from '../tabs/case-tariffs-tab/case-tariffs-tab.component';
-import { CaseFacilityTypesTabComponent } from '../tabs/case-facility-types-tab/case-facility-types-tab.component';
+//import { CaseFacilityTypesTabComponent } from '../tabs/case-facility-types-tab/case-facility-types-tab.component';
 import { CaseExclusionsTabComponent } from '../tabs/case-exclusions-tab/case-exclusions-tab.component';
 import { CaseNappiTabComponent } from '../tabs/case-nappi-tab/case-nappi-tab.component';
 import { CaseNotesTabComponent } from '../tabs/case-notes-tab/case-notes-tab.component';
@@ -56,7 +55,6 @@ import { CaseCopyDialogComponent } from '../case-copy-dialog/case-copy-dialog.co
     MatTabsModule,
     MatButtonModule,
     MatIconModule,
-    MatToolbarModule,
     MatDialogModule,
     MatSnackBarModule,
     MatTooltipModule,
@@ -76,7 +74,7 @@ import { CaseCopyDialogComponent } from '../case-copy-dialog/case-copy-dialog.co
     CaseCptTabComponent,
     CaseIcdTabComponent,
     CaseTariffsTabComponent,
-    CaseFacilityTypesTabComponent,
+    //CaseFacilityTypesTabComponent,
     CaseExclusionsTabComponent,
     CaseNappiTabComponent,
     CaseNotesTabComponent,
@@ -116,7 +114,7 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
     { id: 'cpt', label: 'CPT Codes' },
     { id: 'icd', label: 'ICD Codes' },
     { id: 'tariffs', label: 'Tariffs' },
-    { id: 'facility', label: 'Facility Types' },
+    //{ id: 'facility', label: 'Facility Types' },
     { id: 'exclusions', label: 'Exclusions' },
     { id: 'nappi', label: 'NAPPI' },
     { id: 'notes', label: 'Notes' },
@@ -580,7 +578,11 @@ export class CaseDetailComponent implements OnInit, OnDestroy {
   onCopyCase(): void {
     const dialogRef = this.dialog.open(CaseCopyDialogComponent, {
       width: '500px',
-      data: { caseId: this.caseId, caseNumber: this.caseData?.caseNumber }
+      data: {
+        caseId: this.caseId,
+        caseNumber: this.caseData?.authNumber || this.caseData?.caseNumber,
+        admissionDate: this.caseData?.admissionDate
+      }
     });
 
     dialogRef.afterClosed().subscribe(result => {

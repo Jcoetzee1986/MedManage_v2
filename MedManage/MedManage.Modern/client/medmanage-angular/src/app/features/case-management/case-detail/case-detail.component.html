@@ -1,41 +1,41 @@
 <div class="case-detail-container" *ngIf="!loading; else loadingTpl">
-  <!-- Toolbar -->
-  <mat-toolbar class="case-toolbar">
-    <button mat-icon-button (click)="onClose()" aria-label="Back to list" matTooltip="Close">
-      <mat-icon>arrow_back</mat-icon>
-    </button>
-    <span class="case-title" *ngIf="!isNewCase">
-      Case #{{ caseData?.authNumber || caseData?.caseNumber || caseId }} - {{ caseData?.memberSurname ? (caseData!.memberSurname + ', ' + (caseData!.memberName || '')) : '' }}
-    </span>
-    <span class="case-title" *ngIf="isNewCase">New Case</span>
-
-    <span class="toolbar-spacer"></span>
-
-    <span class="status-badge" *ngIf="caseData?.caseStatusName">{{ caseData?.caseStatusName }}</span>
-
-    <button mat-raised-button color="primary" (click)="onSave()" [disabled]="saving" matTooltip="Save case">
-      <mat-icon>save</mat-icon> Save
-    </button>
-
-    <button mat-stroked-button (click)="onClose()" matTooltip="Close and return to list">
-      <mat-icon>close</mat-icon> Close
-    </button>
-
-    <button mat-stroked-button (click)="onPrintLetter()" *ngIf="!isNewCase"
-            matTooltip="Generate case letter PDF (requires ICD codes)">
-      <mat-icon>print</mat-icon> Print Letter
-    </button>
-
-    <button mat-stroked-button (click)="onCreateBooking()" *ngIf="!isNewCase" matTooltip="Create a new booking for this case">
-      <mat-icon>event</mat-icon> Create Booking
-    </button>
-
-    <ng-container *hasRole="['Case Manager', 'System Administrator']">
-      <button mat-stroked-button (click)="onCopyCase()" *ngIf="!isNewCase" matTooltip="Copy this case">
-        <mat-icon>content_copy</mat-icon> Copy
+  <!-- Header -->
+  <div class="case-header">
+    <div class="case-header-title">
+      <button mat-icon-button (click)="onClose()" aria-label="Back to list" matTooltip="Close">
+        <mat-icon>arrow_back</mat-icon>
       </button>
-    </ng-container>
-  </mat-toolbar>
+      <span class="case-title" *ngIf="!isNewCase">
+        Case #{{ caseData?.authNumber || caseData?.caseNumber || caseId }} - {{ caseData?.memberSurname ? (caseData!.memberSurname + ', ' + (caseData!.memberName || '')) : '' }}
+      </span>
+      <span class="case-title" *ngIf="isNewCase">New Case</span>
+      <span class="status-badge" *ngIf="caseData?.caseStatusName">{{ caseData?.caseStatusName }}</span>
+    </div>
+    <div class="case-header-actions">
+      <button mat-raised-button color="primary" (click)="onSave()" [disabled]="saving" matTooltip="Save case">
+        <mat-icon>save</mat-icon> Save
+      </button>
+
+      <button mat-stroked-button (click)="onClose()" matTooltip="Close and return to list">
+        <mat-icon>close</mat-icon> Close
+      </button>
+
+      <button mat-stroked-button (click)="onPrintLetter()" *ngIf="!isNewCase"
+              matTooltip="Generate case letter PDF (requires ICD codes)">
+        <mat-icon>print</mat-icon> Print Letter
+      </button>
+
+      <button mat-stroked-button (click)="onCreateBooking()" *ngIf="!isNewCase" matTooltip="Create a new booking for this case">
+        <mat-icon>event</mat-icon> Create Booking
+      </button>
+
+      <ng-container *hasRole="['Case Manager', 'System Administrator']">
+        <button mat-stroked-button (click)="onCopyCase()" *ngIf="!isNewCase" matTooltip="Copy this case">
+          <mat-icon>content_copy</mat-icon> Copy
+        </button>
+      </ng-container>
+    </div>
+  </div>
 
   <!-- Tab Navigation -->
   <nav mat-tab-nav-bar [tabPanel]="tabPanel">
@@ -276,9 +276,9 @@
       @case ('tariffs') {
         <app-case-tariffs-tab [caseId]="caseId"></app-case-tariffs-tab>
       }
-      @case ('facility') {
+      <!-- @case ('facility') {
         <app-case-facility-types-tab [caseId]="caseId"></app-case-facility-types-tab>
-      }
+      } -->
       @case ('exclusions') {
         <app-case-exclusions-tab [caseId]="caseId"></app-case-exclusions-tab>
       }

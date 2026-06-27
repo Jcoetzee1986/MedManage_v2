@@ -104,21 +104,30 @@ export class TariffService {
   // ─── Tariff Lookup ───────────────────────────────────────────
 
   lookup(query: string): Observable<TariffLookupResult[]> {
-    const params = new HttpParams().set('q', query);
+    const params = new HttpParams().set('code', query);
     return this.http.get<ApiResponse<any[]>>(`${this.baseUrl}/search`, { params })
-      .pipe(map(r => (r.data || []).map((item: any) => {
-        // BaseTariffId format: "14_0109" — extract code after underscore
-        const rawCode = item.baseTariffId || item.code || '';
-        const code = rawCode.includes('_') ? rawCode.substring(rawCode.indexOf('_') + 1) : rawCode;
-        return {
-          id: item.tariffId || item.id || 0,
-          code: code,
-          description: item.tariffDescription || item.description || '',
-          category: item.category || null,
-          currentRate: item.currentRate || null,
-          baseTariffId: rawCode
-        };
-      })));
+      .pipe(map(r => (r.data || []).map((item: any) => ({
+        id: item.tariffId || item.id || 0,
+        code: item.tariffCode || (item.baseTariffId?.includes('_') ? item.baseTariffId.substring(item.baseTariffId.indexOf('_') + 1) : item.baseTariffId) || '',
+        description: item.tariffDescription || item.description || '',
+        category: item.category || null,
+        currentRate: item.tariffAmount || item.currentRate || null,
+        baseTariffId: item.baseTariffId
+      }))));
+  }
+
+  /** Lookup tariff with case context (returns rates via SP) */
+  lookupForCase(caseId: number, code: string): Observable<TariffLookupResult[]> {
+    const params = new HttpParams().set('code', code);
+    return this.http.get<ApiResponse<any[]>>(`${this.baseUrl}/search-for-case/${caseId}`, { params })
+      .pipe(map(r => (r.data || []).map((item: any) => ({
+        id: item.tariffId || 0,
+        code: item.tariffCode || '',
+        description: item.tariffDescription || '',
+        category: item.speciality || null,
+        currentRate: item.tariffAmount || null,
+        baseTariffId: item.baseTariffId
+      }))));
   }
 
   // ─── Tariff Calculation ──────────────────────────────────────

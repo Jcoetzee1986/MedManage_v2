@@ -270,28 +270,30 @@ export interface CaseNoteDto {
   id: number;
   caseId: number;
   note?: string;
-  interimAmount1?: number;
-  interimAmount2?: number;
-  interimAmount3?: number;
-  interimAmount4?: number;
-  interimAmount5?: number;
-  interimAmount6?: number;
-  interimAmount7?: number;
-  interimAmount8?: number;
+  interimAmount?: number;
+  interimHospital?: number;
+  interimRadiology?: number;
+  interimDialysis?: number;
+  interimSpecialist?: number;
+  interimPhysio?: number;
+  interimTransport?: number;
+  interimAccomodation?: number;
+  interimScript?: number;
   dateCreated?: string;
   createdBy?: string;
 }
 
 export interface CreateCaseNoteRequest {
   note?: string;
-  interimAmount1?: number;
-  interimAmount2?: number;
-  interimAmount3?: number;
-  interimAmount4?: number;
-  interimAmount5?: number;
-  interimAmount6?: number;
-  interimAmount7?: number;
-  interimAmount8?: number;
+  interimAmount?: number;
+  interimHospital?: number;
+  interimRadiology?: number;
+  interimDialysis?: number;
+  interimSpecialist?: number;
+  interimPhysio?: number;
+  interimTransport?: number;
+  interimAccomodation?: number;
+  interimScript?: number;
 }
 
 /** Comments */
@@ -348,12 +350,16 @@ export interface CaseNappiDto {
   nappiId?: number;
   nappiCode?: string;
   nappiDescription?: string;
+  price1?: number;
   value?: number;
   quantity?: number;
+  measure?: string;
+  units?: number;
   dispensary?: boolean;
   ward?: boolean;
   theater?: boolean;
   tto?: boolean;
+  _0201?: boolean;
   date?: string;
 }
 
@@ -394,13 +400,17 @@ export interface CreateCaseLinkRequest {
 
 /** Case Copy */
 export interface CaseCopyRequest {
-  includeNotes?: boolean;
-  includeComments?: boolean;
-  includeCpt?: boolean;
-  includeIcd?: boolean;
+  includeCptCodes?: boolean;
+  includeIcdCodes?: boolean;
   includeTariffs?: boolean;
   includeFacilityTypes?: boolean;
   includeExclusions?: boolean;
-  includeNappi?: boolean;
+  includeNotes?: boolean;
+  includeComments?: boolean;
+  includeNappiCodes?: boolean;
   includeChecklist?: boolean;
+  includeLetterNotes?: boolean;
+  useSameAuthNumber?: boolean;
+  linkToParentCase?: boolean;
+  newAdmissionDate?: string;
 }

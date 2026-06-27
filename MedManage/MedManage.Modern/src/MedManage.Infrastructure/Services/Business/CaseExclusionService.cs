@@ -7,16 +7,20 @@ using MedManage.Core.DTOs.CaseExclusion;
 using MedManage.Core.Entities;
 using MedManage.Core.Interfaces;
 using MedManage.Core.Interfaces.Services;
+using MedManage.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 namespace MedManage.Infrastructure.Services.Business;
 
 public class CaseExclusionService : ICaseExclusionService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly MedManageDbContext _dbContext;
 
-    public CaseExclusionService(IUnitOfWork unitOfWork)
+    public CaseExclusionService(IUnitOfWork unitOfWork, MedManageDbContext dbContext)
     {
         _unitOfWork = unitOfWork;
+        _dbContext = dbContext;
     }
 
     public async Task<IEnumerable<CaseExclusionDto>> GetAllAsync()
@@ -28,18 +32,22 @@ public class CaseExclusionService : ICaseExclusionService
 
     public async Task<CaseExclusionDto?> GetByIdAsync(int caseId, int exclusionId)
     {
-        var exclusion = (await _unitOfWork.CaseExclusions
-            .FindAsync(c => c.CaseId == caseId && c.ExclusionId == exclusionId && c.DateDeleted == null))
-            .FirstOrDefault();
+        var exclusion = await _dbContext.Set<CaseExclusion>()
+            .Include(c => c.Exclusion)
+            .FirstOrDefaultAsync(c => c.CaseId == caseId && c.ExclusionId == exclusionId && c.DateDeleted == null);
 
         return exclusion == null ? null : exclusion.ToDto();
     }
 
     public async Task<IEnumerable<CaseExclusionDto>> GetByCaseIdAsync(int caseId)
     {
-        var exclusions = await _unitOfWork.CaseExclusions
-            .FindAsync(c => c.CaseId == caseId && c.DateDeleted == null);
-        return exclusions.OrderByDescending(c => c.DateInserted).Select(e => e.ToDto());
+        var exclusions = await _dbContext.Set<CaseExclusion>()
+            .Include(c => c.Exclusion)
+            .Where(c => c.CaseId == caseId && c.DateDeleted == null)
+            .OrderByDescending(c => c.DateInserted)
+            .ToListAsync();
+
+        return exclusions.Select(e => e.ToDto());
     }
 
     public async Task<CaseExclusionDto> CreateAsync(CreateCaseExclusionDto dto)

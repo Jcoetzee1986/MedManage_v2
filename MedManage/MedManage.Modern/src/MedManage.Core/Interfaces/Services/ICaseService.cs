@@ -9,6 +9,7 @@ public interface ICaseService
     Task<PagedResult<CaseDto>> SearchAsync(CaseSearchRequest request, CancellationToken cancellationToken = default);
     Task<CaseDto> CreateAsync(CreateCaseRequest request, CancellationToken cancellationToken = default);
     Task<CaseDto> UpdateAsync(UpdateCaseRequest request, CancellationToken cancellationToken = default);
+    Task<CaseDto> PatchAsync(int caseId, Dictionary<string, object?> fields, CancellationToken cancellationToken = default);
     Task<bool> DeleteAsync(int caseId, CancellationToken cancellationToken = default);
     Task<bool> ExistsAsync(int caseId, CancellationToken cancellationToken = default);
     Task<DuplicateCheckResult> CheckDuplicateAsync(DuplicateCheckRequest request, CancellationToken cancellationToken = default);

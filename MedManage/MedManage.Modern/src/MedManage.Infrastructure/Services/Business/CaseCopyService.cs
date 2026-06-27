@@ -35,17 +35,26 @@ public class CaseCopyService : ICaseCopyService
             throw new KeyNotFoundException($"Case with ID {sourceCaseId} not found");
         }
 
+        // Calculate date shift (difference between original admission and new admission)
+        int dateDiffDays = 0;
+        if (request.NewAdmissionDate.HasValue && sourceCase.AdmissionDate.HasValue)
+        {
+            dateDiffDays = request.NewAdmissionDate.Value.DayNumber - sourceCase.AdmissionDate.Value.DayNumber;
+        }
+
         // Create new case with same data but reset audit fields
         var newCase = new Case
         {
-            AuthNumber = sourceCase.AuthNumber,
+            AuthNumber = request.UseSameAuthNumber ? sourceCase.AuthNumber : null,
             AccountNr = sourceCase.AccountNr,
             MemberId = sourceCase.MemberId,
             ReferToId = sourceCase.ReferToId,
             ReferFromId = sourceCase.ReferFromId,
-            AdmissionDate = sourceCase.AdmissionDate,
+            AdmissionDate = request.NewAdmissionDate ?? sourceCase.AdmissionDate,
             AdmissionTime = sourceCase.AdmissionTime,
-            DischargeDate = sourceCase.DischargeDate,
+            DischargeDate = sourceCase.DischargeDate.HasValue && dateDiffDays != 0
+                ? sourceCase.DischargeDate.Value.AddDays(dateDiffDays)
+                : sourceCase.DischargeDate,
             DischargeTime = sourceCase.DischargeTime,
             AuthTypeId = sourceCase.AuthTypeId,
             WcaIod = sourceCase.WcaIod,
@@ -62,7 +71,6 @@ public class CaseCopyService : ICaseCopyService
             HasBooking = sourceCase.HasBooking,
             PenaltyPercentage = sourceCase.PenaltyPercentage,
             CaseCategoryId = sourceCase.CaseCategoryId,
-            // Reset audit fields — DbContext SaveChanges will set DateInserted/UserID
         };
 
         _context.Cases.Add(newCase);
@@ -121,6 +129,12 @@ public class CaseCopyService : ICaseCopyService
             await CopyLetterNotes(sourceCaseId, newCaseId, cancellationToken);
         }
 
+        // Link to parent case if requested
+        if (request.LinkToParentCase)
+        {
+            await LinkCases(sourceCaseId, newCaseId, cancellationToken);
+        }
+
         // Reload the new case for the response DTO
         var createdCase = await _context.Cases
             .Include(c => c.Member)
@@ -130,6 +144,14 @@ public class CaseCopyService : ICaseCopyService
             .FirstAsync(c => c.CaseId == newCaseId, cancellationToken);
 
         return createdCase.ToDto();
+    }
+
+    private async Task LinkCases(int sourceCaseId, int newCaseId, CancellationToken cancellationToken)
+    {
+        // Insert a link record between the source and new case
+        await _context.Database.ExecuteSqlRawAsync(
+            "INSERT INTO CaseManagement.Case_Link (CaseID, LinkedCaseID, DateInserted) VALUES ({0}, {1}, GETDATE())",
+            newCaseId, sourceCaseId);
     }
 
     private async Task CopyCptCodes(int sourceCaseId, int newCaseId, CancellationToken cancellationToken)

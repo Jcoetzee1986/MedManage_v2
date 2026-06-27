@@ -9,6 +9,8 @@ namespace MedManage.Infrastructure.Services.Business;
 /// <summary>
 /// Service for searching CPT, ICD, and NAPPI codes with typeahead support.
 /// Returns top N matching results ordered by code for efficient autocomplete.
+/// When 'code' param is provided, uses StartsWith (left-match).
+/// When 'description' param is provided, uses Contains (wildcard).
 /// </summary>
 public class CodeLookupService : ICodeLookupService
 {
@@ -19,17 +21,35 @@ public class CodeLookupService : ICodeLookupService
         _context = context;
     }
 
-    public async Task<IEnumerable<CodeLookupDto>> SearchCptAsync(string query, int limit = 20, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<CodeLookupDto>> SearchCptAsync(string? query, int limit = 20, CancellationToken cancellationToken = default, string? code = null, string? description = null)
     {
-        if (string.IsNullOrWhiteSpace(query))
-            return Enumerable.Empty<CodeLookupDto>();
+        var q = _context.Cpts.Where(c => c.DateDeleted == null);
 
-        var trimmed = query.Trim();
+        if (!string.IsNullOrWhiteSpace(code))
+        {
+            var trimCode = code.Trim();
+            q = q.Where(c => c.Code != null && c.Code.StartsWith(trimCode));
+        }
 
-        return await _context.Cpts
-            .Where(c => c.DateDeleted == null &&
-                (c.Code != null && c.Code.Contains(trimmed) ||
-                 c.ShortDescr != null && c.ShortDescr.Contains(trimmed)))
+        if (!string.IsNullOrWhiteSpace(description))
+        {
+            var trimDesc = description.Trim();
+            q = q.Where(c => c.ShortDescr != null && c.ShortDescr.Contains(trimDesc));
+        }
+
+        // Fallback to the generic 'q' param (wildcard on both)
+        if (string.IsNullOrWhiteSpace(code) && string.IsNullOrWhiteSpace(description))
+        {
+            if (string.IsNullOrWhiteSpace(query))
+                return Enumerable.Empty<CodeLookupDto>();
+
+            var trimmed = query.Trim();
+            q = q.Where(c =>
+                (c.Code != null && c.Code.StartsWith(trimmed)) ||
+                (c.ShortDescr != null && c.ShortDescr.Contains(trimmed)));
+        }
+
+        return await q
             .OrderBy(c => c.Code)
             .Take(limit)
             .Select(c => new CodeLookupDto
@@ -41,17 +61,35 @@ public class CodeLookupService : ICodeLookupService
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<IEnumerable<CodeLookupDto>> SearchIcdAsync(string query, int limit = 20, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<CodeLookupDto>> SearchIcdAsync(string? query, int limit = 20, CancellationToken cancellationToken = default, string? code = null, string? description = null)
     {
-        if (string.IsNullOrWhiteSpace(query))
-            return Enumerable.Empty<CodeLookupDto>();
+        var q = _context.Icds.Where(i => i.DateDeleted == null);
 
-        var trimmed = query.Trim();
+        if (!string.IsNullOrWhiteSpace(code))
+        {
+            var trimCode = code.Trim();
+            q = q.Where(i => i.DiagnosisCode != null && i.DiagnosisCode.StartsWith(trimCode));
+        }
 
-        return await _context.Icds
-            .Where(i => i.DateDeleted == null &&
-                (i.DiagnosisCode != null && i.DiagnosisCode.Contains(trimmed) ||
-                 i.DiagnosisDesc != null && i.DiagnosisDesc.Contains(trimmed)))
+        if (!string.IsNullOrWhiteSpace(description))
+        {
+            var trimDesc = description.Trim();
+            q = q.Where(i => i.DiagnosisDesc != null && i.DiagnosisDesc.Contains(trimDesc));
+        }
+
+        // Fallback to the generic 'q' param
+        if (string.IsNullOrWhiteSpace(code) && string.IsNullOrWhiteSpace(description))
+        {
+            if (string.IsNullOrWhiteSpace(query))
+                return Enumerable.Empty<CodeLookupDto>();
+
+            var trimmed = query.Trim();
+            q = q.Where(i =>
+                (i.DiagnosisCode != null && i.DiagnosisCode.StartsWith(trimmed)) ||
+                (i.DiagnosisDesc != null && i.DiagnosisDesc.Contains(trimmed)));
+        }
+
+        return await q
             .OrderBy(i => i.DiagnosisCode)
             .Take(limit)
             .Select(i => new CodeLookupDto
@@ -63,27 +101,43 @@ public class CodeLookupService : ICodeLookupService
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<IEnumerable<NappiCodeLookupDto>> SearchNappiAsync(string query, DateTime? effectiveDate = null, int limit = 20, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<NappiCodeLookupDto>> SearchNappiAsync(string? query, DateTime? effectiveDate = null, int limit = 20, CancellationToken cancellationToken = default, string? code = null, string? description = null)
     {
-        if (string.IsNullOrWhiteSpace(query))
-            return Enumerable.Empty<NappiCodeLookupDto>();
+        var q = _context.NappiCodes.Where(n => n.DateDeleted == null);
 
-        var trimmed = query.Trim();
+        if (!string.IsNullOrWhiteSpace(code))
+        {
+            var trimCode = code.Trim();
+            q = q.Where(n => n.Code != null && n.Code.StartsWith(trimCode));
+        }
 
-        var baseQuery = _context.NappiCodes
-            .Where(n => n.DateDeleted == null &&
-                (n.Code != null && n.Code.Contains(trimmed) ||
-                 n.Description != null && n.Description.Contains(trimmed)));
+        if (!string.IsNullOrWhiteSpace(description))
+        {
+            var trimDesc = description.Trim();
+            q = q.Where(n => n.Description != null && n.Description.Contains(trimDesc));
+        }
+
+        // Fallback to the generic 'q' param
+        if (string.IsNullOrWhiteSpace(code) && string.IsNullOrWhiteSpace(description))
+        {
+            if (string.IsNullOrWhiteSpace(query))
+                return Enumerable.Empty<NappiCodeLookupDto>();
+
+            var trimmed = query.Trim();
+            q = q.Where(n =>
+                (n.Code != null && n.Code.StartsWith(trimmed)) ||
+                (n.Description != null && n.Description.Contains(trimmed)));
+        }
 
         if (effectiveDate.HasValue)
         {
             var dateOnly = DateOnly.FromDateTime(effectiveDate.Value);
-            baseQuery = baseQuery.Where(n =>
+            q = q.Where(n =>
                 (!n.StartDate.HasValue || n.StartDate <= dateOnly) &&
                 (!n.EndDate.HasValue || n.EndDate >= dateOnly));
         }
 
-        return await baseQuery
+        return await q
             .OrderBy(n => n.Code)
             .Take(limit)
             .Select(n => new NappiCodeLookupDto

@@ -545,7 +545,8 @@ mat-form-field.full-width {
 .form-row {
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--spacing-md);
+  gap: 0 var(--spacing-md);
+  margin-bottom: 4px;
   
   @include respond-to(md) {
     grid-template-columns: repeat(2, 1fr);
@@ -587,9 +588,10 @@ mat-form-field {
 
 // Make all Material form fields more compact (less vertical space)
 .mat-mdc-form-field {
-  // Remove the subscript space (hints/errors) when not needed
+  // Reduce subscript space but keep enough for label clearance
   .mat-mdc-form-field-subscript-wrapper {
-    display: none;
+    height: 8px;
+    overflow: hidden;
   }
 
   // Reduce overall field height
@@ -1092,6 +1094,41 @@ img {
   height: calc(100vh - 64px);
 }
 
+.case-header {
+  display: flex;
+  flex-direction: column;
+  background: #f5f5f5;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 12px 16px;
+  gap: 8px;
+}
+
+.case-header-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .case-title {
+    font-size: 16px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .status-badge {
+    margin-left: auto;
+  }
+}
+
+.case-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-left: 40px;
+}
+
 .detail-toolbar {
   display: flex;
   align-items: center;
@@ -1162,11 +1199,16 @@ img {
 .form-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 12px 16px;
+  gap: 4px 16px;
   align-items: start;
 
   .span-2 { grid-column: span 2; }
   .span-3 { grid-column: span 3; }
+
+  mat-form-field,
+  app-reference-data-dropdown {
+    width: 100%;
+  }
 }
 
 // ============================================================================
@@ -2328,4 +2370,97 @@ img {
 .overcharged {
   color: var(--color-error);
   font-weight: 500;
+}
+
+// ============================================================================
+// Comment Editor (Rich Text)
+// ============================================================================
+.add-comment-form {
+  margin-bottom: 16px;
+}
+
+.editor-toolbar {
+  display: flex;
+  gap: 2px;
+  border: 1px solid #e0e0e0;
+  border-bottom: none;
+  border-radius: 4px 4px 0 0;
+  padding: 4px;
+  background: #fafafa;
+}
+
+.comment-editor {
+  border: 1px solid #e0e0e0;
+  border-radius: 0 0 4px 4px;
+  min-height: 80px;
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 12px 12px 12px 24px;
+  margin-bottom: 8px;
+  outline: none;
+  font-size: 14px;
+  line-height: 1.5;
+
+  &:focus {
+    border-color: var(--mdc-theme-primary, #1a3a5c);
+  }
+
+  &:empty::before {
+    content: attr(placeholder);
+    color: #999;
+  }
+
+  ul, ol {
+    padding-left: 20px;
+    margin: 4px 0;
+  }
+}
+
+.comment-card {
+  margin-bottom: 12px;
+
+  mat-card-content {
+    padding-top: 8px;
+
+    p, div {
+      margin: 0;
+      word-break: break-word;
+    }
+
+    ul, ol {
+      padding-left: 20px;
+      margin: 4px 0;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+  }
+}
+
+.comments-list {
+  margin-top: 16px;
+}
+
+// ============================================================================
+// Inline Editable Table Inputs
+// ============================================================================
+.inline-input {
+  border: none;
+  border-bottom: 1px solid transparent;
+  background: transparent;
+  width: 100%;
+  padding: 4px 0;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+
+  &:focus {
+    border-bottom-color: var(--mdc-theme-primary, #1a3a5c);
+  }
+
+  &:hover {
+    border-bottom-color: #ccc;
+  }
 }

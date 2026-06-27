@@ -232,4 +232,60 @@ public class CaseLockService : ICaseLockService
             ExpiresAt = expiresAt,
         };
     }
+
+    public async Task<IEnumerable<object>> GetAllLocksAsync(CancellationToken cancellationToken = default)
+    {
+        var locks = await _context.SessionUserCases
+            .Where(s => s.DateDeleted == null)
+            .ToListAsync(cancellationToken);
+
+        // Resolve user IDs to names
+        var userIds = locks.Select(l => l.UserID).Where(u => !string.IsNullOrEmpty(u)).Distinct().ToList();
+        var userLookup = new Dictionary<string, string>();
+        if (userIds.Any())
+        {
+            var guids = userIds.Select(id => Guid.TryParse(id, out var g) ? g : (Guid?)null)
+                .Where(g => g.HasValue).Select(g => g!.Value).ToList();
+            userLookup = await _context.AspnetUsers
+                .Where(u => guids.Contains(u.UserId))
+                .ToDictionaryAsync(u => u.UserId.ToString(), u => u.UserName, cancellationToken);
+        }
+
+        return locks.Select(l => new
+        {
+            caseId = l.CaseId,
+            userId = l.UserID,
+            userName = l.UserID != null && userLookup.TryGetValue(l.UserID, out var name) ? name : l.UserID,
+            lockedAt = l.DateInserted,
+            lastActivity = l.DateUpdated ?? l.DateInserted
+        });
+    }
+
+    public async Task<bool> AdminReleaseLockAsync(int caseId, CancellationToken cancellationToken = default)
+    {
+        var lockRecord = await _context.SessionUserCases
+            .FirstOrDefaultAsync(s => s.CaseId == caseId && s.DateDeleted == null, cancellationToken);
+
+        if (lockRecord == null) return false;
+
+        lockRecord.DateDeleted = DateTime.UtcNow;
+        await _context.SaveChangesAsync(cancellationToken);
+        return true;
+    }
+
+    public async Task<int> AdminReleaseAllLocksAsync(CancellationToken cancellationToken = default)
+    {
+        var locks = await _context.SessionUserCases
+            .Where(s => s.DateDeleted == null)
+            .ToListAsync(cancellationToken);
+
+        if (locks.Count == 0) return 0;
+
+        var now = DateTime.UtcNow;
+        foreach (var l in locks)
+            l.DateDeleted = now;
+
+        await _context.SaveChangesAsync(cancellationToken);
+        return locks.Count;
+    }
 }

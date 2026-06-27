@@ -4,44 +4,44 @@ export interface ProviderDto {
   practiceName: string;
   firstName: string;
   lastName: string;
-  specialityId: number | null;
-  specialityName: string | null;
-  practiceGroupNumber: string | null;
-  numberOfPartners: number | null;
-  serviceArea: string | null;
-  isHospital: boolean;
-  contactNumber: string | null;
-  cellNumber: string | null;
-  fax: string | null;
-  email: string | null;
-  countryId: number | null;
-  countryName: string | null;
-  languageId: number | null;
-  languageName: string | null;
+  specialityId?: number | null;
+  specialityName?: string | null;
+  practiceGroupNumber?: string | null;
+  numberOfPartners?: number | null;
+  serviceArea?: string | null;
+  isHospital?: boolean;
+  contactNumber?: string | null;
+  cellNumber?: string | null;
+  fax?: string | null;
+  email?: string | null;
+  countryId?: number | null;
+  countryName?: string | null;
+  languageId?: number | null;
+  languageName?: string | null;
   // Physical address
-  address1: string | null;
-  address2: string | null;
-  address3: string | null;
-  address4: string | null;
-  addressCode: string | null;
+  address1?: string | null;
+  address2?: string | null;
+  address3?: string | null;
+  address4?: string | null;
+  addressCode?: string | null;
   // Postal address
-  postalAddress1: string | null;
-  postalAddress2: string | null;
-  postalAddress3: string | null;
-  postalAddress4: string | null;
-  postalAddressCode: string | null;
+  postalAddress1?: string | null;
+  postalAddress2?: string | null;
+  postalAddress3?: string | null;
+  postalAddress4?: string | null;
+  postalAddressCode?: string | null;
   // Banking
-  bankName: string | null;
-  branchName: string | null;
-  branchCode: string | null;
-  accountType: string | null;
-  accountNumber: string | null;
+  bankName?: string | null;
+  branchName?: string | null;
+  branchCode?: string | null;
+  accountType?: string | null;
+  accountNumber?: string | null;
   // Legacy compat
-  address: string | null;
-  bHFNumber: string | null;
-  hpcsaNumber: string | null;
-  isActive: boolean;
-  dateCreated: string | null;
+  address?: string | null;
+  bHFNumber?: string | null;
+  hpcsaNumber?: string | null;
+  isActive?: boolean;
+  dateCreated?: string | null;
 }
 
 export interface CreateProviderRequest {
@@ -84,12 +84,14 @@ export interface CreateProviderRequest {
 export interface UpdateProviderRequest extends CreateProviderRequest {}
 
 export interface ProviderSearchRequest {
-  providerNumber?: string;
+  serviceProviderName?: string;
+  serviceProviderSurname?: string;
   practiceName?: string;
-  firstName?: string;
-  lastName?: string;
+  practiceNr?: string;
   specialityId?: number;
   specialityName?: string;
+  isHospital?: boolean;
+  visible?: boolean;
   pageNumber?: number;
   pageSize?: number;
   sortField?: string;

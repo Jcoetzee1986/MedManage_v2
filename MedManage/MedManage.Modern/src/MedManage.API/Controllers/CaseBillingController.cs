@@ -192,5 +192,20 @@ public class CaseBillingController : ControllerBase
         return Ok(ApiResponse<object>.SuccessResponse(billings));
     }
 
+    /// <summary>
+    /// Import status updates from CSV data (mark as paid, set remittance, etc.)
+    /// </summary>
+    [HttpPost("import-status")]
+    [Authorize(Roles = "System Administrator,Billing Auditing")]
+    [ProducesResponseType(typeof(ApiResponse<BulkPaymentResult>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> ImportStatus([FromBody] List<BillingStatusImportItem> items, CancellationToken cancellationToken)
+    {
+        if (items == null || items.Count == 0)
+            return BadRequest(ApiResponse<object>.ErrorResponse("No items to import."));
+
+        var result = await _service.ImportStatusUpdatesAsync(items, cancellationToken);
+        return Ok(ApiResponse<BulkPaymentResult>.SuccessResponse(result));
+    }
+
     #endregion
 }
