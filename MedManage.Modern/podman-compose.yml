@@ -1,5 +1,5 @@
 # MedManage.Modern — Podman Compose
-# Runs the API, Angular frontend, and jsreport.
+# Runs the API and Angular frontend.
 # The SQL Server database runs on the host — not in a container.
 #
 # Usage:
@@ -30,9 +30,6 @@ services:
       - JwtSettings__Issuer=MedManage.API
       - JwtSettings__Audience=MedManage.Angular
       - JwtSettings__ExpirationMinutes=60
-      - JsReport__ServerUrl=http://jsreport:5488
-      - JsReport__Username=admin
-      - JsReport__Password=${JSREPORT_PASSWORD:-password}
       - CorsSettings__AllowedOrigins__0=http://localhost:8080
       - CorsSettings__AllowedOrigins__1=https://localhost:8443
       - CorsSettings__AllowedOrigins__2=http://localhost:4200
@@ -40,9 +37,6 @@ services:
     volumes:
       - medmanage-uploads:/app/uploads
       - medmanage-logs:/app/logs
-    depends_on:
-      jsreport:
-        condition: service_healthy
     restart: unless-stopped
     extra_hosts:
       - "host.containers.internal:host-gateway"
@@ -70,32 +64,8 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  # ──────────────────────────────────────────────────────────────
-  # jsreport — PDF/Excel report generation engine
-  # ──────────────────────────────────────────────────────────────
-  jsreport:
-    image: jsreport/jsreport:4.5.0
-    container_name: medmanage-jsreport
-    ports:
-      - "5488:5488"
-    environment:
-      - extensions_authentication_admin_username=admin
-      - extensions_authentication_admin_password=${JSREPORT_PASSWORD:-password}
-      - extensions_authentication_cookieSession_secret=medmanage-jsreport-secret
-    volumes:
-      - jsreport-data:/app/data
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5488/api/ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-
 volumes:
   medmanage-uploads:
     driver: local
   medmanage-logs:
-    driver: local
-  jsreport-data:
     driver: local

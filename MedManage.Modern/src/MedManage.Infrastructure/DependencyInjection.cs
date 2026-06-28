@@ -1,4 +1,3 @@
-using System.Net.Http.Headers;
 using System.Threading.Channels;
 using MedManage.Core.Configuration;
 using MedManage.Core.DTOs.TariffPercentage;
@@ -14,7 +13,6 @@ using MedManage.Infrastructure.Repositories;
 using MedManage.Infrastructure.Services;
 using MedManage.Infrastructure.Services.Business;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace MedManage.Infrastructure;
 
@@ -199,22 +197,6 @@ public static class DependencyInjection
 
         // Report Generation Service (ClosedXML + PuppeteerSharp)
         services.AddScoped<IReportGenerationService, ReportGenerationService>();
-        
-        // Reporting Services (jsreport)
-        services.AddHttpClient<IReportService, ReportService>((sp, client) =>
-        {
-            var settings = sp.GetRequiredService<IOptions<JsReportSettings>>().Value;
-            client.BaseAddress = new Uri(settings.ServerUrl);
-            client.Timeout = TimeSpan.FromSeconds(settings.TimeoutSeconds);
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-            if (!string.IsNullOrEmpty(settings.Username) && !string.IsNullOrEmpty(settings.Password))
-            {
-                var credentials = Convert.ToBase64String(
-                    System.Text.Encoding.UTF8.GetBytes($"{settings.Username}:{settings.Password}"));
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", credentials);
-            }
-        });
         
         // Reference Data Services
         services.AddScoped<IMarritalStatusService, MarritalStatusService>();

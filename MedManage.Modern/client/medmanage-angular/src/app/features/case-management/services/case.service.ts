@@ -68,15 +68,17 @@ export class CaseService {
 
   /** Generate a report for cases between dates */
   exportReport(request: CaseSearchRequest): Observable<Blob> {
-    // Map CaseSearchRequest fields to what the reports API expects
+    // Map CaseSearchRequest fields to what the report generation API expects
+    const today = new Date();
+    const thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const formatDate = (d: Date) => d.toISOString().split('T')[0];
     const reportRequest = {
-      dateFrom: request.dateCreatedFrom,
-      dateTo: request.dateCreatedTo,
-      serviceProviderId: null,
-      caseStatusId: request.statusId || null,
-      format: 'Pdf'
+      dateFrom: request.dateCreatedFrom || formatDate(thirtyDaysAgo),
+      dateTo: request.dateCreatedTo || formatDate(today),
+      statusId: request.statusId || null,
+      format: 'pdf'
     };
-    return this.http.post(`${environment.apiUrl}/reports/cases-between-dates`, reportRequest, {
+    return this.http.post(`${this.baseUrl.replace('/cases', '')}/report/cases-between-dates`, reportRequest, {
       responseType: 'blob'
     });
   }

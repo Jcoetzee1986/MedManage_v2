@@ -35,18 +35,19 @@ export class WipExtractParamsComponent {
   form = this.fb.group({
     dateFrom: [null as Date | null, Validators.required],
     dateTo: [null as Date | null, Validators.required],
-    providerId: [null as number | null],
+    mainClientId: [null as number | null],
     format: ['excel' as ReportFormat]
   });
 
   onSubmit(): void {
     if (this.form.valid) {
       const value = this.form.value;
+      const formatDate = (d: Date) => d.toISOString().split('T')[0];
       this.generate.emit({
         params: {
-          dateFrom: value.dateFrom!.toISOString(),
-          dateTo: value.dateTo!.toISOString(),
-          providerId: value.providerId ?? undefined
+          dateFrom: formatDate(value.dateFrom!),
+          dateTo: formatDate(value.dateTo!),
+          mainClientId: value.mainClientId ?? undefined
         },
         format: value.format ?? 'excel'
       });

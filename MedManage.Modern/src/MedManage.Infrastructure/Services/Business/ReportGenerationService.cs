@@ -32,8 +32,8 @@ public class ReportGenerationService : IReportGenerationService
             .Include(c => c.AuthType)
             .Include(c => c.ReferTo)
             .Where(c => c.DateDeleted == null
-                && c.AdmissionDate >= request.DateFrom
-                && c.AdmissionDate <= request.DateTo);
+                && c.DateCreated >= request.DateFrom
+                && c.DateCreated <= request.DateTo);
 
         if (request.MainClientId.HasValue)
             query = query.Where(c => c.Member != null && c.Member.MedicalAid != null && c.Member.MedicalAid.MainClientId == request.MainClientId);
@@ -235,9 +235,9 @@ public class ReportGenerationService : IReportGenerationService
             .Where(c => c.DateDeleted == null && c.StatusId != 3); // Exclude closed
 
         if (request.DateFrom.HasValue)
-            query = query.Where(c => c.AdmissionDate >= request.DateFrom);
+            query = query.Where(c => c.DateCreated >= request.DateFrom);
         if (request.DateTo.HasValue)
-            query = query.Where(c => c.AdmissionDate <= request.DateTo);
+            query = query.Where(c => c.DateCreated <= request.DateTo);
         if (request.MainClientId.HasValue)
             query = query.Where(c => c.Member != null && c.Member.MedicalAid != null && c.Member.MedicalAid.MainClientId == request.MainClientId);
 

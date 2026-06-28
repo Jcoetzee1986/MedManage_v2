@@ -8,11 +8,17 @@ export const authGuard: CanActivateFn = (route, state) => {
   const router = inject(Router);
 
   // In development mode without auth configured, allow access
-  if (!environment.production && !authService.getToken()) {
+  if (!environment.production && !authService.getToken() && !authService.getRefreshToken()) {
     return true;
   }
 
   if (authService.isAuthenticated()) {
+    return true;
+  }
+
+  // Token expired but refresh token exists — allow navigation
+  // and let the interceptor handle the refresh on the next API call
+  if (authService.getRefreshToken()) {
     return true;
   }
 

@@ -3,7 +3,7 @@
     Stops and removes all MedManage.Modern containers.
 
 .PARAMETER Volumes
-    Also remove named volumes (uploads, logs, jsreport data).
+    Also remove named volumes (uploads, logs).
 
 .EXAMPLE
     .\scripts\podman-down.ps1

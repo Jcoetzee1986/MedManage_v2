@@ -35,22 +35,23 @@ export class CasesBetweenDatesParamsComponent {
   form = this.fb.group({
     dateFrom: [null as Date | null, Validators.required],
     dateTo: [null as Date | null, Validators.required],
-    caseStatusId: [null as number | null],
+    statusId: [null as number | null],
     caseTypeId: [null as number | null],
-    medicalAidId: [null as number | null],
+    mainClientId: [null as number | null],
     format: ['pdf' as ReportFormat]
   });
 
   onSubmit(): void {
     if (this.form.valid) {
       const value = this.form.value;
+      const formatDate = (d: Date) => d.toISOString().split('T')[0];
       this.generate.emit({
         params: {
-          dateFrom: value.dateFrom!.toISOString(),
-          dateTo: value.dateTo!.toISOString(),
-          caseStatusId: value.caseStatusId ?? undefined,
+          dateFrom: formatDate(value.dateFrom!),
+          dateTo: formatDate(value.dateTo!),
+          statusId: value.statusId ?? undefined,
           caseTypeId: value.caseTypeId ?? undefined,
-          medicalAidId: value.medicalAidId ?? undefined
+          mainClientId: value.mainClientId ?? undefined
         },
         format: value.format ?? 'pdf'
       });

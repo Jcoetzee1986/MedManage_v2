@@ -10,12 +10,13 @@ COPY src/MedManage.Infrastructure/MedManage.Infrastructure.csproj src/MedManage.
 COPY src/MedManage.Identity/MedManage.Identity.csproj src/MedManage.Identity/
 COPY src/MedManage.Shared/MedManage.Shared.csproj src/MedManage.Shared/
 COPY tests/MedManage.Infrastructure.Tests/MedManage.Infrastructure.Tests.csproj tests/MedManage.Infrastructure.Tests/
+COPY tests/MedManage.API.Tests/MedManage.API.Tests.csproj tests/MedManage.API.Tests/
+COPY tests/MedManage.Core.Tests/MedManage.Core.Tests.csproj tests/MedManage.Core.Tests/
 
 RUN dotnet restore MedManage.Modern.sln
 
 # Copy everything and build
 COPY src/ src/
-COPY tests/ tests/
 RUN dotnet publish src/MedManage.API/MedManage.API.csproj -c Release -o /app/publish --no-restore
 
 # Runtime image

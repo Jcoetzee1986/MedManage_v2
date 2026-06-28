@@ -3,7 +3,7 @@
     Builds and starts all MedManage.Modern containers using Podman.
 
 .DESCRIPTION
-    Runs podman-compose to build the API, Angular frontend, and jsreport containers.
+    Runs podman-compose to build the API and Angular frontend containers.
     The SQL Server database is expected to be running on the host machine.
 
 .PARAMETER Build
@@ -63,7 +63,6 @@ try {
     Write-Host "`nStarting MedManage.Modern containers..." -ForegroundColor Cyan
     Write-Host "  API:       http://localhost:5000" -ForegroundColor White
     Write-Host "  Frontend:  http://localhost:8080" -ForegroundColor White
-    Write-Host "  jsreport:  http://localhost:5488" -ForegroundColor White
     Write-Host ""
 
     podman-compose @composeArgs

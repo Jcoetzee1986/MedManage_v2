@@ -21,24 +21,24 @@ export interface CaseLetterParams {
 export interface CasesBetweenDatesParams {
   dateFrom: string;
   dateTo: string;
-  caseStatusId?: number;
+  statusId?: number;
   caseTypeId?: number;
-  medicalAidId?: number;
+  mainClientId?: number;
 }
 
 /** Parameters for WIP Extract report */
 export interface WipExtractParams {
   dateFrom: string;
   dateTo: string;
-  providerId?: number;
+  mainClientId?: number;
 }
 
 /** Parameters for Billing Summary report */
 export interface BillingSummaryParams {
   dateFrom: string;
   dateTo: string;
-  providerId?: number;
-  billingStatusId?: number;
+  serviceProviderId?: number;
+  mainClientId?: number;
 }
 
 /** Union type for all report parameters */

@@ -260,11 +260,9 @@ export class AuthService {
     // Check if token is expired
     const expiry = this.getTokenExpiration();
     if (expiry && expiry < new Date()) {
-      // Token expired — clean up silently without triggering HTTP calls
+      // Token expired — remove access token but keep refresh token
+      // so the interceptor can attempt a refresh on the next 401
       this.removeToken();
-      this.removeRefreshToken();
-      this.removeUser();
-      this.currentUserSubject.next(null);
       return false;
     }
 

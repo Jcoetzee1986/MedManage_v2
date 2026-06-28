@@ -35,20 +35,21 @@ export class BillingSummaryParamsComponent {
   form = this.fb.group({
     dateFrom: [null as Date | null, Validators.required],
     dateTo: [null as Date | null, Validators.required],
-    providerId: [null as number | null],
-    billingStatusId: [null as number | null],
+    serviceProviderId: [null as number | null],
+    mainClientId: [null as number | null],
     format: ['pdf' as ReportFormat]
   });
 
   onSubmit(): void {
     if (this.form.valid) {
       const value = this.form.value;
+      const formatDate = (d: Date) => d.toISOString().split('T')[0];
       this.generate.emit({
         params: {
-          dateFrom: value.dateFrom!.toISOString(),
-          dateTo: value.dateTo!.toISOString(),
-          providerId: value.providerId ?? undefined,
-          billingStatusId: value.billingStatusId ?? undefined
+          dateFrom: formatDate(value.dateFrom!),
+          dateTo: formatDate(value.dateTo!),
+          serviceProviderId: value.serviceProviderId ?? undefined,
+          mainClientId: value.mainClientId ?? undefined
         },
         format: value.format ?? 'pdf'
       });

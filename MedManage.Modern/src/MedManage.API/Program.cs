@@ -57,9 +57,6 @@ builder.Services.Configure<EmailSettings>(options =>
 // Register email service
 builder.Services.AddScoped<IEmailService, EmailService>();
 
-// Configure JsReport Settings
-builder.Services.Configure<JsReportSettings>(builder.Configuration.GetSection(JsReportSettings.SectionName));
-
 // Configure Case Lock Settings (inactivity timeout, cleanup interval)
 builder.Services.Configure<CaseLockSettings>(builder.Configuration.GetSection(CaseLockSettings.SectionName));
 
