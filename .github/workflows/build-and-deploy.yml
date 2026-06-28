@@ -1,0 +1,273 @@
+name: MedManage - Build and Deploy
+env:
+  REGISTRY: registry.iconicdev.co.za
+  API_IMAGE_NAME: medmanage/medmanage-api
+  WEB_IMAGE_NAME: medmanage/medmanage-web
+  DEVOPS_REPO: Jcoetzee1986/NirvanaFlowDevOps
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'MedManage.Modern/**'
+
+jobs:
+  get-versions:
+    name: Get Application Versions
+    runs-on: ubuntu-latest
+    outputs:
+      api-version: ${{ steps.api-version.outputs.version }}
+      web-version: ${{ steps.web-version.outputs.version }}
+      build-number: ${{ steps.build-number.outputs.number }}
+    
+    steps:
+    - uses: actions/checkout@v4.3.1
+    
+    - name: Generate build number
+      id: build-number
+      run: echo "number=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_OUTPUT
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v5.2.0
+      with:
+        dotnet-version: '10.0.x'
+    
+    - name: Get API version
+      id: api-version
+      run: |
+        API_VERSION=$(grep -oPm1 "(?<=<Version>)[^<]+" ./MedManage.Modern/src/MedManage.API/MedManage.API.csproj || echo "1.0.0")
+        echo "API Version: $API_VERSION"
+        echo "version=$API_VERSION" >> $GITHUB_OUTPUT
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+    
+    - name: Get Web version
+      id: web-version
+      run: |
+        WEB_VERSION=$(node -p "require('./MedManage.Modern/client/medmanage-angular/package.json').version")
+        echo "Web Version: $WEB_VERSION"
+        echo "version=$WEB_VERSION" >> $GITHUB_OUTPUT
+
+  update-versions:
+    name: Update Versions
+    runs-on: ubuntu-latest
+    needs: get-versions
+    permissions:
+      contents: write
+    outputs:
+      api-version: ${{ steps.update-api.outputs.new-version }}
+      web-version: ${{ steps.update-web.outputs.new-version }}
+    
+    steps:
+    - uses: actions/checkout@v4.3.1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        fetch-depth: 0
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v5.2.0
+      with:
+        dotnet-version: '10.0.x'
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+    
+    - name: Update API version
+      id: update-api
+      run: |
+        CURRENT_VERSION="${{ needs.get-versions.outputs.api-version }}"
+        
+        IFS='.' read -ra VERSION_PARTS <<< "$CURRENT_VERSION"
+        MAJOR=${VERSION_PARTS[0]}
+        MINOR=${VERSION_PARTS[1]}
+        PATCH=${VERSION_PARTS[2]:-0}
+        
+        # Increment patch version
+        NEW_PATCH=$((PATCH + 1))
+        NEW_VERSION="$MAJOR.$MINOR.$NEW_PATCH"
+        
+        # Add version to csproj if not present
+        if grep -q "<Version>" ./MedManage.Modern/src/MedManage.API/MedManage.API.csproj; then
+          sed -i "s/<Version>$CURRENT_VERSION<\/Version>/<Version>$NEW_VERSION<\/Version>/g" ./MedManage.Modern/src/MedManage.API/MedManage.API.csproj
+        else
+          sed -i "s|<TargetFramework>|<Version>$NEW_VERSION</Version>\n    <TargetFramework>|" ./MedManage.Modern/src/MedManage.API/MedManage.API.csproj
+        fi
+
+        echo "Updated API version from $CURRENT_VERSION to $NEW_VERSION"
+        echo "new-version=$NEW_VERSION" >> $GITHUB_OUTPUT
+    
+    - name: Update Web version
+      id: update-web
+      run: |
+        cd MedManage.Modern/client/medmanage-angular
+        CURRENT_VERSION="${{ needs.get-versions.outputs.web-version }}"
+        
+        IFS='.' read -ra VERSION_PARTS <<< "$CURRENT_VERSION"
+        MAJOR=${VERSION_PARTS[0]}
+        MINOR=${VERSION_PARTS[1]}
+        PATCH=${VERSION_PARTS[2]:-0}
+        
+        # Increment patch version
+        NEW_PATCH=$((PATCH + 1))
+        NEW_VERSION="$MAJOR.$MINOR.$NEW_PATCH"
+        
+        # Update package.json
+        npm version $NEW_VERSION --no-git-tag-version
+        
+        echo "Updated Web version from $CURRENT_VERSION to $NEW_VERSION"
+        echo "new-version=$NEW_VERSION" >> $GITHUB_OUTPUT
+    
+    - name: Commit version updates
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add MedManage.Modern/src/MedManage.API/MedManage.API.csproj MedManage.Modern/client/medmanage-angular/package.json
+        git commit -m "chore: bump versions to API ${{ steps.update-api.outputs.new-version }}, Web ${{ steps.update-web.outputs.new-version }}" || exit 0
+        git push
+
+  build-and-test-api:
+    name: Build and Test .NET API
+    runs-on: ubuntu-latest
+    needs: [get-versions, update-versions]
+    
+    steps:
+    - uses: actions/checkout@v4.3.1
+      with:
+        ref: main
+        token: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v5.2.0
+      with:
+        dotnet-version: '10.0.x'
+    
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+    
+    - name: Restore dependencies
+      working-directory: ./MedManage.Modern
+      run: dotnet restore MedManage.Modern.sln
+    
+    - name: Build solution
+      working-directory: ./MedManage.Modern
+      run: dotnet build MedManage.Modern.sln --no-restore --configuration Release
+
+  build-docker-images:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+    needs: [get-versions, update-versions, build-and-test-api]
+    
+    permissions:
+      contents: read
+      packages: write
+    
+    strategy:
+      matrix:
+        include:
+          - name: api
+            context: ./MedManage.Modern
+            dockerfile: ./MedManage.Modern/Dockerfile.api
+            image: medmanage/medmanage-api
+            version: ${{ needs.update-versions.outputs.api-version }}
+          - name: web
+            context: ./MedManage.Modern
+            dockerfile: ./MedManage.Modern/Dockerfile.angular
+            image: medmanage/medmanage-web
+            version: ${{ needs.update-versions.outputs.web-version }}
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4.3.1
+      with:
+        ref: main
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ secrets.HARBOR_USERNAME }}
+        password: ${{ secrets.HARBOR_PASSWORD }}
+    
+    - name: Extract metadata for ${{ matrix.name }}
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ matrix.image }}
+        tags: |
+          type=raw,value=latest
+          type=raw,value=v${{ matrix.version }}
+          type=raw,value=${{ matrix.version }}
+          type=sha,prefix=sha-
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Build and push ${{ matrix.name }} Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: ${{ matrix.context }}
+        file: ${{ matrix.dockerfile }}
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ matrix.image }}:buildcache
+        cache-to: type=inline
+        platforms: linux/amd64
+
+  deploy-to-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [update-versions, build-docker-images]
+    environment:
+      name: production
+      url: https://medmanage.iconicdev.co.za
+    
+    steps:
+    - name: Verify PAT_TOKEN exists
+      run: |
+        if [ -z "${{ secrets.PAT_TOKEN }}" ]; then
+          echo "ERROR: PAT_TOKEN secret is not set"
+          echo "Please add PAT_TOKEN secret in repository settings with 'repo' scope"
+          exit 1
+        fi
+        echo "PAT_TOKEN is configured"
+    
+    - name: Checkout DevOps repository
+      uses: actions/checkout@v4.3.1
+      with:
+        repository: ${{ env.DEVOPS_REPO }}
+        token: ${{ secrets.PAT_TOKEN }}
+        ref: main
+    
+    - name: Update production deployment manifests
+      run: |
+        API_VERSION="${{ needs.update-versions.outputs.api-version }}"
+        WEB_VERSION="${{ needs.update-versions.outputs.web-version }}"
+        
+        # Update API image tag in medmanage/production/deployment.yaml
+        sed -i "s|image: registry.iconicdev.co.za/medmanage/medmanage-api:[^[:space:]]*|image: registry.iconicdev.co.za/medmanage/medmanage-api:$API_VERSION|g" medmanage/production/deployment.yaml
+        
+        # Update Web image tag in medmanage/production/deployment.yaml
+        sed -i "s|image: registry.iconicdev.co.za/medmanage/medmanage-web:[^[:space:]]*|image: registry.iconicdev.co.za/medmanage/medmanage-web:$WEB_VERSION|g" medmanage/production/deployment.yaml
+        
+        echo "Updated production deployment to API: $API_VERSION, Web: $WEB_VERSION"
+    
+    - name: Commit and push production deployment updates
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add medmanage/production/deployment.yaml
+        git commit -m "Deploy MedManage: API v${{ needs.update-versions.outputs.api-version }}, Web v${{ needs.update-versions.outputs.web-version }}" || exit 0
+        git push

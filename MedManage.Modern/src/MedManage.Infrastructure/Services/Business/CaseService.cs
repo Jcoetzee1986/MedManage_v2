@@ -400,12 +400,24 @@ public class CaseService : ICaseService
             "dischargedate" => sortDescending
                 ? query.OrderByDescending(c => c.DischargeDate)
                 : query.OrderBy(c => c.DischargeDate),
-            "status" => sortDescending
+            "status" or "casestatusname" => sortDescending
                 ? query.OrderByDescending(c => c.StatusId)
                 : query.OrderBy(c => c.StatusId),
-            "member" => sortDescending
+            "member" or "membersurname" => sortDescending
                 ? query.OrderByDescending(c => c.Member != null ? c.Member.Surname : "")
                 : query.OrderBy(c => c.Member != null ? c.Member.Surname : ""),
+            "membername" => sortDescending
+                ? query.OrderByDescending(c => c.Member != null ? c.Member.Name : "")
+                : query.OrderBy(c => c.Member != null ? c.Member.Name : ""),
+            "membernumber" => sortDescending
+                ? query.OrderByDescending(c => c.Member != null ? c.Member.MemberNumber : "")
+                : query.OrderBy(c => c.Member != null ? c.Member.MemberNumber : ""),
+            "refertopracticename" => sortDescending
+                ? query.OrderByDescending(c => c.ReferTo != null ? c.ReferTo.PracticeName : "")
+                : query.OrderBy(c => c.ReferTo != null ? c.ReferTo.PracticeName : ""),
+            "casetypename" => sortDescending
+                ? query.OrderByDescending(c => c.AuthTypeId)
+                : query.OrderBy(c => c.AuthTypeId),
             "datecreated" => sortDescending
                 ? query.OrderByDescending(c => c.DateCreated)
                 : query.OrderBy(c => c.DateCreated),

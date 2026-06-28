@@ -63,7 +63,8 @@
         [loading]="loading"
         emptyMessage="No bookings found."
         (rowDblClick)="onRowDoubleClicked($event)"
-        (pageChange)="onPageChange($event)">
+        (pageChange)="onPageChange($event)"
+        (sortChange)="onSortChange($event)">
       </app-data-table>
     </mat-card-content>
   </mat-card>

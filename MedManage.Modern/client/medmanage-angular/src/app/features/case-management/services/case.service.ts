@@ -68,7 +68,15 @@ export class CaseService {
 
   /** Generate a report for cases between dates */
   exportReport(request: CaseSearchRequest): Observable<Blob> {
-    return this.http.post(`${environment.apiUrl}/reports/cases-between-dates`, request, {
+    // Map CaseSearchRequest fields to what the reports API expects
+    const reportRequest = {
+      dateFrom: request.dateCreatedFrom,
+      dateTo: request.dateCreatedTo,
+      serviceProviderId: null,
+      caseStatusId: request.statusId || null,
+      format: 'Pdf'
+    };
+    return this.http.post(`${environment.apiUrl}/reports/cases-between-dates`, reportRequest, {
       responseType: 'blob'
     });
   }

@@ -12,6 +12,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { PageEvent } from '@angular/material/paginator';
+import { Sort } from '@angular/material/sort';
 import { BookingService } from '../services/booking.service';
 import { BookingDto, BookingSearchFilters } from '../models/booking.models';
 import { DataTableComponent, DataTableColumn } from '../../../shared/components/data-table/data-table.component';
@@ -47,6 +48,8 @@ export class BookingListComponent implements OnInit {
   pageSize = 30;
   pageIndex = 0;
   loading = false;
+  currentSortBy?: string;
+  currentSortDescending?: boolean;
 
   searchForm = this.fb.group({
     surname: [''],
@@ -85,7 +88,9 @@ export class BookingListComponent implements OnInit {
       dateFrom: formValue.dateFrom ? formValue.dateFrom.toISOString() : undefined,
       dateTo: formValue.dateTo ? formValue.dateTo.toISOString() : undefined,
       pageNumber: this.pageIndex + 1,
-      pageSize: this.pageSize
+      pageSize: this.pageSize,
+      sortBy: this.currentSortBy,
+      sortDescending: this.currentSortDescending
     };
 
     this.bookingService.search(filters).subscribe({
@@ -115,6 +120,18 @@ export class BookingListComponent implements OnInit {
   onPageChange(event: PageEvent): void {
     this.pageIndex = event.pageIndex;
     this.pageSize = event.pageSize;
+    this.loadBookings();
+  }
+
+  onSortChange(sort: Sort): void {
+    if (sort.direction) {
+      this.currentSortBy = sort.active;
+      this.currentSortDescending = sort.direction === 'desc';
+    } else {
+      this.currentSortBy = undefined;
+      this.currentSortDescending = undefined;
+    }
+    this.pageIndex = 0;
     this.loadBookings();
   }
 

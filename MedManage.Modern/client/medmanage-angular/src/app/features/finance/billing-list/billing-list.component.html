@@ -91,6 +91,7 @@
     emptyMessage="No billing records found."
     (rowDblClick)="onRowDoubleClicked($event)"
     (rowClick)="selectedRow = $event"
-    (pageChange)="onPageChange($event)">
+    (pageChange)="onPageChange($event)"
+    (sortChange)="onSortChange($event)">
   </app-data-table>
 </div>

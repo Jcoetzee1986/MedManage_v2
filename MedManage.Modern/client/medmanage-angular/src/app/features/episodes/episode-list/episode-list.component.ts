@@ -13,6 +13,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialogModule } from '@angular/material/dialog';
 import { PageEvent } from '@angular/material/paginator';
+import { Sort } from '@angular/material/sort';
 import { EpisodeService } from '../services/episode.service';
 import { EpisodeDto, EpisodeSearchFilters } from '../models/episode.models';
 import { DataTableComponent, DataTableColumn } from '../../../shared/components/data-table/data-table.component';
@@ -49,6 +50,8 @@ export class EpisodeListComponent implements OnInit {
   pageSize = 30;
   pageIndex = 0;
   loading = false;
+  currentSortBy?: string;
+  currentSortDescending?: boolean;
 
   searchForm = this.fb.group({
     episodeName: [''],
@@ -80,7 +83,9 @@ export class EpisodeListComponent implements OnInit {
       dateFrom: formValue.dateFrom ? formValue.dateFrom.toISOString() : undefined,
       dateTo: formValue.dateTo ? formValue.dateTo.toISOString() : undefined,
       pageNumber: this.pageIndex + 1,
-      pageSize: this.pageSize
+      pageSize: this.pageSize,
+      sortBy: this.currentSortBy,
+      sortDescending: this.currentSortDescending
     };
 
     this.episodeService.search(filters).subscribe({
@@ -110,6 +115,18 @@ export class EpisodeListComponent implements OnInit {
   onPageChange(event: PageEvent): void {
     this.pageIndex = event.pageIndex;
     this.pageSize = event.pageSize;
+    this.loadEpisodes();
+  }
+
+  onSortChange(sort: Sort): void {
+    if (sort.direction) {
+      this.currentSortBy = sort.active;
+      this.currentSortDescending = sort.direction === 'desc';
+    } else {
+      this.currentSortBy = undefined;
+      this.currentSortDescending = undefined;
+    }
+    this.pageIndex = 0;
     this.loadEpisodes();
   }
 

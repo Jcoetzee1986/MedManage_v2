@@ -11,6 +11,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { PageEvent } from '@angular/material/paginator';
+import { Sort } from '@angular/material/sort';
 import { ReferenceDataDropdownComponent } from '../../../shared/components/reference-data-dropdown/reference-data-dropdown.component';
 import { DataTableComponent, DataTableColumn } from '../../../shared/components/data-table/data-table.component';
 import { BillingService } from '../services/billing.service';
@@ -47,6 +48,10 @@ export class BillingListComponent implements OnInit {
   totalCount = 0;
   pageSize = 30;
   pageIndex = 0;
+
+  /** Sort state */
+  currentSortBy?: string;
+  currentSortDescending?: boolean;
 
   /** Search filter form */
   searchForm = this.fb.group({
@@ -97,7 +102,9 @@ export class BillingListComponent implements OnInit {
       dateFrom: formValue.dateFrom ? formValue.dateFrom.toISOString() : undefined,
       dateTo: formValue.dateTo ? formValue.dateTo.toISOString() : undefined,
       pageNumber: this.pageIndex + 1,
-      pageSize: this.pageSize
+      pageSize: this.pageSize,
+      sortField: this.currentSortBy,
+      sortDirection: this.currentSortDescending === true ? 'desc' : this.currentSortDescending === false ? 'asc' : undefined
     };
 
     this.billingService.search(searchRequest).subscribe({
@@ -125,10 +132,25 @@ export class BillingListComponent implements OnInit {
     this.loadBillings();
   }
 
+  /** Handle sort change */
+  onSortChange(sort: Sort): void {
+    if (sort.direction) {
+      this.currentSortBy = sort.active;
+      this.currentSortDescending = sort.direction === 'desc';
+    } else {
+      this.currentSortBy = undefined;
+      this.currentSortDescending = undefined;
+    }
+    this.pageIndex = 0;
+    this.loadBillings();
+  }
+
   /** Reset search form */
   onReset(): void {
     this.searchForm.reset();
     this.pageIndex = 0;
+    this.currentSortBy = undefined;
+    this.currentSortDescending = undefined;
     this.loadBillings();
   }
 

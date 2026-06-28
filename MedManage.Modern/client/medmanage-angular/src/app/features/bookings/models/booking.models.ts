@@ -67,6 +67,8 @@ export interface BookingSearchFilters {
   includeDeleted?: boolean;
   pageNumber?: number;
   pageSize?: number;
+  sortBy?: string;
+  sortDescending?: boolean;
 }
 
 export interface PagedResult<T> {

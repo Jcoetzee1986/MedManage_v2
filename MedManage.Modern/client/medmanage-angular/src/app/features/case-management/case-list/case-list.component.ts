@@ -18,6 +18,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { Sort } from '@angular/material/sort';
 import { Subject, takeUntil } from 'rxjs';
 import { ReferenceDataDropdownComponent } from '../../../shared/components/reference-data-dropdown/reference-data-dropdown.component';
 import { HasRoleDirective } from '../../../shared/directives/has-role.directive';
@@ -88,6 +89,10 @@ export class CaseListComponent implements OnInit, OnDestroy {
   totalCount = 0;
   pageSize = 30;
   pageIndex = 0;
+
+  /** Sort state */
+  currentSortBy?: string;
+  currentSortDescending?: boolean;
 
   /** Search filter form — matches legacy search fields */
   searchForm = this.fb.group({
@@ -240,7 +245,7 @@ export class CaseListComponent implements OnInit, OnDestroy {
       this.pageIndex = 0;
     }
     this.isMyView = false;
-    const searchRequest = this.buildSearchRequest(this.pageIndex + 1, this.pageSize);
+    const searchRequest = this.buildSearchRequest(this.pageIndex + 1, this.pageSize, this.currentSortBy, this.currentSortDescending);
 
     this.caseService.search(searchRequest)
       .pipe(takeUntil(this.destroy$))
@@ -263,6 +268,31 @@ export class CaseListComponent implements OnInit, OnDestroy {
     this.onSearch(false);
   }
 
+  /** Handle sort change from data table */
+  onSortChange(sort: Sort): void {
+    if (sort.direction) {
+      this.currentSortBy = sort.active;
+      this.currentSortDescending = sort.direction === 'desc';
+    } else {
+      this.currentSortBy = undefined;
+      this.currentSortDescending = undefined;
+    }
+
+    if (this.isMyView) {
+      // Client-side sort for "My Cases" view (all data is already loaded)
+      if (!sort.active || !sort.direction) return;
+      const dir = sort.direction === 'asc' ? 1 : -1;
+      this.rowData = [...this.rowData].sort((a: any, b: any) => {
+        const valA = (a[sort.active] ?? '').toString().toLowerCase();
+        const valB = (b[sort.active] ?? '').toString().toLowerCase();
+        return valA.localeCompare(valB) * dir;
+      });
+    } else {
+      // Server-side sort for search results
+      this.onSearch(true);
+    }
+  }
+
   /** Reset search form and return to "My Cases" view */
   onReset(): void {
     this.searchForm.reset();
@@ -270,6 +300,8 @@ export class CaseListComponent implements OnInit, OnDestroy {
     this.selectedCase = null;
     this.pageIndex = 0;
     this.totalCount = 0;
+    this.currentSortBy = undefined;
+    this.currentSortDescending = undefined;
     this.loadMyCases();
   }
 
@@ -341,12 +373,26 @@ export class CaseListComponent implements OnInit, OnDestroy {
 
   /** Export current data to CSV (simple) */
   onExportExcel(): void {
-    // Simple CSV export of current rowData
     if (this.rowData.length === 0) return;
-    const headers = this.tableColumns.join(',');
-    const rows = this.rowData.map(r => this.tableColumns.map(col => (r as any)[col] || '').join(','));
-    const csv = [headers, ...rows].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
+
+    // Use column definitions to resolve field values with fallbacks (same as table rendering)
+    const headers = this.tableColumnDefs.map(c => c.header).join(',');
+    const rows = this.rowData.map(r => {
+      return this.tableColumnDefs.map(col => {
+        let value = (r as any)[col.field];
+        if ((value === null || value === undefined || value === '') && col.fallbacks) {
+          for (const fb of col.fallbacks) {
+            value = (r as any)[fb];
+            if (value !== null && value !== undefined && value !== '') break;
+          }
+        }
+        return `"${((value ?? '').toString().replace(/"/g, '""'))}"`;
+      }).join(',');
+    });
+
+    const csv = ['sep=,', headers, ...rows].join('\r\n');
+    const bom = '\uFEFF';
+    const blob = new Blob([bom + csv], { type: 'text/csv;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;

@@ -78,6 +78,54 @@ public class CaseCopyService : ICaseCopyService
 
         var newCaseId = newCase.CaseId;
 
+        // Generate auth number if not using the same one from source
+        if (string.IsNullOrEmpty(newCase.AuthNumber))
+        {
+            var prefix = "BWP"; // Default
+            if (newCase.MemberId.HasValue)
+            {
+                var memberPrefix = await _context.Members
+                    .Where(m => m.MemberId == newCase.MemberId.Value)
+                    .Join(_context.MedicalAids, m => m.MedicalAidId, ma => ma.MedicalAidId, (m, ma) => ma.MainClientId)
+                    .Join(_context.MainClients, mcId => mcId, mc => mc.MainClientId, (mcId, mc) => mc.MainClientName)
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                if (memberPrefix != null)
+                {
+                    prefix = memberPrefix.Length >= 3 ? memberPrefix[..3].ToUpper() : memberPrefix.ToUpper();
+                }
+            }
+            newCase.AuthNumber = $"{prefix}0{newCaseId}";
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
+        // Ensure StatusId is set (default to 1 = Open if not copied)
+        if (!newCase.StatusId.HasValue)
+        {
+            newCase.StatusId = 1;
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
+        // Always auto-populate checklist from templates (fresh checklist for new case)
+        var checklistTemplates = await _context.ChecklistTemplates
+            .Where(ct => ct.DateDeleted == null)
+            .ToListAsync(cancellationToken);
+
+        foreach (var template in checklistTemplates)
+        {
+            _context.CaseChecklists.Add(new CaseChecklist
+            {
+                CaseId = newCaseId,
+                ChecklistTemplateId = template.ChecklistTemplateId,
+                Checked = false,
+                NotApplicable = false,
+                Comments = "",
+                Date = DateTime.Now
+            });
+        }
+        if (checklistTemplates.Any())
+            await _context.SaveChangesAsync(cancellationToken);
+
         // Deep copy sub-entities
         if (request.IncludeCptCodes)
         {

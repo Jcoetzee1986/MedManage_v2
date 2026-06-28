@@ -146,6 +146,7 @@
     [selectedRow]="selectedCase"
     (rowClick)="selectedCase = $event"
     (rowDblClick)="onRowDoubleClicked2($event)"
-    (pageChange)="onPageChange($event)">
+    (pageChange)="onPageChange($event)"
+    (sortChange)="onSortChange($event)">
   </app-data-table>
 </div>
