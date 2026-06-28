@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Case Letter - {{AuthNumber}}</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: Arial, sans-serif; font-size: 8.5pt; color: #000; padding: 15mm 15mm 10mm 15mm; }
+  .page-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
+  .page-header-left { font-size: 8pt; }
+  .page-header-right { text-align: right; font-size: 7.5pt; line-height: 1.5; }
+  .page-header-right img { max-height: 55px; display: block; margin-left: auto; margin-bottom: 4px; }
+  .letter-title { text-align: center; font-weight: bold; font-size: 10pt; margin: 10px 0; border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 4px 0; }
+  .info-table { width: 100%; border-collapse: collapse; margin-bottom: 8px; }
+  .info-table td { padding: 2px 4px; font-size: 8pt; vertical-align: top; }
+  .info-table .lbl { font-weight: bold; width: 120px; white-space: nowrap; }
+  .info-table .val { }
+  .section-header { font-weight: bold; font-size: 8.5pt; background: #f5e6a3; padding: 3px 6px; margin: 8px 0 3px 0; border: 1px solid #c9a800; }
+  .data-tbl { width: 100%; border-collapse: collapse; margin-bottom: 8px; font-size: 7.5pt; }
+  .data-tbl th { background: #fdf3cd; padding: 3px 5px; text-align: left; border: 1px solid #c9a800; font-weight: bold; }
+  .data-tbl td { padding: 2px 5px; border: 1px solid #ddd; }
+  .note-box { border: 1px solid #999; padding: 6px; margin: 8px 0; min-height: 30px; font-size: 8pt; }
+  .standard-notes { margin-top: 10px; font-size: 7.5pt; line-height: 1.5; }
+  .standard-notes h4 { font-size: 8pt; margin-bottom: 4px; text-decoration: underline; }
+  .standard-notes ol { padding-left: 16px; }
+  .standard-notes li { margin-bottom: 3px; }
+  .footer-section { margin-top: 12px; display: flex; justify-content: space-between; font-size: 7.5pt; border-top: 1px solid #000; padding-top: 6px; }
+  .footer-left { }
+  .footer-right { text-align: right; }
+  .generated { font-size: 7pt; color: #666; text-align: center; margin-top: 10px; }
+  @media print { body { padding: 10mm; } }
+</style>
+</head>
+<body>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="page-header-left">
+    {{GeneratedDate}}<br>
+    {{CurrentPractice}}
+  </div>
+  <div class="page-header-right">
+    {{#if SystemLogoBase64}}<img src="data:image/png;base64,{{SystemLogoBase64}}" alt="Healthshare Health Solutions" style="max-height:55px;">{{/if}}
+    Email: casemanagement@healthshare.co.za<br>
+    Fax: 0862743499<br>
+    Website: www.healthshare.co.za<br>
+    Telephone: 012 6614181
+  </div>
+</div>
+
+<!-- TITLE -->
+<div class="letter-title">Approval/Partial Approval of Request</div>
+
+<!-- CASE INFORMATION -->
+<table class="info-table">
+  <tr>
+    <td class="lbl">Auth No:</td>
+    <td class="val">{{AuthNumber}}</td>
+    <td class="lbl">Patient:</td>
+    <td class="val">{{Name}} {{Surname}}</td>
+  </tr>
+  <tr>
+    <td class="lbl">Medical Aid:</td>
+    <td class="val">{{MedicalAidName}}</td>
+    <td class="lbl">Medical Aid Number:</td>
+    <td class="val">{{MemberNumber}}</td>
+  </tr>
+  <tr>
+    <td class="lbl">Medical Product:</td>
+    <td class="val">{{MedAidProductName}}</td>
+    <td class="lbl">Date Of Birth:</td>
+    <td class="val">{{DateOfBirth}}</td>
+  </tr>
+  <tr>
+    <td class="lbl">Admission Date:</td>
+    <td class="val">{{AdmissionDate}}</td>
+    <td class="lbl">Discharge Date:</td>
+    <td class="val">{{DischargeDate}}</td>
+  </tr>
+  <tr>
+    <td class="lbl">Account Number:</td>
+    <td class="val">{{AccountNr}}</td>
+    <td class="lbl">Approved LOS/C:</td>
+    <td class="val">{{TotalLOS}} days</td>
+  </tr>
+  <tr>
+    <td class="lbl">Referring Provider:</td>
+    <td class="val">{{ReferringProvider}}</td>
+    <td class="lbl">Current Practice:</td>
+    <td class="val">{{CurrentPractice}}</td>
+  </tr>
+  <tr>
+    <td class="lbl">Provider Speciality:</td>
+    <td class="val">{{Speciality}}</td>
+    <td class="lbl">Status:</td>
+    <td class="val" {{#if IsClosed}}style="color: red; font-weight: bold;"{{/if}}>{{CaseStatus}}</td>
+  </tr>
+</table>
+
+<!-- ICD CODES -->
+{{#if IcdCodes}}
+<div class="section-header">ICD Code(s)</div>
+<table class="data-tbl">
+  <thead><tr><th>Code</th><th>Code Type</th><th>Description</th></tr></thead>
+  <tbody>
+    {{#each IcdCodes}}<tr><td>{{DiagnosisCode}}</td><td>Primary</td><td>{{DiagnosisDesc}}</td></tr>{{/each}}
+  </tbody>
+</table>
+{{/if}}
+
+<!-- TARIFF CODES -->
+{{#if Tariffs}}
+<div class="section-header">Tariff Code(s)</div>
+<table class="data-tbl">
+  <thead><tr><th>Code</th><th>Description</th></tr></thead>
+  <tbody>
+    {{#each Tariffs}}<tr><td>{{TariffCode}}</td><td>{{TariffDescription}}</td></tr>{{/each}}
+  </tbody>
+</table>
+{{/if}}
+
+<!-- CPT CODES -->
+{{#if CptCodes}}
+<div class="section-header">CPT Code(s)</div>
+<table class="data-tbl">
+  <thead><tr><th>Code</th><th>Code Type</th><th>Description</th></tr></thead>
+  <tbody>
+    {{#each CptCodes}}<tr><td>{{CODE}}</td><td>{{CodeType}}</td><td>{{LONG_DESCR}}</td></tr>{{/each}}
+  </tbody>
+</table>
+{{/if}}
+
+<!-- FACILITY TYPES -->
+{{#if FacilityTypes}}
+<div class="section-header">Treatment Dates</div>
+<table class="data-tbl">
+  <thead><tr><th>Facility Type</th><th>Admitted</th><th>Discharged</th><th>LOS</th></tr></thead>
+  <tbody>
+    {{#each FacilityTypes}}<tr><td>{{FacilityType}}</td><td>{{DateAdmitted}}</td><td>{{DateDischarged}}</td><td>{{Los}}</td></tr>{{/each}}
+  </tbody>
+</table>
+{{/if}}
+
+<!-- CASE NOTE -->
+<div class="section-header">Note</div>
+<div class="note-box">{{CaseNote}}</div>
+
+<!-- STANDARD NOTES (conditional based on MedAidProductName) -->
+{{#if HasMedicalScheme}}
+<!-- Standard Notes: Patient HAS medical scheme product -->
+<div class="standard-notes">
+  <h4>Standard Notes</h4>
+  <ol>
+    <li>This authorisation is only valid for the specified member, accommodation level and codes and is dependant on active membership, benefit sub-limits and available benefits at date of service.</li>
+    <li>It is essential to contact the managed healthcare agent in the event of changes in the date of service, length of stay, level of care or scope of this authorisation request.</li>
+    <li>Please note that should the patient's stay be extended and we do not receive an appropriate clinical motivation Healthshare may decline funding of the changes.</li>
+    <li>All accounts to be sent by registered post or courier or hand delivered to Healthshare. <span style="color: red; font-weight: bold;">Please send 4 original copies together with <u>Referral Request Form</u> and <u>Authorisation Number</u>.</span> After payment from medical scheme was received and within 90 days.</li>
+    <li><strong>KINDLY NOTE THAT THIS PATIENT IS COVERED BY {{MedAidProductName}} MEDICAL SCHEME (PRIMARY FUNDER). MINISTRY OF HEALTH BOTSWANA IS ONLY LIABLE FOR THE 10% CO-PAYMENT.</strong></li>
+  </ol>
+</div>
+{{else}}
+<!-- Standard Notes: Patient does NOT have medical scheme product -->
+<div class="standard-notes">
+  <h4>Standard Notes</h4>
+  <ol>
+    <li>This authorisation is only valid for the specified member, accommodation level and codes and is dependant on active membership, benefit sub-limits and available benefits at date of service.</li>
+    <li>It is essential to contact the managed healthcare agent in the event of changes in the date of service, length of stay, level of care or scope of this authorisation request.</li>
+    <li>Please note that should the patient's stay be extended and we do not receive an appropriate clinical motivation Healthshare may decline funding of the changes.</li>
+    <li>All accounts to be sent by registered post or courier or hand delivered to Healthshare. <span style="color: red; font-weight: bold;">Please send 4 original copies together with <u>Referral Request Form</u> and <u>Authorisation Number</u>.</span></li>
+    <li>Every service provider who renders a service to a Botswana patient, must obtain their own authorisation on commencement of service by requesting authorisation from Healthshare by:<br>
+      &nbsp;&nbsp;&nbsp;Fax to mail: +27 086 274 3499<br>
+      &nbsp;&nbsp;&nbsp;Or E-MAIL: <a href="mailto:casemanagement@healthshare.co.za">casemanagement@healthshare.co.za</a>.<br>
+      Failure to obtain authorisation within 24 hrs will result in a penalty and not within 7 days will result in rejection of your claim.</li>
+    <li>All claims older than 90 days will be regarded as stale.</li>
+    <li>Ministry of Health Botswana will pay 2009 NHRPL+ {{TariffPercentagePriorYearValue}}% for {{TariffPercentagePriorYear}}, unless agreed for a different fee structure with Dr T de Coito from Healthshare. (drtdecoito@healthshare.co.za)</li>
+    <li>Ministry of Health Botswana will pay 2009 NHRPL+ {{TariffPercentageCurrentYearValue}}% for {{TariffPercentageCurrentYear}}, unless agreed for a different fee structure with Dr T de Coito from Healthshare. (drtdecoito@healthshare.co.za)</li>
+  </ol>
+</div>
+{{/if}}
+
+<!-- ACCOUNT QUERIES / FOOTER -->
+<div class="footer-section">
+  <div class="footer-left">
+    <strong>ACCOUNT QUERIES TO BE DIRECTED TO:</strong><br>
+    Billing Auditing<br>
+    Email: billingauditing@healthshare.co.za<br>
+    Tel office: 012 001 4181<br>
+    Fax to mail: 086 274 4028<br><br>
+    <strong>Healthshare Health Solutions</strong>
+  </div>
+  <div class="footer-right">
+    <strong>ADDRESS:</strong><br>
+    SOUTHDOWNS OFFICE PARK<br>
+    Block C<br>
+    2nd Floor<br>
+    C/O John Vorster and Karee Road<br>
+    Irene, Extension 54<br>
+    PO Box 65363<br>
+    Highveldpark, 0169
+  </div>
+</div>
+
+<!-- DISCHARGE FORM (conditional) -->
+{{#if IncludeDischargeForm}}
+<div style="page-break-before: always;"></div>
+<div style="text-align: center; margin-bottom: 20px;">
+  {{#if SystemLogoBase64}}<img src="data:image/png;base64,{{SystemLogoBase64}}" alt="Healthshare" style="max-height:60px;">{{/if}}
+</div>
+<h2 style="text-align: center; font-size: 13pt; margin-bottom: 20px;">Patient Discharge Summary Form</h2>
+
+<h3 style="font-size: 10pt; margin: 15px 0 5px;">Employee Details</h3>
+<table class="data-tbl">
+  <tr><td style="width:200px; font-weight:bold;">Surname</td><td>{{Surname}}</td></tr>
+  <tr><td style="font-weight:bold;">First Names</td><td>{{Name}}</td></tr>
+  <tr><td style="font-weight:bold;">Coy / Industry No</td><td></td></tr>
+  <tr><td style="font-weight:bold;">Job Title</td><td></td></tr>
+  <tr><td style="font-weight:bold;">SAMOHP Code</td><td></td></tr>
+  <tr><td style="font-weight:bold;">Date Of Discharge Form</td><td>{{DischargeDate}}</td></tr>
+</table>
+
+<h3 style="font-size: 10pt; margin: 15px 0 5px;">Investigations Done</h3>
+<table class="data-tbl">
+  <tr><th style="width:50%;">Investigations And Date</th><th>Summary Of Findings</th></tr>
+  <tr><td>&nbsp;</td><td></td></tr>
+  <tr><td>&nbsp;</td><td></td></tr>
+  <tr><td>&nbsp;</td><td></td></tr>
+  <tr><td>&nbsp;</td><td></td></tr>
+</table>
+
+<p style="margin: 12px 0; font-size: 9pt;"><strong>Specialists report attached (If was seen by specialist)</strong> &nbsp;&nbsp; No ☐ &nbsp;&nbsp; Yes ☐ &nbsp;&nbsp; Never referred ☐</p>
+
+<h3 style="font-size: 10pt; margin: 15px 0 5px;">Medical Diagnosis</h3>
+<table class="data-tbl">
+  <tr><th style="width:200px;">ICD10</th><th>Description</th></tr>
+  {{#each IcdCodes}}<tr><td>{{DiagnosisCode}}</td><td>{{DiagnosisDesc}}</td></tr>{{/each}}
+  <tr><td>&nbsp;</td><td></td></tr>
+</table>
+
+<h3 style="font-size: 10pt; margin: 15px 0 5px;">Treatment Summary</h3>
+<table class="data-tbl">
+  <tr><th>Drug or device</th><th>Dosage or size</th><th>Duration (Lifelong or not)</th></tr>
+  <tr><td>&nbsp;</td><td></td><td></td></tr>
+  <tr><td>&nbsp;</td><td></td><td></td></tr>
+  <tr><td>&nbsp;</td><td></td><td></td></tr>
+  <tr><td>&nbsp;</td><td></td><td></td></tr>
+  <tr><td>&nbsp;</td><td></td><td></td></tr>
+</table>
+
+<h3 style="font-size: 10pt; margin: 15px 0 5px;">Follow up Medical Requirement</h3>
+<table class="data-tbl">
+  <tr><th>Description</th><th>By Who</th><th>Where and when</th></tr>
+  <tr><td>&nbsp;</td><td></td><td></td></tr>
+  <tr><td>&nbsp;</td><td></td><td></td></tr>
+  <tr><td>&nbsp;</td><td></td><td></td></tr>
+  <tr style="border-top: 2px solid #000;"><td style="font-weight:bold;">Health centre</td><td style="font-weight:bold;">Name</td><td style="font-weight:bold;">Signature</td></tr>
+  <tr><td>&nbsp;</td><td></td><td></td></tr>
+</table>
+
+<h3 style="font-size: 10pt; margin: 15px 0 5px;">Notes</h3>
+<table style="width:100%; border: 1px solid #000; border-collapse: collapse;">
+  <tr><td style="border-bottom:1px solid #000; height:20px;">&nbsp;</td></tr>
+  <tr><td style="border-bottom:1px solid #000; height:20px;">&nbsp;</td></tr>
+  <tr><td style="border-bottom:1px solid #000; height:20px;">&nbsp;</td></tr>
+  <tr><td style="border-bottom:1px solid #000; height:20px;">&nbsp;</td></tr>
+  <tr><td style="border-bottom:1px solid #000; height:20px;">&nbsp;</td></tr>
+  <tr><td style="height:20px;">&nbsp;</td></tr>
+</table>
+
+<p style="margin-top: 20px; font-size: 9pt;">Discharging Doctor: ________________________________________</p>
+<p style="font-size: 9pt;">Signature: ________________________________________</p>
+<p style="font-size: 9pt;">Date: ________________________________________</p>
+{{/if}}
+
+<!-- REFERRAL LETTER (conditional) -->
+{{#if IncludeReferralLetter}}
+<div style="page-break-before: always;"></div>
+<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+  {{#if SystemLogoBase64}}<img src="data:image/png;base64,{{SystemLogoBase64}}" alt="Healthshare" style="max-height:45px;">{{/if}}
+  <span style="font-size: 14pt; color: #c44; font-weight: bold; font-style: italic;">Internal/External patient referral form</span>
+</div>
+
+<table class="data-tbl" style="margin: 15px 0; width: 60%;">
+  <tr><th></th><th>Botswana Ministry of Health</th><th>Medical Scheme patient</th><th>Ministry of Health Patient</th></tr>
+  <tr><td style="font-weight:bold;">Swaziland Ministry of Health</td><td></td><td>Phalala fund</td><td>Civil servants</td></tr>
+</table>
+
+<div style="float: right; width: 150px; height: 100px; border: 2px solid #c90; border-radius: 8px; text-align: center; padding-top: 35px; font-style: italic; color: #666; margin-left: 20px;">Patient Sticker</div>
+
+<p style="margin: 30px 0 15px; font-size: 10pt;">Dear Dr/Service provider. ____________________________</p>
+
+<p style="font-size: 10pt; margin-bottom: 10px;">Please see the above mentioned patient for the following clinical problems:</p>
+
+<table style="width: 100%; border: 1px solid #000; border-collapse: collapse; margin-bottom: 15px;">
+  <tr><td style="border-bottom:1px solid #000; height:25px; padding: 4px;">&nbsp;</td></tr>
+  <tr><td style="height:25px; padding: 4px;">&nbsp;</td></tr>
+</table>
+
+<p style="font-size: 10pt; margin: 20px 0;">Thank you</p>
+
+<p style="font-size: 9pt; margin-top: 30px;">Dr. ______________________________ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Date: ______________________________</p>
+
+<div class="standard-notes" style="margin-top: 20px;">
+  <h4>Standard Notes</h4>
+  <ol>
+    <li><strong>Every service provider</strong> who renders a service to a Botswana/Swaziland patient, must obtain their own authorisation on commencement of service by requesting authorisation from Healthshare by: Fax to mail: +27 086 274 3499 Or E-MAIL: <a href="mailto:casemanagement@healthshare.co.za">casemanagement@healthshare.co.za</a> (Botswana) or <a href="mailto:Casemanagement.swazi@healthshare.co.za">Casemanagement.swazi@healthshare.co.za</a> (Swaziland) or fax to mail +27 0866173037<br><strong><u>Failure to obtain authorisation within 7 days could result in rejection of your claim.</u></strong></li>
+    <li>This authorisation is only valid for the specified member, accommodation level and codes and is dependent on active membership, benefit sub-limits and available benefits at date of service.</li>
+    <li>It is essential to contact the managed healthcare agent in the event of changes in the date of service, length of stay, level of care or scope of this authorisation request.</li>
+    <li>Please note that should the patient's stay be extended and we do not receive an appropriate clinical motivation Healthshare may decline funding of the changes.</li>
+    <li>All accounts to be sent by post or courier to Healthshare. <span style="color:red; font-weight:bold;">Please send 4 original (Botswana) copies together with <u>Referral Request Form</u> and <u>Authorisation Number</u>. Please send 2 original (Swaziland) copies with <u>Referral request form</u> and <u>Auth Number</u>.</span></li>
+    <li><strong>All claims older than 90 days will be regarded as stale.</strong></li>
+    <li>Ministry of Health Botswana/Swaziland will pay 2009 NHRPL+ {{TariffPercentagePriorYearValue}}% for {{TariffPercentagePriorYear}}, unless agreed for a different fee structure with Dr T de Coito from Healthshare. (drtdecoito@healthshare.co.za)</li>
+    <li>Ministry of Health Botswana/Swaziland will pay 2009 NHRPL+ {{TariffPercentageCurrentYearValue}}% for {{TariffPercentageCurrentYear}}, unless agreed for a different fee structure with Dr T de Coito from Healthshare. (drtdecoito@healthshare.co.za)</li>
+  </ol>
+</div>
+
+<div class="footer-section" style="margin-top: 15px;">
+  <div class="footer-left">
+    <strong>Healthshare Health Solutions</strong><br><br>
+    <strong>ACCOUNT QUERIES TO BE DIRECTED TO:</strong><br>
+    Billing Auditing<br>
+    Email: <a href="mailto:billingauditing@healthshare.co.za">billingauditing@healthshare.co.za</a><br>
+    Tel office: 012 661 4181<br>
+    Fax-to-mail: 086 274 4029
+  </div>
+  <div class="footer-right">
+    <strong>ADDRESS:</strong><br>
+    SOUTHDOWNS OFFICE PARK<br>
+    Block C<br>
+    2nd Floor<br>
+    C/O John Vorster and Karee Road<br>
+    Irene, Extension 54<br>
+    PO Box 65363<br>
+    Highveldpark, 0169
+  </div>
+</div>
+{{/if}}
+
+<div class="generated">Generated: {{GeneratedDate}} | Auth: {{AuthNumber}} | This document is confidential and intended for the recipient only.</div>
+
+<!-- PAGE 2: MEDICAL SCHEME VIA GOVERNMENT REFERRAL HOSPITALS LETTER (embedded image) -->
+<div style="page-break-before: always;"></div>
+<div style="text-align: center;">
+  <img src="data:image/jpeg;base64,{{ReferralLetterImage}}" alt="Medical Scheme via Government Referral Hospitals" style="max-width: 100%; height: auto;">
+</div>
+
+</body>
+</html>

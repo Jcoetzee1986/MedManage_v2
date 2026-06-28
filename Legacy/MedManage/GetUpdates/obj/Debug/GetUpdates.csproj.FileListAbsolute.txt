@@ -1,0 +1,7 @@
+C:\Code\MedManage\MedManageDeploy\GetUpdates.exe.config
+C:\Code\MedManage\MedManageDeploy\GetUpdates.exe
+C:\Code\MedManage\MedManageDeploy\GetUpdates.pdb
+C:\Code\MedManage\MedManage\GetUpdates\obj\Debug\GetUpdates.csproj.AssemblyReference.cache
+C:\Code\MedManage\MedManage\GetUpdates\obj\Debug\GetUpdates.csproj.CoreCompileInputs.cache
+C:\Code\MedManage\MedManage\GetUpdates\obj\Debug\GetUpdates.exe
+C:\Code\MedManage\MedManage\GetUpdates\obj\Debug\GetUpdates.pdb

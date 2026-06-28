@@ -1,0 +1,14 @@
+C:\Code\MedManage\MedManageDeploy\Icondev.MedManage.MedManageLib.dll
+C:\Code\MedManage\MedManageDeploy\Icondev.MedManage.MedManageLib.pdb
+C:\Code\MedManage\MedManage\MedManageLib\obj\Debug\MedManageLib.csproj.AssemblyReference.cache
+C:\Code\MedManage\MedManage\MedManageLib\obj\Debug\MedManageLib.csproj.CoreCompileInputs.cache
+C:\Code\MedManage\MedManage\MedManageLib\obj\Debug\MedManag.52221107.Up2Date
+C:\Code\MedManage\MedManage\MedManageLib\obj\Debug\Icondev.MedManage.MedManageLib.dll
+C:\Code\MedManage\MedManage\MedManageLib\obj\Debug\Icondev.MedManage.MedManageLib.pdb
+C:\Code\MedManage_v2\MedManageDeploy\Icondev.MedManage.MedManageLib.dll
+C:\Code\MedManage_v2\MedManageDeploy\Icondev.MedManage.MedManageLib.pdb
+C:\Code\MedManage_v2\MedManage\MedManageLib\obj\Debug\MedManageLib.csproj.AssemblyReference.cache
+C:\Code\MedManage_v2\MedManage\MedManageLib\obj\Debug\MedManageLib.csproj.CoreCompileInputs.cache
+C:\Code\MedManage_v2\MedManage\MedManageLib\obj\Debug\MedManag.52221107.Up2Date
+C:\Code\MedManage_v2\MedManage\MedManageLib\obj\Debug\Icondev.MedManage.MedManageLib.dll
+C:\Code\MedManage_v2\MedManage\MedManageLib\obj\Debug\Icondev.MedManage.MedManageLib.pdb

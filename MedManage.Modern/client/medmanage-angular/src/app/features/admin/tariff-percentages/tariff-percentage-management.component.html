@@ -1,0 +1,200 @@
+<div class="tariff-percentage-management">
+  <h1>Tariff Percentage Management</h1>
+  <p class="subtitle">Manage tariff percentages for each period</p>
+
+  <!-- Create/Edit Form -->
+  @if (showForm) {
+    <mat-card class="form-panel">
+      <mat-card-header>
+        <mat-card-title>{{ isEditing ? 'Edit' : 'Create' }} Tariff Percentage</mat-card-title>
+      </mat-card-header>
+
+      <mat-card-content>
+        @if (serverError) {
+          <div class="server-error">
+            <mat-icon>error</mat-icon>
+            <span>{{ serverError }}</span>
+          </div>
+        }
+
+        <form [formGroup]="form" (ngSubmit)="onSave()" class="percentage-form">
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Percentage Added</mat-label>
+              <input matInput type="number" formControlName="percentageAdded" step="0.0001" required>
+              <mat-hint>Value between 0.0001 and 9999.9999</mat-hint>
+              @if (form.controls.percentageAdded.hasError('required')) {
+                <mat-error>Percentage is required</mat-error>
+              }
+              @if (form.controls.percentageAdded.hasError('min')) {
+                <mat-error>Percentage must be greater than 0</mat-error>
+              }
+              @if (form.controls.percentageAdded.hasError('max')) {
+                <mat-error>Percentage must not exceed 9999.9999</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Tariff Period (Year)</mat-label>
+              <input matInput type="number" formControlName="tariffPeriodName" [readonly]="isEditing" required>
+              <mat-hint>4-digit year (2000–2100)</mat-hint>
+              @if (form.controls.tariffPeriodName.hasError('required')) {
+                <mat-error>Period year is required</mat-error>
+              }
+              @if (form.controls.tariffPeriodName.hasError('min') || form.controls.tariffPeriodName.hasError('max') || form.controls.tariffPeriodName.hasError('invalidYear')) {
+                <mat-error>Must be a year between 2000 and 2100</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Start Active Date</mat-label>
+              <input matInput [matDatepicker]="startPicker" formControlName="startActiveDate" required>
+              <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
+              <mat-datepicker #startPicker></mat-datepicker>
+              @if (form.controls.startActiveDate.hasError('required')) {
+                <mat-error>Start date is required</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>End Active Date</mat-label>
+              <input matInput [matDatepicker]="endPicker" formControlName="endActiveDate">
+              <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
+              <mat-datepicker #endPicker></mat-datepicker>
+              @if (form.hasError('endBeforeStart')) {
+                <mat-error>End date cannot be before start date</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <div class="form-row full-width">
+            <mat-form-field appearance="outline">
+              <mat-label>Notes</mat-label>
+              <textarea matInput formControlName="notes" rows="3" maxlength="500"></textarea>
+              <mat-hint align="end">{{ form.controls.notes.value?.length || 0 }} / 500</mat-hint>
+              @if (form.controls.notes.hasError('maxlength')) {
+                <mat-error>Notes cannot exceed 500 characters</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <div class="form-actions">
+            <button mat-button type="button" (click)="onCancel()" [disabled]="saving">Cancel</button>
+            <button mat-raised-button color="primary" type="submit" [disabled]="saving">
+              @if (saving) {
+                Saving...
+              } @else {
+                {{ isEditing ? 'Update' : 'Create' }}
+              }
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Data Table -->
+  <mat-card class="data-panel">
+    <mat-card-header>
+      <mat-card-title>Tariff Percentages</mat-card-title>
+    </mat-card-header>
+
+    @if (loading) {
+      <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    }
+
+    <mat-card-content>
+      <div class="toolbar">
+        <button mat-raised-button color="primary" (click)="onAdd()" [disabled]="showForm" matTooltip="Add new tariff percentage">
+          <mat-icon>add</mat-icon> Add New
+        </button>
+        <button mat-button (click)="loadPercentages()" matTooltip="Refresh data">
+          <mat-icon>refresh</mat-icon>
+        </button>
+      </div>
+
+      @if (percentages.length > 0) {
+        <div class="table-scroll">
+          <table mat-table [dataSource]="percentages" class="data-table">
+            <!-- Period Column -->
+            <ng-container matColumnDef="tariffPeriodName">
+              <th mat-header-cell *matHeaderCellDef>Period</th>
+              <td mat-cell *matCellDef="let row">{{ row.tariffPeriodName }}</td>
+            </ng-container>
+
+            <!-- Start Date Column -->
+            <ng-container matColumnDef="startActiveDate">
+              <th mat-header-cell *matHeaderCellDef>Start Date</th>
+              <td mat-cell *matCellDef="let row">{{ row.startActiveDate | date:'mediumDate' }}</td>
+            </ng-container>
+
+            <!-- End Date Column -->
+            <ng-container matColumnDef="endActiveDate">
+              <th mat-header-cell *matHeaderCellDef>End Date</th>
+              <td mat-cell *matCellDef="let row">{{ row.endActiveDate ? (row.endActiveDate | date:'mediumDate') : 'Open-ended' }}</td>
+            </ng-container>
+
+            <!-- Percentage Column -->
+            <ng-container matColumnDef="percentageAdded">
+              <th mat-header-cell *matHeaderCellDef>Percentage</th>
+              <td mat-cell *matCellDef="let row">{{ row.percentageAdded | number:'1.2-4' }}%</td>
+            </ng-container>
+
+            <!-- Status Column -->
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef>Status</th>
+              <td mat-cell *matCellDef="let row">
+                <span [class]="getStatusBadgeClass(row.status)">{{ row.status }}</span>
+              </td>
+            </ng-container>
+
+            <!-- Records Affected Column -->
+            <ng-container matColumnDef="recordsAffected">
+              <th mat-header-cell *matHeaderCellDef>Records Affected</th>
+              <td mat-cell *matCellDef="let row">{{ row.recordsAffected != null ? (row.recordsAffected | number) : '—' }}</td>
+            </ng-container>
+
+            <!-- Actions Column -->
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Actions</th>
+              <td mat-cell *matCellDef="let row">
+                <div class="actions-cell">
+                  @if (canEdit(row)) {
+                    <button mat-icon-button matTooltip="Edit" (click)="onEdit(row)" [disabled]="showForm">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                  }
+                  @if (isRowProcessing(row)) {
+                    <mat-spinner diameter="24"></mat-spinner>
+                  } @else {
+                    <button
+                      mat-flat-button
+                      color="primary"
+                      [disabled]="!isApplyEnabled(row)"
+                      (click)="onApplyClick(row)"
+                      matTooltip="Apply tariff percentage to provider tariff records">
+                      Apply
+                    </button>
+                  }
+                </div>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+                [class.row-processing]="isRowProcessing(row)"></tr>
+          </table>
+        </div>
+      }
+
+      @if (!loading && percentages.length === 0) {
+        <div class="empty-state">
+          <mat-icon>inbox</mat-icon>
+          <p>No tariff percentages found.</p>
+        </div>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>
