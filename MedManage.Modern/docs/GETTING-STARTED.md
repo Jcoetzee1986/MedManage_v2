@@ -9,7 +9,7 @@ Complete guide for running the application locally or with Podman containers.
 | Tool | Version | Purpose |
 |------|---------|---------|
 | SQL Server | 2016+ | Database (runs on host, not containerized) |
-| .NET SDK | 8.0+ | API build & run |
+| .NET SDK | 10.0+ | API build & run |
 | Node.js | 20.x+ | Angular build & run |
 | Podman | 4.x+ | Container runtime (alternative to local dev) |
 | podman-compose | latest | Multi-container orchestration |
@@ -28,13 +28,16 @@ Scripts are numbered and must be executed in order:
 
 | # | Script | Purpose | Required |
 |---|--------|---------|----------|
-| 1 | `001_AddAuditColumns.sql` | Adds `DateInserted`, `UserID`, `DateUpdated`, `UpdatedUserID` columns to all tables (BaseEntity pattern) | Yes |
-| 2 | `002_StandardizeDateInsertedColumns.sql` | Changes `DateInserted` from DATE to DATETIME on tables that had the wrong type | Yes |
-| 3 | `003_RemoveOldAuditTriggers.sql` | Drops old/broken audit triggers from legacy migration | Yes (first time) |
-| 4 | `004_FixAuditTriggers.sql` | Recreates all 24 audit triggers with explicit column names and SESSION_CONTEXT support | Yes |
-| 5 | `005_CreateRefreshTokensTable.sql` | Creates `RefreshTokens` table for JWT token rotation | Yes |
-| 6 | `006_CreatePasswordResetTokensTable.sql` | Creates `PasswordResetTokens` table for password recovery flow | Yes |
-| 7 | `007_AddIsPermanentlyBlocked.sql` | Adds `IsPermanentlyBlocked` column to `aspnet_Membership` for user deactivation | Yes |
+| 1 | `001_AddAuditColumns.sql` | Adds audit columns to all tables (BaseEntity pattern) | Yes |
+| 2 | `002_StandardizeDateInsertedColumns.sql` | Changes `DateInserted` from DATE to DATETIME | Yes |
+| 3 | `003_RemoveOldAuditTriggers.sql` | Drops old/broken audit triggers | Yes (first time) |
+| 4 | `004_FixAuditTriggers.sql` | Recreates all 24 audit triggers with SESSION_CONTEXT | Yes |
+| 5 | `005_CreateRefreshTokensTable.sql` | Creates `RefreshTokens` table for JWT rotation | Yes |
+| 6 | `006_CreatePasswordResetTokensTable.sql` | Creates `PasswordResetTokens` table | Yes |
+| 7 | `007_AddIsPermanentlyBlocked.sql` | Adds `IsPermanentlyBlocked` column for user deactivation | Yes |
+| 8 | `008_CreateCaseLetterNotesTable.sql` | Creates `CaseLetterNotes` table for letter generation | Yes |
+| 9 | `009_SeedLetterTemplates.sql` | Seeds HTML letter templates per main client | Yes |
+| 10 | `010_CreateTariffPercentageTable.sql` | Creates `Tariff.TariffPercentage` table + seed data | Yes |
 
 All scripts are located in `Infrastructure/Scripts/`.
 
@@ -42,36 +45,31 @@ All scripts are located in `Infrastructure/Scripts/`.
 
 ```powershell
 # From the project root (MedManage.Modern/)
-sqlcmd -S localhost -d MedManage -i Infrastructure\Scripts\001_AddAuditColumns.sql
-sqlcmd -S localhost -d MedManage -i Infrastructure\Scripts\002_StandardizeDateInsertedColumns.sql
-sqlcmd -S localhost -d MedManage -i Infrastructure\Scripts\003_RemoveOldAuditTriggers.sql
-sqlcmd -S localhost -d MedManage -i Infrastructure\Scripts\004_FixAuditTriggers.sql
-sqlcmd -S localhost -d MedManage -i Infrastructure\Scripts\005_CreateRefreshTokensTable.sql
-sqlcmd -S localhost -d MedManage -i Infrastructure\Scripts\006_CreatePasswordResetTokensTable.sql
-sqlcmd -S localhost -d MedManage -i Infrastructure\Scripts\007_AddIsPermanentlyBlocked.sql
+sqlcmd -S . -d MedManage -E -i Infrastructure\Scripts\001_AddAuditColumns.sql
+sqlcmd -S . -d MedManage -E -i Infrastructure\Scripts\002_StandardizeDateInsertedColumns.sql
+# ... continue for all scripts in order
 ```
 
-Or open each file in SSMS, connect to your MedManage database, and execute in order.
+Or open each file in SSMS, connect to your MedManage database, and execute.
 
-> **Note:** Script 001 generates ALTER statements but requires you to uncomment the `EXEC sp_executesql @sql` line to apply them. Review the output first. All other scripts are idempotent — re-running is safe.
+> **Note:** All scripts are idempotent — re-running is safe.
 
 ### Verify Database Connectivity
 
 ```powershell
-# Quick TCP check
 Test-NetConnection -ComputerName localhost -Port 1433
 ```
 
 Ensure SQL Server is configured for:
 - **TCP/IP enabled** (SQL Server Configuration Manager → Protocols)
-- **Mixed mode authentication** (if using SQL login from containers)
+- **Integrated Security** or mixed mode authentication
 - **Firewall allows port 1433** (for Podman container access)
 
 ---
 
 ## Option A: Run with Podman (Recommended for deployment)
 
-This runs the API, Angular frontend, and jsreport in containers. Only the database stays on the host.
+This runs the API and Angular frontend in containers. Only the database stays on the host.
 
 ### 1. Create environment file
 
@@ -84,7 +82,6 @@ Edit `.env` with your values:
 ```env
 DB_PASSWORD=YourSqlServerPassword
 JWT_SECRET=a-random-string-at-least-32-characters-long
-JSREPORT_PASSWORD=admin-password-for-jsreport
 ```
 
 ### 2. Start all containers
@@ -102,9 +99,8 @@ podman-compose up -d --build
 | Service | URL | Notes |
 |---------|-----|-------|
 | Frontend (HTTP) | http://localhost:8080 | Angular app (nginx proxies /api to the API) |
-| Frontend (HTTPS) | https://localhost:8443 | Same app with self-signed cert (accept browser warning) |
-| API | http://localhost:5000 | .NET 8 API (Swagger at /swagger) |
-| jsreport | http://localhost:5488 | Report template studio |
+| Frontend (HTTPS) | https://localhost:8443 | Self-signed cert (accept browser warning) |
+| API | http://localhost:5000 | .NET 10 API (Swagger at /swagger) |
 
 ### 4. Stop containers
 
@@ -121,10 +117,10 @@ podman-compose up -d --build
 ┌─────────────────────────────────────────────────────────┐
 │  Podman                                                  │
 │                                                          │
-│  ┌──────────┐    ┌──────────────┐    ┌───────────────┐  │
-│  │  nginx   │───▶│  .NET API    │───▶│  jsreport     │  │
-│  │  :80/443 │    │  :8080       │    │  :5488        │  │
-│  └──────────┘    └──────┬───────┘    └───────────────┘  │
+│  ┌──────────┐    ┌──────────────┐                        │
+│  │  nginx   │───▶│  .NET API    │                        │
+│  │  :80/443 │    │  :8080       │                        │
+│  └──────────┘    └──────┬───────┘                        │
 │  (port 8080/8443)       │                                │
 │                         │ host.containers.internal:1433   │
 └─────────────────────────┼────────────────────────────────┘
@@ -175,60 +171,69 @@ Edit `src/MedManage.API/appsettings.json`:
 ### 2. Start the API
 
 ```powershell
-cd src\MedManage.API
-dotnet run
-```
-
-Or with hot-reload (from the solution root):
-```powershell
 dotnet watch run --project src\MedManage.API
 ```
 
-The API starts at `https://localhost:5001` (HTTPS) and `http://localhost:5000` (HTTP).
-Swagger UI: `https://localhost:5001/swagger`
+The API starts at:
+- `https://localhost:58764` (HTTPS)
+- `http://localhost:58765` (HTTP)
+- Swagger UI: `https://localhost:58764/swagger`
 
 ### 3. Start the Angular frontend
 
 ```powershell
-cd client/medmanage-angular
+cd client\medmanage-angular
 npm install    # first time only
 npm start
 ```
 
 Angular dev server starts at `http://localhost:4200`.
 
-The dev server uses a proxy to forward `/api` requests to the local .NET API:
-- **`npm start`** → proxies to `https://localhost:5001` (default, API with HTTPS)
-- **`npm run start:http`** → proxies to `http://localhost:5000` (API without HTTPS)
+The dev server proxies `/api` requests to the .NET API:
+- **`npm start`** → proxies to `https://localhost:58764` (default)
+- **`npm run start:http`** → proxies to `http://localhost:58765`
 
-The proxy configs are at `proxy.conf.json` (HTTPS) and `proxy.conf.http.json` (HTTP). Edit the `target` URL if your API runs on a different port.
+Proxy configs: `proxy.conf.json` (HTTPS) and `proxy.conf.http.json` (HTTP).
 
-### 4. Start jsreport (optional, for reports)
+---
 
-```powershell
-cd Infrastructure/jsreport
-podman-compose up -d
-```
+## Reports
 
-Or run it standalone:
-```powershell
-podman run -d --name jsreport -p 5488:5488 jsreport/jsreport:4.5.0
-```
+Reports are generated entirely in-process — no external containers needed:
 
-jsreport studio: http://localhost:5488
+| Format | Technology | Library |
+|--------|-----------|---------|
+| Excel (.xlsx) | ClosedXML | NuGet: ClosedXML |
+| PDF | HTML → PDF | NuGet: PuppeteerSharp |
+| Case Letters | Handlebars templates → PDF | NuGet: Handlebars.Net + PuppeteerSharp |
+
+Available reports:
+- Cases Between Dates (PDF/Excel)
+- Billing Summary (PDF/Excel)
+- WIP Extract (PDF/Excel)
+- Case Tariff Detail (PDF/Excel)
+- My Cases (Excel)
+- Case Comments Export (Excel)
+- Linked Cases (PDF)
+- Case Letter (PDF) — per-client Handlebars HTML templates
 
 ---
 
 ## Running Tests
 
 ```powershell
-# .NET unit tests
+# All .NET tests
 dotnet test
 
-# Angular tests
-cd client/medmanage-angular
-npm test
+# Exclude integration tests (require running DB)
+dotnet test --filter "Category!=Integration"
+
+# Angular build check
+cd client\medmanage-angular
+npx ng build --configuration production
 ```
+
+Current test status: **61 tests passing** (Infrastructure.Tests)
 
 ---
 
@@ -237,25 +242,26 @@ npm test
 ```
 MedManage.Modern/
 ├── src/
-│   ├── MedManage.API/              # ASP.NET Core Web API
-│   ├── MedManage.Core/             # Domain entities, interfaces, DTOs
-│   ├── MedManage.Infrastructure/   # EF Core, repositories, services
-│   ├── MedManage.Identity/         # Authentication services
+│   ├── MedManage.API/              # ASP.NET Core Web API (controllers, middleware)
+│   ├── MedManage.Core/             # Domain entities, interfaces, DTOs, configuration
+│   ├── MedManage.Infrastructure/   # EF Core, repositories, services, background processors
 │   └── MedManage.Shared/           # Shared utilities
 ├── client/
-│   └── medmanage-angular/          # Angular 17 SPA
+│   └── medmanage-angular/          # Angular 19 SPA (standalone components)
 ├── tests/
-│   └── MedManage.Infrastructure.Tests/
+│   ├── MedManage.Core.Tests/
+│   ├── MedManage.Infrastructure.Tests/
+│   └── MedManage.API.Tests/
 ├── Infrastructure/
-│   ├── Scripts/                    # SQL migration scripts
-│   └── jsreport/                   # jsreport Docker config + templates
-├── scripts/                        # Podman convenience scripts
-├── podman-compose.yml              # Full-stack Podman orchestration
+│   ├── Scripts/                    # SQL migration scripts (numbered)
+│   └── Templates/                  # HTML letter templates, base64 images
+├── scripts/                        # podman-up.ps1, podman-down.ps1, test-report-endpoints.ps1
+├── docs/                           # Documentation
+├── podman-compose.yml              # API + Angular container orchestration
 ├── Dockerfile.api                  # API container build
-├── Dockerfile.angular              # Angular container build
-├── nginx.conf                      # nginx config for Angular container
-├── .env.example                    # Environment variable template
-└── docs/                           # Documentation
+├── Dockerfile.angular              # Angular container build (nginx)
+├── nginx.conf                      # nginx reverse proxy config
+└── .env.example                    # Environment variable template
 ```
 
 ---
@@ -266,32 +272,58 @@ MedManage.Modern/
 |----------|---------|-------------|
 | `DB_PASSWORD` | *required* | SQL Server password for the connection string |
 | `JWT_SECRET` | *required* | JWT signing key (32+ chars) |
-| `JSREPORT_PASSWORD` | `password` | jsreport admin password |
 | `ASPNETCORE_ENVIRONMENT` | `Production` | .NET environment (Production/Development) |
+
+---
+
+## Key Configuration (appsettings.json)
+
+| Section | Purpose |
+|---------|---------|
+| `ConnectionStrings.DefaultConnection` | SQL Server connection |
+| `JwtSettings` | Token signing key, issuer, audience, expiry (480 min) |
+| `CorsSettings` | Allowed origins for CORS |
+| `CaseLock` | Case lock timeout (5h) and cleanup interval (15m) |
+| `Serilog` | Logging sinks (Console, File, Graylog) |
 
 ---
 
 ## Useful Commands
 
 ```powershell
-# Build everything
+# Build solution
 dotnet build MedManage.Modern.sln
 
 # Run API with hot-reload
 dotnet watch run --project src\MedManage.API
 
 # Build Angular for production
-cd client/medmanage-angular && npx ng build --configuration production
+cd client\medmanage-angular
+npx ng build --configuration production
 
 # Run Podman stack
 podman-compose up -d --build
 
-# View API logs in Podman
+# View API logs
 podman logs -f medmanage-api
 
-# View all running containers
-podman ps
+# Run report integration tests
+.\scripts\test-report-endpoints.ps1 -Username "YourUser" -Password "YourPass"
 
-# Rebuild just the API container
-podman-compose build api && podman-compose up -d api
+# Apply a SQL script
+sqlcmd -S . -d MedManage -E -i Infrastructure\Scripts\010_CreateTariffPercentageTable.sql
 ```
+
+---
+
+## Roles
+
+The system uses these role names (must match database):
+
+| Role | Access |
+|------|--------|
+| Case Manager | Case CRUD, letters, notes, bookings |
+| System Administrator | All features + admin panel |
+| Billing Auditing | Finance, billing, reports |
+| Imports | Data import module |
+| Metadata Administrator | Reference data, tariff admin |

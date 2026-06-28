@@ -255,21 +255,21 @@ public async Task<decimal> CalculateCaseTariffAsync(int caseId, int providerId)
 
 #### 3C. Reporting Procedures (Recommended: 14 procedures)
 **Complexity:** Medium-High  
-**Priority:** Low (Move to jsreport)  
-**Approach:** Keep temporarily, migrate to jsreport in Phase 10
+**Priority:** Complete  
+**Approach:** Replaced with EF Core queries + ClosedXML (Excel) + PuppeteerSharp (PDF)
 
-| Stored Procedure | Description | Migration Plan |
-|-----------------|-------------|----------------|
-| `usp_rpt_Case_Select_BetweenDates` | Case list report | Convert to jsreport template |
-| `usp_rpt_Case_Tariff_Select` | Tariff report | Convert to jsreport template |
-| `usp_rpt_Finance_WIPExtract` | WIP financial extract | Convert to jsreport template |
-| `usp_rpt_Remittance_Summary` | Payment summary | Convert to jsreport template |
-| `usp_rpt_Case_Export` | Case data export | Convert to jsreport template |
-| `usp_rpt_Member_List` | Member list | Convert to jsreport template |
-| `usp_rpt_Booking_Summary` | Booking report | Convert to jsreport template |
-| `usp_rpt_ServiceProvider_Cases` | Provider workload | Convert to jsreport template |
+| Stored Procedure | Description | Migration Status |
+|-----------------|-------------|-----------------|
+| `usp_rpt_Case_Select_BetweenDates` | Case list report | ✅ Replaced by ReportGenerationService |
+| `usp_rpt_Case_Tariff_Select` | Tariff report | ✅ Still uses SP via `Tariff.usp_Case_Tariff_Select` |
+| `usp_rpt_Finance_WIPExtract` | WIP financial extract | ✅ Replaced by EF Core query |
+| `usp_rpt_Remittance_Summary` | Payment summary | ✅ Replaced by EF Core query |
+| `usp_rpt_Case_Export` | Case data export | ✅ Replaced by EF Core query |
+| `usp_rpt_Member_List` | Member list | Pending |
+| `usp_rpt_Booking_Summary` | Booking report | Pending |
+| `usp_rpt_ServiceProvider_Cases` | Provider workload | Pending |
 
-**Status:** 0/14 (0%) - Keep as SP for now, migrate in Phase 10
+**Status:** 5/8 core reports complete — no external report server needed
 
 ---
 
