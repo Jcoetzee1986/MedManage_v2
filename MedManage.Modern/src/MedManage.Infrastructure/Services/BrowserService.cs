@@ -5,12 +5,18 @@ namespace MedManage.Infrastructure.Services;
 
 /// <summary>
 /// Singleton service managing a shared Chromium browser instance for PDF generation.
-/// Downloads Chromium to a configurable path (supports PVC mounts in k8s).
+/// 
+/// Resolution order for Chromium executable:
+/// 1. PUPPETEER_EXECUTABLE_PATH env var (system-installed Chromium, e.g. /usr/bin/chromium)
+/// 2. PUPPETEER_CACHE_DIR env var (PVC-cached download)
+/// 3. OS temp directory (local dev fallback — downloads on first use)
+/// 
 /// Used by ReportGenerationService and LetterTemplateService.
 /// </summary>
 public class BrowserService : IDisposable
 {
     private readonly ILogger<BrowserService> _logger;
+    private readonly string? _executablePath;
     private readonly string _cachePath;
     private IBrowser? _browser;
     private readonly SemaphoreSlim _lock = new(1, 1);
@@ -18,7 +24,7 @@ public class BrowserService : IDisposable
     public BrowserService(ILogger<BrowserService> logger)
     {
         _logger = logger;
-        // Use PUPPETEER_CACHE_DIR env var if set (for PVC mount), otherwise default
+        _executablePath = Environment.GetEnvironmentVariable("PUPPETEER_EXECUTABLE_PATH");
         _cachePath = Environment.GetEnvironmentVariable("PUPPETEER_CACHE_DIR")
             ?? Path.Combine(Path.GetTempPath(), "puppeteer-cache");
     }
@@ -34,35 +40,21 @@ public class BrowserService : IDisposable
             if (_browser != null && _browser.IsConnected)
                 return _browser;
 
-            _logger.LogInformation("Chromium cache directory: {CachePath}", _cachePath);
+            string executablePath;
 
-            var fetcherOptions = new BrowserFetcherOptions { Path = _cachePath };
-            var browserFetcher = new BrowserFetcher(fetcherOptions);
-
-            // Check if already downloaded
-            var installedBrowser = browserFetcher.GetInstalledBrowsers().FirstOrDefault();
-            if (installedBrowser != null)
+            // Option 1: Use system-installed Chromium (Docker image with apt chromium)
+            if (!string.IsNullOrEmpty(_executablePath))
             {
-                _logger.LogInformation("Chromium already downloaded at {Path} (revision {Revision})",
-                    installedBrowser.GetExecutablePath(), installedBrowser.BuildId);
+                executablePath = _executablePath;
+                _logger.LogInformation("Using system Chromium at: {ExecutablePath}", executablePath);
             }
             else
             {
-                _logger.LogInformation("Downloading Chromium to {CachePath}...", _cachePath);
-                var sw = System.Diagnostics.Stopwatch.StartNew();
-                var result = await browserFetcher.DownloadAsync();
-                sw.Stop();
-                _logger.LogInformation("Chromium downloaded successfully in {ElapsedMs}ms. Path: {Path}, BuildId: {BuildId}",
-                    sw.ElapsedMilliseconds, result.GetExecutablePath(), result.BuildId);
+                // Option 2/3: Download via BrowserFetcher (PVC cache or temp dir)
+                executablePath = await EnsureChromiumDownloadedAsync();
             }
 
             _logger.LogInformation("Launching Chromium browser...");
-            
-            // Get the executable path from the fetcher
-            var installedBrowsers = browserFetcher.GetInstalledBrowsers().ToList();
-            var executablePath = installedBrowsers.First().GetExecutablePath();
-            _logger.LogInformation("Chromium executable: {ExecutablePath}", executablePath);
-
             _browser = await Puppeteer.LaunchAsync(new LaunchOptions
             {
                 Headless = true,
@@ -84,13 +76,41 @@ public class BrowserService : IDisposable
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to initialize Chromium browser. CachePath: {CachePath}", _cachePath);
+            _logger.LogError(ex, "Failed to initialize Chromium browser. ExecutablePath: {ExecutablePath}, CachePath: {CachePath}",
+                _executablePath ?? "(auto)", _cachePath);
             throw;
         }
         finally
         {
             _lock.Release();
         }
+    }
+
+    private async Task<string> EnsureChromiumDownloadedAsync()
+    {
+        _logger.LogInformation("Chromium cache directory: {CachePath}", _cachePath);
+
+        var fetcherOptions = new BrowserFetcherOptions { Path = _cachePath };
+        var browserFetcher = new BrowserFetcher(fetcherOptions);
+
+        var installedBrowser = browserFetcher.GetInstalledBrowsers().FirstOrDefault();
+        if (installedBrowser != null)
+        {
+            var path = installedBrowser.GetExecutablePath();
+            _logger.LogInformation("Chromium already cached at {Path} (build {BuildId})",
+                path, installedBrowser.BuildId);
+            return path;
+        }
+
+        _logger.LogInformation("Downloading Chromium to {CachePath}...", _cachePath);
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+        var result = await browserFetcher.DownloadAsync();
+        sw.Stop();
+
+        var execPath = result.GetExecutablePath();
+        _logger.LogInformation("Chromium downloaded in {ElapsedMs}ms. Path: {Path}, BuildId: {BuildId}",
+            sw.ElapsedMilliseconds, execPath, result.BuildId);
+        return execPath;
     }
 
     public void Dispose()
