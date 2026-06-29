@@ -155,6 +155,12 @@ public class CaseService : ICaseService
             query = query.Where(c => c.Member != null && c.Member.MedicalAidId == request.MedicalAidId.Value);
         }
 
+        // Main client filter (active client context — filters by member's medical aid's main client)
+        if (request.MainClientId.HasValue)
+        {
+            query = query.Where(c => c.Member != null && c.Member.MedicalAid != null && c.Member.MedicalAid.MainClientId == request.MainClientId.Value);
+        }
+
         // ICD code filter - find cases that have a matching ICD code
         if (!string.IsNullOrWhiteSpace(request.IcdCode))
         {
@@ -425,7 +431,7 @@ public class CaseService : ICaseService
         };
     }
 
-    public async Task<IEnumerable<CaseDto>> GetMyCasesAsync(string userId, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<CaseDto>> GetMyCasesAsync(string userId, int? mainClientId = null, CancellationToken cancellationToken = default)
     {
         // Get case IDs that are currently locked by this user
         var lockedCaseIds = await _context.SessionUserCases
@@ -434,13 +440,21 @@ public class CaseService : ICaseService
             .ToListAsync(cancellationToken);
 
         // Get cases created by or locked by this user
-        var cases = await _context.Cases
-            .Include(c => c.Member)
+        var query = _context.Cases
+            .Include(c => c.Member).ThenInclude(m => m!.MedicalAid)
             .Include(c => c.Status)
             .Include(c => c.AuthType)
             .Include(c => c.ReferTo)
             .Where(c => c.DateDeleted == null &&
-                (c.UserID == userId || lockedCaseIds.Contains(c.CaseId)))
+                (c.UserID == userId || lockedCaseIds.Contains(c.CaseId)));
+
+        // Filter by main client if specified
+        if (mainClientId.HasValue)
+        {
+            query = query.Where(c => c.Member != null && c.Member.MedicalAid != null && c.Member.MedicalAid.MainClientId == mainClientId.Value);
+        }
+
+        var cases = await query
             .OrderByDescending(c => c.DateCreated)
             .Take(100)
             .ToListAsync(cancellationToken);

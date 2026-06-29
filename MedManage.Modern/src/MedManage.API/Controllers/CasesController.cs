@@ -61,7 +61,7 @@ public class CasesController : ControllerBase
     /// </summary>
     [HttpGet("my-cases")]
     [ProducesResponseType(typeof(ApiResponse<IEnumerable<CaseDto>>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetMyCases(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetMyCases([FromQuery] int? mainClientId, CancellationToken cancellationToken)
     {
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
             ?? User.FindFirst("sub")?.Value;
@@ -70,7 +70,7 @@ public class CasesController : ControllerBase
             return Unauthorized();
         }
 
-        var cases = await _caseService.GetMyCasesAsync(userId, cancellationToken);
+        var cases = await _caseService.GetMyCasesAsync(userId, mainClientId, cancellationToken);
         return Ok(ApiResponse<IEnumerable<CaseDto>>.SuccessResponse(cases));
     }
 

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, inject } from '@angular/core';
+import { Component, EventEmitter, Output, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -9,6 +9,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatSelectModule } from '@angular/material/select';
 import { ReportFormat, BillingSummaryParams } from '../../models/report.models';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-billing-summary-params',
@@ -27,10 +28,11 @@ import { ReportFormat, BillingSummaryParams } from '../../models/report.models';
   templateUrl: './billing-summary-params.component.html',
   styleUrls: ['./billing-summary-params.component.scss']
 })
-export class BillingSummaryParamsComponent {
+export class BillingSummaryParamsComponent implements OnInit {
   @Output() generate = new EventEmitter<{ params: BillingSummaryParams; format: ReportFormat }>();
 
   private readonly fb = inject(FormBuilder);
+  private readonly authService = inject(AuthService);
 
   form = this.fb.group({
     dateFrom: [null as Date | null, Validators.required],
@@ -39,6 +41,10 @@ export class BillingSummaryParamsComponent {
     mainClientId: [null as number | null],
     format: ['pdf' as ReportFormat]
   });
+
+  ngOnInit(): void {
+    this.form.patchValue({ mainClientId: this.authService.activeClientId });
+  }
 
   onSubmit(): void {
     if (this.form.valid) {

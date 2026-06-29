@@ -134,11 +134,16 @@ export class CaseListComponent implements OnInit, OnDestroy {
     this.loadMedicalAids();
     this.loadMyCases();
 
-    // Reload medical aids when the active client changes
+    // Reload data when the active client changes
     this.authService.activeClient$
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
         this.loadMedicalAids();
+        if (this.isMyView) {
+          this.loadMyCases();
+        } else {
+          this.onSearch(false);
+        }
       });
   }
 
@@ -149,7 +154,8 @@ export class CaseListComponent implements OnInit, OnDestroy {
 
   /** Load current user's cases */
   private loadMyCases(): void {
-    this.caseService.getMyCases()
+    const mainClientId = this.authService.activeClientId ?? undefined;
+    this.caseService.getMyCases(mainClientId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (cases) => {
@@ -194,7 +200,8 @@ export class CaseListComponent implements OnInit, OnDestroy {
       pageNumber,
       pageSize,
       sortBy,
-      sortDescending
+      sortDescending,
+      mainClientId: this.authService.activeClientId ?? undefined
     };
 
     if (formValue.authNumber) {

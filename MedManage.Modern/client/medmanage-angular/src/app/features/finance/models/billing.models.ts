@@ -74,6 +74,7 @@ export interface BillingSearchRequest {
   remittanceNumber?: string;
   dateFrom?: string;
   dateTo?: string;
+  mainClientId?: number;
   pageNumber?: number;
   pageSize?: number;
   sortField?: string;

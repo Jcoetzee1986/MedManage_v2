@@ -138,6 +138,10 @@ public class CaseBillingService : ICaseBillingService
         if (!string.IsNullOrEmpty(request.MemberNumber))
             query = query.Where(x => x.c != null && x.c.Member != null && x.c.Member.MemberNumber != null && x.c.Member.MemberNumber.Contains(request.MemberNumber));
 
+        // Main client filter (through case → member → medical aid)
+        if (request.MainClientId.HasValue)
+            query = query.Where(x => x.c != null && x.c.Member != null && x.c.Member.MedicalAid != null && x.c.Member.MedicalAid.MainClientId == request.MainClientId.Value);
+
         var totalCount = await query.CountAsync(cancellationToken);
 
         var items = await query

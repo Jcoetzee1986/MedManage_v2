@@ -148,6 +148,7 @@ export interface CaseSearchRequest {
   icdCode?: string;
   cptCode?: string;
   medicalAidId?: number;
+  mainClientId?: number;
   pageNumber?: number;
   pageSize?: number;
   sortBy?: string;

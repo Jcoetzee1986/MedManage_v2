@@ -34,6 +34,9 @@ public class BillingSearchRequest
     public DateOnly? DatePaidFrom { get; set; }
     public DateOnly? DatePaidTo { get; set; }
 
+    // Main client filter (active client context)
+    public int? MainClientId { get; set; }
+
     // Pagination
     public int PageNumber { get; set; } = 1;
     public int PageSize { get; set; } = 30;

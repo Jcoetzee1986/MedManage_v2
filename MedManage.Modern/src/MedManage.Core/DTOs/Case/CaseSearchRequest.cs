@@ -35,6 +35,9 @@ public class CaseSearchRequest
     // Medical aid filter
     public int? MedicalAidId { get; set; }
 
+    // Main client filter (active client context)
+    public int? MainClientId { get; set; }
+
     // Pagination
     public int PageNumber { get; set; } = 1;
     public int PageSize { get; set; } = 20;

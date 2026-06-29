@@ -13,5 +13,5 @@ public interface ICaseService
     Task<bool> DeleteAsync(int caseId, CancellationToken cancellationToken = default);
     Task<bool> ExistsAsync(int caseId, CancellationToken cancellationToken = default);
     Task<DuplicateCheckResult> CheckDuplicateAsync(DuplicateCheckRequest request, CancellationToken cancellationToken = default);
-    Task<IEnumerable<CaseDto>> GetMyCasesAsync(string userId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<CaseDto>> GetMyCasesAsync(string userId, int? mainClientId = null, CancellationToken cancellationToken = default);
 }

@@ -33,8 +33,9 @@ export class CaseService {
       .pipe(map(r => r.data));
   }
 
-  getMyCases(): Observable<CaseDto[]> {
-    return this.http.get<ApiResponse<CaseDto[]>>(`${this.baseUrl}/my-cases`)
+  getMyCases(mainClientId?: number): Observable<CaseDto[]> {
+    const params = mainClientId ? `?mainClientId=${mainClientId}` : '';
+    return this.http.get<ApiResponse<CaseDto[]>>(`${this.baseUrl}/my-cases${params}`)
       .pipe(map(r => r.data));
   }
 
@@ -76,6 +77,7 @@ export class CaseService {
       dateFrom: request.dateCreatedFrom || formatDate(thirtyDaysAgo),
       dateTo: request.dateCreatedTo || formatDate(today),
       statusId: request.statusId || null,
+      mainClientId: request.mainClientId || null,
       format: 'pdf'
     };
     return this.http.post(`${this.baseUrl.replace('/cases', '')}/report/cases-between-dates`, reportRequest, {

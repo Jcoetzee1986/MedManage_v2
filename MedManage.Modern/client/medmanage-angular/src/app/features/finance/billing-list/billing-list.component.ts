@@ -16,6 +16,7 @@ import { ReferenceDataDropdownComponent } from '../../../shared/components/refer
 import { DataTableComponent, DataTableColumn } from '../../../shared/components/data-table/data-table.component';
 import { BillingService } from '../services/billing.service';
 import { BillingSearchRequest } from '../models/billing.models';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-billing-list',
@@ -39,6 +40,7 @@ import { BillingSearchRequest } from '../models/billing.models';
 })
 export class BillingListComponent implements OnInit {
   private readonly billingService = inject(BillingService);
+  private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
 
@@ -101,6 +103,7 @@ export class BillingListComponent implements OnInit {
       remittanceNumber: formValue.remittanceNumber || undefined,
       dateFrom: formValue.dateFrom ? formValue.dateFrom.toISOString() : undefined,
       dateTo: formValue.dateTo ? formValue.dateTo.toISOString() : undefined,
+      mainClientId: this.authService.activeClientId ?? undefined,
       pageNumber: this.pageIndex + 1,
       pageSize: this.pageSize,
       sortField: this.currentSortBy,
