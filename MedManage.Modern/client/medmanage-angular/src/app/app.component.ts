@@ -11,6 +11,7 @@ import { ActivityTrackingService } from './core/services/activity-tracking.servi
 import { AuthService } from './core/services/auth.service';
 import { SessionTimeoutWarningComponent } from './shared/components/session-timeout-warning.component';
 import { ClientSwitcherComponent } from './shared/components/client-switcher/client-switcher.component';
+import { LoadingSpinnerComponent } from './shared/components/loading-spinner/loading-spinner.component';
 
 @Component({
     selector: 'app-root',
@@ -24,7 +25,8 @@ import { ClientSwitcherComponent } from './shared/components/client-switcher/cli
       MatButtonModule,
       MatTooltipModule,
       MatDialogModule,
-      ClientSwitcherComponent
+      ClientSwitcherComponent,
+      LoadingSpinnerComponent
     ],
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.scss']
