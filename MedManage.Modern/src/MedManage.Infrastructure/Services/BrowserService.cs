@@ -57,9 +57,16 @@ public class BrowserService : IDisposable
             }
 
             _logger.LogInformation("Launching Chromium browser...");
+            
+            // Get the executable path from the fetcher
+            var installedBrowsers = browserFetcher.GetInstalledBrowsers().ToList();
+            var executablePath = installedBrowsers.First().GetExecutablePath();
+            _logger.LogInformation("Chromium executable: {ExecutablePath}", executablePath);
+
             _browser = await Puppeteer.LaunchAsync(new LaunchOptions
             {
                 Headless = true,
+                ExecutablePath = executablePath,
                 Args = new[]
                 {
                     "--no-sandbox",

@@ -18,7 +18,7 @@ export const ADMIN_ROUTES: Routes = [
           import('./user-management/user-management.component').then(
             m => m.UserManagementComponent
           ),
-        title: 'User Management'
+        title: 'User Management - MedManage'
       },
       {
         path: 'locks',
@@ -26,7 +26,7 @@ export const ADMIN_ROUTES: Routes = [
           import('./case-locks/case-locks.component').then(
             m => m.CaseLocksComponent
           ),
-        title: 'Case Locks'
+        title: 'Case Locks - MedManage'
       },
       {
         path: 'reference-data',
@@ -34,7 +34,7 @@ export const ADMIN_ROUTES: Routes = [
           import('./reference-data/reference-data-admin.component').then(
             m => m.ReferenceDataAdminComponent
           ),
-        title: 'Reference Data Administration'
+        title: 'Reference Data - MedManage'
       },
       {
         path: 'system-config',
@@ -42,7 +42,7 @@ export const ADMIN_ROUTES: Routes = [
           import('./system-config/system-config.component').then(
             m => m.SystemConfigComponent
           ),
-        title: 'System Configuration'
+        title: 'System Configuration - MedManage'
       },
       {
         path: 'imports',
@@ -50,7 +50,7 @@ export const ADMIN_ROUTES: Routes = [
           import('./imports/imports.component').then(
             m => m.ImportsComponent
           ),
-        title: 'Data Import'
+        title: 'Data Import - MedManage'
       },
       {
         path: 'tariff-percentages',
@@ -59,7 +59,7 @@ export const ADMIN_ROUTES: Routes = [
             m => m.TariffPercentageManagementComponent
           ),
         canActivate: [roleGuard('System Administrator')],
-        title: 'Tariff Percentages'
+        title: 'Tariff Percentages - MedManage'
       }
     ]
   }
