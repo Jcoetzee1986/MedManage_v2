@@ -236,6 +236,17 @@ app.MapHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks
 
 Log.Information("MedManage API Starting...");
 
+// Log email configuration at startup (mask password)
+var emailSettings = app.Services.GetRequiredService<Microsoft.Extensions.Options.IOptions<EmailSettings>>().Value;
+Log.Information("Email Settings: SmtpHost={SmtpHost}, SmtpPort={SmtpPort}, From={FromEmail}, Username={SmtpUsername}, SSL={EnableSsl}, TestMode={UseTestMode}, TestAddress={TestEmail}",
+    emailSettings.SmtpHost,
+    emailSettings.SmtpPort,
+    emailSettings.FromEmail,
+    emailSettings.SmtpUsername,
+    emailSettings.EnableSsl,
+    emailSettings.UseTestMode,
+    emailSettings.TestEmailAddress ?? "(none)");
+
 app.Run();
 
 // Make the implicit Program class public so test projects can access it via WebApplicationFactory<Program>

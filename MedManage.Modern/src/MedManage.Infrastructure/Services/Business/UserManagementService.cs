@@ -248,7 +248,12 @@ public class UserManagementService : IUserManagementService
         // Send welcome email
         if (request.SendWelcomeEmail && !string.IsNullOrWhiteSpace(request.Email))
         {
-            await _emailService.SendWelcomeEmailWithPasswordAsync(request.Email, request.Username, temporaryPassword);
+            var emailSent = await _emailService.SendWelcomeEmailWithPasswordAsync(request.Email, request.Username, temporaryPassword);
+            if (!emailSent)
+            {
+                _logger.LogError("Failed to send welcome email to {Email} for new user {Username}. SMTP delivery failed.", 
+                    request.Email, request.Username);
+            }
         }
 
         _logger.LogInformation("Admin created user {Username} ({UserId})", request.Username, userId);
@@ -298,7 +303,12 @@ public class UserManagementService : IUserManagementService
         // Send email with new password
         if (request.SendEmail && !string.IsNullOrWhiteSpace(membership.Email))
         {
-            await _emailService.SendAdminPasswordResetEmailAsync(membership.Email, user.UserName, newPassword);
+            var emailSent = await _emailService.SendAdminPasswordResetEmailAsync(membership.Email, user.UserName, newPassword);
+            if (!emailSent)
+            {
+                _logger.LogError("Failed to send admin password reset email to {Email} for user {UserId}. SMTP delivery failed.", 
+                    membership.Email, userId);
+            }
         }
 
         _logger.LogInformation("Admin reset password for user {UserId}", userId);

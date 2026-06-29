@@ -101,7 +101,8 @@ public class EmailService : IEmailService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to send email to {Recipient} with subject: {Subject}", to, subject);
+            _logger.LogError(ex, "Failed to send email to {Recipient} with subject: {Subject}. SMTP: {SmtpHost}:{SmtpPort}, From: {FromEmail}", 
+                to, subject, _emailSettings.SmtpHost, _emailSettings.SmtpPort, _emailSettings.FromEmail);
             return false;
         }
     }

@@ -634,9 +634,19 @@ public class AuthService : IAuthService
             await _context.SaveChangesAsync();
 
             // Send email with PIN
-            await _emailService.SendPasswordResetPinAsync(membership!.Email!, user.UserName, pin);
+            var emailSent = await _emailService.SendPasswordResetPinAsync(membership!.Email!, user.UserName, pin);
 
-            _logger.LogInformation("Password reset PIN sent to user {UserId}", user.UserId);
+            if (!emailSent)
+            {
+                _logger.LogError("Failed to send password reset email to {Email} for user {UserId}. SMTP delivery failed.", 
+                    membership.Email, user.UserId);
+                // Still return success to caller (don't reveal email delivery status to end user)
+            }
+            else
+            {
+                _logger.LogInformation("Password reset PIN sent successfully to {Email} for user {UserId}", 
+                    membership.Email, user.UserId);
+            }
 
             return new PasswordResetResponse
             {
