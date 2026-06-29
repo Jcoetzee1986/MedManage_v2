@@ -115,9 +115,12 @@ export class ReportsPageComponent implements OnDestroy {
     this.loading = false;
     this.errorMessage = null;
     this.lastBlob = blob;
-    this.lastFilename = this.reportService.buildFilename(reportType, format);
 
-    if (format === 'pdf') {
+    // Detect actual format from response content type (backend may fall back to Excel for large datasets)
+    const actualFormat: ReportFormat = blob.type.includes('spreadsheet') || blob.type.includes('excel') ? 'excel' : format;
+    this.lastFilename = this.reportService.buildFilename(reportType, actualFormat);
+
+    if (actualFormat === 'pdf') {
       this.previewUrl = this.reportService.createPreviewUrl(blob);
     } else {
       // For Excel, just download directly since inline preview isn't supported

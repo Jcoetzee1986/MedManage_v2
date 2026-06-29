@@ -408,7 +408,7 @@ export class CaseListComponent implements OnInit, OnDestroy {
     URL.revokeObjectURL(url);
   }
 
-  /** Generate PDF/Excel report via server-side API */
+  /** Generate Excel report via server-side API */
   onPrintReport(): void {
     this.exporting = true;
     const request = this.buildSearchRequest(1, 10000);
@@ -418,10 +418,11 @@ export class CaseListComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (blob) => {
           this.exporting = false;
+          const ext = blob.type.includes('spreadsheet') ? 'xlsx' : 'pdf';
           const url = window.URL.createObjectURL(blob);
           const link = document.createElement('a');
           link.href = url;
-          link.download = `cases-report-${new Date().toISOString().split('T')[0]}.pdf`;
+          link.download = `cases-report-${new Date().toISOString().split('T')[0]}.${ext}`;
           link.click();
           window.URL.revokeObjectURL(url);
         },
