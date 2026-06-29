@@ -78,7 +78,7 @@ export class CaseService {
       dateTo: request.dateCreatedTo || formatDate(today),
       statusId: request.statusId || null,
       mainClientId: request.mainClientId || null,
-      format: 'pdf'
+      format: 'excel'
     };
     return this.http.post(`${this.baseUrl.replace('/cases', '')}/report/cases-between-dates`, reportRequest, {
       responseType: 'blob'

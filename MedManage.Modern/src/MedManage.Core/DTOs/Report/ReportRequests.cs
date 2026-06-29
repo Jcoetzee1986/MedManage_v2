@@ -24,7 +24,7 @@ public class BillingSummaryRequest
 public class CaseTariffDetailRequest
 {
     public int CaseId { get; set; }
-    public string Format { get; set; } = "pdf";
+    public string Format { get; set; } = "excel";
 }
 
 public class MyCasesRequest
@@ -51,7 +51,7 @@ public class WipExtractRequest
 public class LinkedCasesRequest
 {
     public int CaseId { get; set; }
-    public string Format { get; set; } = "pdf";
+    public string Format { get; set; } = "excel";
 }
 
 public class ReportOutput

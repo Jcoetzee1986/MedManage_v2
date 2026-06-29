@@ -39,7 +39,7 @@ export class BillingSummaryParamsComponent implements OnInit {
     dateTo: [null as Date | null, Validators.required],
     serviceProviderId: [null as number | null],
     mainClientId: [null as number | null],
-    format: ['pdf' as ReportFormat]
+    format: ['excel' as ReportFormat]
   });
 
   ngOnInit(): void {
@@ -57,7 +57,7 @@ export class BillingSummaryParamsComponent implements OnInit {
           serviceProviderId: value.serviceProviderId ?? undefined,
           mainClientId: value.mainClientId ?? undefined
         },
-        format: value.format ?? 'pdf'
+        format: value.format ?? 'excel'
       });
     }
   }

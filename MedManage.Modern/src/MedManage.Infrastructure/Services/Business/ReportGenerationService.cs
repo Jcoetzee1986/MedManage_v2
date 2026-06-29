@@ -348,8 +348,19 @@ public class ReportGenerationService : IReportGenerationService
     // ═══════════════════════════════════════════════════════════════════
     // PDF GENERATION (HTML → PuppeteerSharp)
     // ═══════════════════════════════════════════════════════════════════
+    // Max rows for PDF rendering — beyond this Chrome OOMs. Auto-fall back to Excel.
+    private const int MaxPdfRows = 3000;
+
     private async Task<ReportOutput> GeneratePdfTable(string title, string? subtitle, string[] headers, List<object?[]> rows)
     {
+        // Large datasets: fall back to Excel to avoid Chrome OOM
+        if (rows.Count > MaxPdfRows)
+        {
+            _logger.LogWarning("PDF requested for {RowCount} rows (exceeds {MaxRows} limit). Falling back to Excel.",
+                rows.Count, MaxPdfRows);
+            return GenerateExcel(title, headers, rows);
+        }
+
         var html = $@"<!DOCTYPE html>
 <html><head><meta charset='utf-8'><style>
 body {{ font-family: Arial, sans-serif; font-size: 8pt; padding: 15mm; }}
