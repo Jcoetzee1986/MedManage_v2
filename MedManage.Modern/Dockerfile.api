@@ -53,8 +53,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Create uploads directory and set permissions for non-root user
 RUN mkdir -p /app/uploads/documents /app/uploads/thumbnails /app/uploads/cases /app/logs \
-    && addgroup --system appgroup \
-    && adduser --system --ingroup appgroup appuser \
+    && groupadd --system appgroup \
+    && useradd --system --gid appgroup --no-create-home appuser \
     && chown -R appuser:appgroup /app
 
 COPY --from=build /app/publish .
