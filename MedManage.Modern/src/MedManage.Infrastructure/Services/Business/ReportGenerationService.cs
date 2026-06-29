@@ -376,19 +376,58 @@ tr:nth-child(even) {{ background: #fafafa; }}
         };
     }
 
+    private static IBrowser? _browser;
+    private static readonly SemaphoreSlim _browserLock = new(1, 1);
+
+    private static async Task<IBrowser> GetBrowserAsync()
+    {
+        if (_browser != null && _browser.IsConnected)
+            return _browser;
+
+        await _browserLock.WaitAsync();
+        try
+        {
+            if (_browser != null && _browser.IsConnected)
+                return _browser;
+
+            var browserFetcher = new BrowserFetcher();
+            await browserFetcher.DownloadAsync();
+            _browser = await Puppeteer.LaunchAsync(new LaunchOptions
+            {
+                Headless = true,
+                Args = new[]
+                {
+                    "--no-sandbox",
+                    "--disable-setuid-sandbox",
+                    "--disable-dev-shm-usage",
+                    "--disable-gpu",
+                    "--single-process"
+                }
+            });
+            return _browser;
+        }
+        finally
+        {
+            _browserLock.Release();
+        }
+    }
+
     private static async Task<byte[]> HtmlToPdfAsync(string html)
     {
-        var browserFetcher = new BrowserFetcher();
-        await browserFetcher.DownloadAsync();
-        await using var browser = await Puppeteer.LaunchAsync(new LaunchOptions { Headless = true, Args = new[] { "--no-sandbox" } });
+        var browser = await GetBrowserAsync();
         await using var page = await browser.NewPageAsync();
-        await page.SetContentAsync(html, new NavigationOptions { WaitUntil = [WaitUntilNavigation.Load] });
-        return await page.PdfDataAsync(new PdfOptions
+        await page.SetContentAsync(html, new NavigationOptions
+        {
+            WaitUntil = [WaitUntilNavigation.Load],
+            Timeout = 60000
+        });
+        var pdf = await page.PdfDataAsync(new PdfOptions
         {
             Format = PaperFormat.A4,
             Landscape = true,
             PrintBackground = true,
             MarginOptions = new MarginOptions { Top = "10mm", Bottom = "10mm", Left = "10mm", Right = "10mm" }
         });
+        return pdf;
     }
 }
