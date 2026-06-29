@@ -6,11 +6,13 @@ using MedManage.Infrastructure;
 using MedManage.Core.Interfaces;
 using MedManage.Core.Configuration;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using System.Text;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -189,6 +191,34 @@ builder.Services.AddHealthChecks()
         tags: new[] { "db", "sql", "sqlserver" }
     );
 
+// Configure Rate Limiting for auth endpoints
+var rateLimitPermitLimit = builder.Configuration.GetValue<int>("RateLimiting:AuthPermitLimit", 100);
+var rateLimitWindowSeconds = builder.Configuration.GetValue<int>("RateLimiting:AuthWindowSeconds", 60);
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    options.AddFixedWindowLimiter("auth", limiterOptions =>
+    {
+        limiterOptions.PermitLimit = rateLimitPermitLimit;
+        limiterOptions.Window = TimeSpan.FromSeconds(rateLimitWindowSeconds);
+        limiterOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        limiterOptions.QueueLimit = 0;
+    });
+
+    options.OnRejected = async (context, cancellationToken) =>
+    {
+        context.HttpContext.Response.ContentType = "application/json";
+        await context.HttpContext.Response.WriteAsync(
+            """{"success":false,"message":"Too many requests. Please try again later."}""",
+            cancellationToken);
+        Log.Warning("Rate limit exceeded for {RemoteIp} on {Path}",
+            context.HttpContext.Connection.RemoteIpAddress,
+            context.HttpContext.Request.Path);
+    };
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
@@ -204,6 +234,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseCors("AllowAngularApp");
+
+app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseAuthorization();

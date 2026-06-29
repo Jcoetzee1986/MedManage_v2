@@ -197,6 +197,9 @@ public static class DependencyInjection
 
         // Report Generation Service (ClosedXML + PuppeteerSharp)
         services.AddScoped<IReportGenerationService, ReportGenerationService>();
+
+        // Shared Chromium browser instance for PDF rendering (singleton — reused across requests)
+        services.AddSingleton<BrowserService>();
         
         // Reference Data Services
         services.AddScoped<IMarritalStatusService, MarritalStatusService>();

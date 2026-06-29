@@ -14,11 +14,13 @@ public class ReportGenerationService : IReportGenerationService
 {
     private readonly MedManageDbContext _db;
     private readonly ILogger<ReportGenerationService> _logger;
+    private readonly BrowserService _browserService;
 
-    public ReportGenerationService(MedManageDbContext db, ILogger<ReportGenerationService> logger)
+    public ReportGenerationService(MedManageDbContext db, ILogger<ReportGenerationService> logger, BrowserService browserService)
     {
         _db = db;
         _logger = logger;
+        _browserService = browserService;
     }
 
     // ═══════════════════════════════════════════════════════════════════
@@ -376,45 +378,9 @@ tr:nth-child(even) {{ background: #fafafa; }}
         };
     }
 
-    private static IBrowser? _browser;
-    private static readonly SemaphoreSlim _browserLock = new(1, 1);
-
-    private static async Task<IBrowser> GetBrowserAsync()
+    private async Task<byte[]> HtmlToPdfAsync(string html)
     {
-        if (_browser != null && _browser.IsConnected)
-            return _browser;
-
-        await _browserLock.WaitAsync();
-        try
-        {
-            if (_browser != null && _browser.IsConnected)
-                return _browser;
-
-            var browserFetcher = new BrowserFetcher();
-            await browserFetcher.DownloadAsync();
-            _browser = await Puppeteer.LaunchAsync(new LaunchOptions
-            {
-                Headless = true,
-                Args = new[]
-                {
-                    "--no-sandbox",
-                    "--disable-setuid-sandbox",
-                    "--disable-dev-shm-usage",
-                    "--disable-gpu",
-                    "--single-process"
-                }
-            });
-            return _browser;
-        }
-        finally
-        {
-            _browserLock.Release();
-        }
-    }
-
-    private static async Task<byte[]> HtmlToPdfAsync(string html)
-    {
-        var browser = await GetBrowserAsync();
+        var browser = await _browserService.GetBrowserAsync();
         await using var page = await browser.NewPageAsync();
         await page.SetContentAsync(html, new NavigationOptions
         {

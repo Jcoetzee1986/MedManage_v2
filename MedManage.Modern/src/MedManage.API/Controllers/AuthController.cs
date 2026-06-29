@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using MedManage.Core.DTOs.Auth;
 using MedManage.Core.Interfaces;
 using MedManage.Core.Interfaces.Services;
@@ -9,6 +10,7 @@ namespace MedManage.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[EnableRateLimiting("auth")]
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;

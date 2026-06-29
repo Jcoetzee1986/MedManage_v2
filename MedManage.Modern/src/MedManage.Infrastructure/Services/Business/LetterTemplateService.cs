@@ -16,14 +16,14 @@ public class LetterTemplateService : ILetterTemplateService
     private readonly MedManageDbContext _dbContext;
     private readonly ILogger<LetterTemplateService> _logger;
     private readonly ITariffPercentageService _tariffPercentageService;
-    private static IBrowser? _browser;
-    private static readonly SemaphoreSlim _browserLock = new(1, 1);
+    private readonly BrowserService _browserService;
 
-    public LetterTemplateService(MedManageDbContext dbContext, ILogger<LetterTemplateService> logger, ITariffPercentageService tariffPercentageService)
+    public LetterTemplateService(MedManageDbContext dbContext, ILogger<LetterTemplateService> logger, ITariffPercentageService tariffPercentageService, BrowserService browserService)
     {
         _dbContext = dbContext;
         _logger = logger;
         _tariffPercentageService = tariffPercentageService;
+        _browserService = browserService;
     }
 
     public async Task<IEnumerable<LetterTemplate>> GetAllAsync(CancellationToken cancellationToken = default)
@@ -359,9 +359,13 @@ public class LetterTemplateService : ILetterTemplateService
 
     private async Task<byte[]> HtmlToPdfAsync(string html)
     {
-        var browser = await GetBrowserAsync();
+        var browser = await _browserService.GetBrowserAsync();
         await using var page = await browser.NewPageAsync();
-        await page.SetContentAsync(html, new NavigationOptions { WaitUntil = [WaitUntilNavigation.Load] });
+        await page.SetContentAsync(html, new NavigationOptions
+        {
+            WaitUntil = [WaitUntilNavigation.Load],
+            Timeout = 60000
+        });
 
         // Set document title for PDF metadata
         await page.EvaluateExpressionAsync("document.title = 'Case Letter'");
@@ -381,32 +385,5 @@ public class LetterTemplateService : ILetterTemplateService
         });
 
         return pdf;
-    }
-
-    private static async Task<IBrowser> GetBrowserAsync()
-    {
-        if (_browser != null && _browser.IsConnected)
-            return _browser;
-
-        await _browserLock.WaitAsync();
-        try
-        {
-            if (_browser != null && _browser.IsConnected)
-                return _browser;
-
-            var browserFetcher = new BrowserFetcher();
-            await browserFetcher.DownloadAsync();
-            _browser = await Puppeteer.LaunchAsync(new LaunchOptions
-            {
-                Headless = true,
-                Args = new[] { "--no-sandbox", "--disable-setuid-sandbox" }
-            });
-
-            return _browser;
-        }
-        finally
-        {
-            _browserLock.Release();
-        }
     }
 }

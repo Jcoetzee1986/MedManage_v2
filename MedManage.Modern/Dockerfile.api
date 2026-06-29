@@ -51,10 +51,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# Create uploads directory
-RUN mkdir -p /app/uploads/documents /app/uploads/thumbnails /app/uploads/cases /app/logs
+# Create uploads directory and set permissions for non-root user
+RUN mkdir -p /app/uploads/documents /app/uploads/thumbnails /app/uploads/cases /app/logs \
+    && addgroup --system appgroup \
+    && adduser --system --ingroup appgroup appuser \
+    && chown -R appuser:appgroup /app
 
 COPY --from=build /app/publish .
+
+# Run as non-root user
+USER appuser
 
 # Expose port
 EXPOSE 8080
